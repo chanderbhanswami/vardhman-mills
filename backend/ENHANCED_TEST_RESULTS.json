@@ -1,0 +1,428 @@
+{
+  "timestamp": "2025-11-01T08:50:01.349Z",
+  "summary": {
+    "total": 208,
+    "passed": 156,
+    "failed": 52,
+    "skipped": 672,
+    "passRate": "75.00%"
+  },
+  "failedEndpoints": [
+    {
+      "name": "PUT /api/v1/about/stats",
+      "expected": "200-299 or acceptable 404",
+      "got": 403,
+      "path": "/api/v1/about/stats",
+      "error": "You do not have permission to perform this action",
+      "category": "about"
+    },
+    {
+      "name": "GET /api/v1/addresses/suggestions",
+      "expected": "200-299 or acceptable 404",
+      "got": 400,
+      "path": "/api/v1/addresses/suggestions",
+      "error": "Invalid field. Allowed fields: city, state, pincode, landmark",
+      "category": "address"
+    },
+    {
+      "name": "GET /api/v1/analytics/revenue-analytics",
+      "expected": "200-299 or acceptable 404",
+      "got": 403,
+      "path": "/api/v1/analytics/revenue-analytics",
+      "error": "You do not have permission to perform this action",
+      "category": "analytics"
+    },
+    {
+      "name": "GET /api/v1/analytics/conversion-funnel",
+      "expected": "200-299 or acceptable 404",
+      "got": 403,
+      "path": "/api/v1/analytics/conversion-funnel",
+      "error": "You do not have permission to perform this action",
+      "category": "analytics"
+    },
+    {
+      "name": "GET /api/v1/analytics/search-analytics",
+      "expected": "200-299 or acceptable 404",
+      "got": 403,
+      "path": "/api/v1/analytics/search-analytics",
+      "error": "You do not have permission to perform this action",
+      "category": "analytics"
+    },
+    {
+      "name": "GET /api/v1/analytics/dashboard",
+      "expected": "200-299 or acceptable 404",
+      "got": 403,
+      "path": "/api/v1/analytics/dashboard",
+      "error": "You do not have permission to perform this action",
+      "category": "analytics"
+    },
+    {
+      "name": "GET /api/v1/analytics/realtime",
+      "expected": "200-299 or acceptable 404",
+      "got": 403,
+      "path": "/api/v1/analytics/realtime",
+      "error": "You do not have permission to perform this action",
+      "category": "analytics"
+    },
+    {
+      "name": "GET /api/v1/analytics/export",
+      "expected": "200-299 or acceptable 404",
+      "got": 403,
+      "path": "/api/v1/analytics/export",
+      "error": "You do not have permission to perform this action",
+      "category": "analytics"
+    },
+    {
+      "name": "GET /api/v1/announcements/scheduled",
+      "expected": "200-299 or acceptable 404",
+      "got": 403,
+      "path": "/api/v1/announcements/scheduled",
+      "error": "You do not have permission to perform this action",
+      "category": "announcement"
+    },
+    {
+      "name": "GET /api/v1/announcements/stats/overview",
+      "expected": "200-299 or acceptable 404",
+      "got": 403,
+      "path": "/api/v1/announcements/stats/overview",
+      "error": "You do not have permission to perform this action",
+      "category": "announcement"
+    },
+    {
+      "name": "GET /api/v1/bestsellers/analytics/overview",
+      "expected": "200-299 or acceptable 404",
+      "got": 403,
+      "path": "/api/v1/bestsellers/analytics/overview",
+      "error": "You do not have permission to perform this action",
+      "category": "bestseller"
+    },
+    {
+      "name": "GET /api/v1/brands/suggestions",
+      "expected": "200-299 or acceptable 404",
+      "got": 400,
+      "path": "/api/v1/brands/suggestions",
+      "error": "Query is required",
+      "category": "brand"
+    },
+    {
+      "name": "GET /api/v1/brands/admin/statistics",
+      "expected": "200-299 or acceptable 404",
+      "got": 500,
+      "path": "/api/v1/brands/admin/statistics",
+      "error": "Cast to ObjectId failed for value \"admin\" (type string) at path \"_id\" for model \"Brand\"",
+      "category": "brand"
+    },
+    {
+      "name": "GET /api/v1/cms/analytics",
+      "expected": "200-299 or acceptable 404",
+      "got": 403,
+      "path": "/api/v1/cms/analytics",
+      "error": "You do not have permission to perform this action",
+      "category": "cms"
+    },
+    {
+      "name": "GET /api/v1/cms/media/library",
+      "expected": "200-299 or acceptable 404",
+      "got": 403,
+      "path": "/api/v1/cms/media/library",
+      "error": "You do not have permission to perform this action",
+      "category": "cms"
+    },
+    {
+      "name": "GET /api/v1/collections",
+      "expected": "200-299 or acceptable 404",
+      "got": 403,
+      "path": "/api/v1/collections",
+      "error": "You do not have permission to perform this action",
+      "category": "collection"
+    },
+    {
+      "name": "GET /api/v1/collections/analytics",
+      "expected": "200-299 or acceptable 404",
+      "got": 403,
+      "path": "/api/v1/collections/analytics",
+      "error": "You do not have permission to perform this action",
+      "category": "collection"
+    },
+    {
+      "name": "GET /api/v1/coupons/analytics",
+      "expected": "200-299 or acceptable 404",
+      "got": 500,
+      "path": "/api/v1/coupons/analytics",
+      "error": "Cast to ObjectId failed for value \"analytics\" (type string) at path \"_id\" for model \"Coupon\"",
+      "category": "coupon"
+    },
+    {
+      "name": "GET /api/v1/favorite-sections",
+      "expected": "200-299 or acceptable 404",
+      "got": 500,
+      "path": "/api/v1/favorite-sections",
+      "error": "Schema hasn't been registered for model \"products\".\nUse mongoose.model(name, schema)",
+      "category": "favorite-section"
+    },
+    {
+      "name": "GET /api/v1/favorite-sections/analytics/overview",
+      "expected": "200-299 or acceptable 404",
+      "got": 403,
+      "path": "/api/v1/favorite-sections/analytics/overview",
+      "error": "You do not have permission to perform this action",
+      "category": "favorite-section"
+    },
+    {
+      "name": "GET /api/v1/featured-content",
+      "expected": "200-299 or acceptable 404",
+      "got": 403,
+      "path": "/api/v1/featured-content",
+      "error": "You do not have permission to perform this action",
+      "category": "featured-content"
+    },
+    {
+      "name": "GET /api/v1/featured-content/analytics",
+      "expected": "200-299 or acceptable 404",
+      "got": 403,
+      "path": "/api/v1/featured-content/analytics",
+      "error": "You do not have permission to perform this action",
+      "category": "featured-content"
+    },
+    {
+      "name": "GET /api/v1/hero-banners/analytics",
+      "expected": "200-299 or acceptable 404",
+      "got": 403,
+      "path": "/api/v1/hero-banners/analytics",
+      "error": "You do not have permission to perform this action",
+      "category": "hero-banner"
+    },
+    {
+      "name": "GET /api/v1/locations",
+      "expected": "200-299 or acceptable 404",
+      "got": 403,
+      "path": "/api/v1/locations",
+      "error": "You do not have permission to perform this action",
+      "category": "location"
+    },
+    {
+      "name": "GET /api/v1/locations/analytics",
+      "expected": "200-299 or acceptable 404",
+      "got": 403,
+      "path": "/api/v1/locations/analytics",
+      "error": "You do not have permission to perform this action",
+      "category": "location"
+    },
+    {
+      "name": "GET /api/v1/locations/regions",
+      "expected": "200-299 or acceptable 404",
+      "got": 403,
+      "path": "/api/v1/locations/regions",
+      "error": "You do not have permission to perform this action",
+      "category": "location"
+    },
+    {
+      "name": "GET /api/v1/locations/regions/analytics",
+      "expected": "200-299 or acceptable 404",
+      "got": 403,
+      "path": "/api/v1/locations/regions/analytics",
+      "error": "You do not have permission to perform this action",
+      "category": "location"
+    },
+    {
+      "name": "POST /api/v1/logo-enhancements/:id/analytics/impression",
+      "expected": "200-299 or acceptable 404",
+      "got": 500,
+      "path": "/api/v1/logo-enhancements/:id/analytics/impression",
+      "error": "Cast to ObjectId failed for value \":id\" (type string) at path \"_id\" for model \"Logo\"",
+      "category": "logo-enhancement"
+    },
+    {
+      "name": "POST /api/v1/logo-enhancements/:id/analytics/click",
+      "expected": "200-299 or acceptable 404",
+      "got": 500,
+      "path": "/api/v1/logo-enhancements/:id/analytics/click",
+      "error": "Cast to ObjectId failed for value \":id\" (type string) at path \"_id\" for model \"Logo\"",
+      "category": "logo-enhancement"
+    },
+    {
+      "name": "POST /api/v1/logo-enhancements/:id/analytics/hover",
+      "expected": "200-299 or acceptable 404",
+      "got": 400,
+      "path": "/api/v1/logo-enhancements/:id/analytics/hover",
+      "error": "Valid hover duration is required",
+      "category": "logo-enhancement"
+    },
+    {
+      "name": "POST /api/v1/logo-enhancements/:id/analytics/scroll",
+      "expected": "200-299 or acceptable 404",
+      "got": 500,
+      "path": "/api/v1/logo-enhancements/:id/analytics/scroll",
+      "error": "Cast to ObjectId failed for value \":id\" (type string) at path \"_id\" for model \"Logo\"",
+      "category": "logo-enhancement"
+    },
+    {
+      "name": "POST /api/v1/logo-enhancements/:id/analytics/performance",
+      "expected": "200-299 or acceptable 404",
+      "got": 500,
+      "path": "/api/v1/logo-enhancements/:id/analytics/performance",
+      "error": "Cast to ObjectId failed for value \":id\" (type string) at path \"_id\" for model \"Logo\"",
+      "category": "logo-enhancement"
+    },
+    {
+      "name": "POST /api/v1/logo-enhancements/:id/analytics/view-time",
+      "expected": "200-299 or acceptable 404",
+      "got": 400,
+      "path": "/api/v1/logo-enhancements/:id/analytics/view-time",
+      "error": "Valid view duration is required",
+      "category": "logo-enhancement"
+    },
+    {
+      "name": "POST /api/v1/logo-enhancements/:id/analytics/reset",
+      "expected": "200-299 or acceptable 404",
+      "got": 403,
+      "path": "/api/v1/logo-enhancements/:id/analytics/reset",
+      "error": "You do not have permission to perform this action",
+      "category": "logo-enhancement"
+    },
+    {
+      "name": "GET /api/v1/logos/stats/overview",
+      "expected": "200-299 or acceptable 404",
+      "got": 403,
+      "path": "/api/v1/logos/stats/overview",
+      "error": "You do not have permission to perform this action",
+      "category": "logo"
+    },
+    {
+      "name": "GET /api/v1/new-arrivals/analytics/overview",
+      "expected": "200-299 or acceptable 404",
+      "got": 403,
+      "path": "/api/v1/new-arrivals/analytics/overview",
+      "error": "You do not have permission to perform this action",
+      "category": "new-arrival"
+    },
+    {
+      "name": "GET /api/v1/review-media",
+      "expected": "200-299 or acceptable 404",
+      "got": 500,
+      "path": "/api/v1/review-media",
+      "error": "Cannot populate path `reviewId` because it is not in your schema. Set the `strictPopulate` option to false to override.",
+      "category": "review-media"
+    },
+    {
+      "name": "GET /api/v1/review-media/moderation/queue",
+      "expected": "200-299 or acceptable 404",
+      "got": 403,
+      "path": "/api/v1/review-media/moderation/queue",
+      "error": "You do not have permission to perform this action",
+      "category": "review-media"
+    },
+    {
+      "name": "GET /api/v1/review-media/analytics/overview",
+      "expected": "200-299 or acceptable 404",
+      "got": 403,
+      "path": "/api/v1/review-media/analytics/overview",
+      "error": "You do not have permission to perform this action",
+      "category": "review-media"
+    },
+    {
+      "name": "GET /api/v1/review-media/analytics/stats",
+      "expected": "200-299 or acceptable 404",
+      "got": 403,
+      "path": "/api/v1/review-media/analytics/stats",
+      "error": "You do not have permission to perform this action",
+      "category": "review-media"
+    },
+    {
+      "name": "GET /api/v1/review-replies/moderation/queue",
+      "expected": "200-299 or acceptable 404",
+      "got": 403,
+      "path": "/api/v1/review-replies/moderation/queue",
+      "error": "You do not have permission to perform this action",
+      "category": "review-reply"
+    },
+    {
+      "name": "GET /api/v1/sales/stats/overview",
+      "expected": "200-299 or acceptable 404",
+      "got": 403,
+      "path": "/api/v1/sales/stats/overview",
+      "error": "You do not have permission to perform this action",
+      "category": "sale"
+    },
+    {
+      "name": "GET /api/v1/seo/pages",
+      "expected": "200-299 or acceptable 404",
+      "got": 403,
+      "path": "/api/v1/seo/pages",
+      "error": "You do not have permission to perform this action",
+      "category": "seo"
+    },
+    {
+      "name": "GET /api/v1/seo/schema-markups",
+      "expected": "200-299 or acceptable 404",
+      "got": 403,
+      "path": "/api/v1/seo/schema-markups",
+      "error": "You do not have permission to perform this action",
+      "category": "seo"
+    },
+    {
+      "name": "GET /api/v1/seo/meta-tags",
+      "expected": "200-299 or acceptable 404",
+      "got": 403,
+      "path": "/api/v1/seo/meta-tags",
+      "error": "You do not have permission to perform this action",
+      "category": "seo"
+    },
+    {
+      "name": "GET /api/v1/seo/redirect-rules",
+      "expected": "200-299 or acceptable 404",
+      "got": 403,
+      "path": "/api/v1/seo/redirect-rules",
+      "error": "You do not have permission to perform this action",
+      "category": "seo"
+    },
+    {
+      "name": "GET /api/v1/seo/audits",
+      "expected": "200-299 or acceptable 404",
+      "got": 403,
+      "path": "/api/v1/seo/audits",
+      "error": "You do not have permission to perform this action",
+      "category": "seo"
+    },
+    {
+      "name": "GET /api/v1/seo/analytics",
+      "expected": "200-299 or acceptable 404",
+      "got": 403,
+      "path": "/api/v1/seo/analytics",
+      "error": "You do not have permission to perform this action",
+      "category": "seo"
+    },
+    {
+      "name": "GET /api/v1/shipping/stats",
+      "expected": "200-299 or acceptable 404",
+      "got": 403,
+      "path": "/api/v1/shipping/stats",
+      "error": "You do not have permission to perform this action",
+      "category": "shipping"
+    },
+    {
+      "name": "GET /api/v1/social-links/analytics/overview",
+      "expected": "200-299 or acceptable 404",
+      "got": 403,
+      "path": "/api/v1/social-links/analytics/overview",
+      "error": "You do not have permission to perform this action",
+      "category": "social-link"
+    },
+    {
+      "name": "GET /api/v1/social-links/export",
+      "expected": "200-299 or acceptable 404",
+      "got": 500,
+      "path": "/api/v1/social-links/export",
+      "error": "Cast to ObjectId failed for value \"export\" (type string) at path \"_id\" for model \"SocialLink\"",
+      "category": "social-link"
+    },
+    {
+      "name": "GET /api/v1/uploads/folders",
+      "expected": "200-299 or acceptable 404",
+      "got": 500,
+      "path": "/api/v1/uploads/folders",
+      "error": "Cast to ObjectId failed for value \"folders\" (type string) at path \"_id\" for model \"FileUpload\"",
+      "category": "upload"
+    }
+  ]
+}

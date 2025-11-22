@@ -1,0 +1,516 @@
+{
+  "timestamp": "2025-11-01T08:39:41.983Z",
+  "summary": {
+    "total": 213,
+    "passed": 150,
+    "failed": 63,
+    "skipped": 667,
+    "passRate": "70.42%"
+  },
+  "failedEndpoints": [
+    {
+      "name": "GET /api/v1/about/stats",
+      "expected": "200 or 201",
+      "got": 404,
+      "path": "/api/v1/about/stats",
+      "error": "Company statistics not found",
+      "category": "about (Admin)"
+    },
+    {
+      "name": "GET /api/v1/addresses/default",
+      "expected": "200 or 201",
+      "got": 404,
+      "path": "/api/v1/addresses/default",
+      "error": "No default address found",
+      "category": "address (Admin)"
+    },
+    {
+      "name": "GET /api/v1/addresses/by-location",
+      "expected": "200 or 201",
+      "got": 400,
+      "path": "/api/v1/addresses/by-location",
+      "error": "Please provide at least one location parameter",
+      "category": "address (Admin)"
+    },
+    {
+      "name": "GET /api/v1/addresses/suggestions",
+      "expected": "200 or 201",
+      "got": 400,
+      "path": "/api/v1/addresses/suggestions",
+      "error": "Please provide field and value parameters",
+      "category": "address (Admin)"
+    },
+    {
+      "name": "DELETE /api/v1/addresses/bulk",
+      "expected": "200 or 201",
+      "got": 400,
+      "path": "/api/v1/addresses/bulk",
+      "error": "Please provide an array of address IDs",
+      "category": "address (Admin)"
+    },
+    {
+      "name": "GET /api/v1/analytics/system-analytics",
+      "expected": "200 or 201",
+      "got": 404,
+      "path": "/api/v1/analytics/system-analytics",
+      "error": "Can't find /api/v1/analytics/system-analytics on this server!",
+      "category": "analytics (Admin)"
+    },
+    {
+      "name": "GET /api/v1/analytics/settings",
+      "expected": "200 or 201",
+      "got": 404,
+      "path": "/api/v1/analytics/settings",
+      "error": "Can't find /api/v1/analytics/settings on this server!",
+      "category": "analytics (Admin)"
+    },
+    {
+      "name": "DELETE /api/v1/analytics/cleanup",
+      "expected": "200 or 201",
+      "got": 404,
+      "path": "/api/v1/analytics/cleanup",
+      "error": "Can't find /api/v1/analytics/cleanup on this server!",
+      "category": "analytics (Admin)"
+    },
+    {
+      "name": "GET /api/v1/announcements/scheduled",
+      "expected": "200 or 201",
+      "got": 500,
+      "path": "/api/v1/announcements/scheduled",
+      "error": "Cast to ObjectId failed for value \"scheduled\" (type string) at path \"_id\" for model \"Announcement\"",
+      "category": "announcement (Admin)"
+    },
+    {
+      "name": "GET /api/v1/bestsellers/analytics/overview",
+      "expected": "200 or 201",
+      "got": 403,
+      "path": "/api/v1/bestsellers/analytics/overview",
+      "error": "You do not have permission to perform this action",
+      "category": "bestseller (Auth)"
+    },
+    {
+      "name": "DELETE /api/v1/bestsellers/bulk-delete",
+      "expected": "200 or 201",
+      "got": 403,
+      "path": "/api/v1/bestsellers/bulk-delete",
+      "error": "You do not have permission to perform this action",
+      "category": "bestseller (Auth)"
+    },
+    {
+      "name": "GET /api/v1/brands/search",
+      "expected": "200 or 201",
+      "got": 400,
+      "path": "/api/v1/brands/search",
+      "error": "Search query is required",
+      "category": "brand (Admin)"
+    },
+    {
+      "name": "GET /api/v1/brands/suggestions",
+      "expected": "200 or 201",
+      "got": 400,
+      "path": "/api/v1/brands/suggestions",
+      "error": "Query is required",
+      "category": "brand (Admin)"
+    },
+    {
+      "name": "GET /api/v1/brands/admin/statistics",
+      "expected": "200 or 201",
+      "got": 500,
+      "path": "/api/v1/brands/admin/statistics",
+      "error": "Cast to ObjectId failed for value \"admin\" (type string) at path \"_id\" for model \"Brand\"",
+      "category": "brand (Admin)"
+    },
+    {
+      "name": "DELETE /api/v1/cart/items/bulk/remove",
+      "expected": "200 or 201",
+      "got": 400,
+      "path": "/api/v1/cart/items/bulk/remove",
+      "error": "Item IDs array is required",
+      "category": "cart (Auth)"
+    },
+    {
+      "name": "GET /api/v1/collections",
+      "expected": "200 or 201",
+      "got": 401,
+      "path": "/api/v1/collections",
+      "error": "You are not logged in! Please log in to get access.",
+      "category": "collection (Auth)"
+    },
+    {
+      "name": "GET /api/v1/collections/analytics",
+      "expected": "200 or 201",
+      "got": 403,
+      "path": "/api/v1/collections/analytics",
+      "error": "You do not have permission to perform this action",
+      "category": "collection (Auth)"
+    },
+    {
+      "name": "GET /api/v1/coupons/analytics",
+      "expected": "200 or 201",
+      "got": 500,
+      "path": "/api/v1/coupons/analytics",
+      "error": "Cast to ObjectId failed for value \"analytics\" (type string) at path \"_id\" for model \"Coupon\"",
+      "category": "coupon (Admin)"
+    },
+    {
+      "name": "DELETE /api/v1/faqs/bulk-delete",
+      "expected": "200 or 201",
+      "got": 400,
+      "path": "/api/v1/faqs/bulk-delete",
+      "error": "FAQ IDs array is required",
+      "category": "faq (Admin)"
+    },
+    {
+      "name": "GET /api/v1/favorite-sections",
+      "expected": "200 or 201",
+      "got": 500,
+      "path": "/api/v1/favorite-sections",
+      "error": "Schema hasn't been registered for model \"products\".\nUse mongoose.model(name, schema)",
+      "category": "favorite-section (Auth)"
+    },
+    {
+      "name": "GET /api/v1/favorite-sections/analytics/overview",
+      "expected": "200 or 201",
+      "got": 403,
+      "path": "/api/v1/favorite-sections/analytics/overview",
+      "error": "You do not have permission to perform this action",
+      "category": "favorite-section (Auth)"
+    },
+    {
+      "name": "DELETE /api/v1/favorite-sections/bulk-delete",
+      "expected": "200 or 201",
+      "got": 403,
+      "path": "/api/v1/favorite-sections/bulk-delete",
+      "error": "You do not have permission to perform this action",
+      "category": "favorite-section (Auth)"
+    },
+    {
+      "name": "GET /api/v1/featured-content",
+      "expected": "200 or 201",
+      "got": 401,
+      "path": "/api/v1/featured-content",
+      "error": "You are not logged in! Please log in to get access.",
+      "category": "featured-content (Auth)"
+    },
+    {
+      "name": "GET /api/v1/featured-content/analytics",
+      "expected": "200 or 201",
+      "got": 403,
+      "path": "/api/v1/featured-content/analytics",
+      "error": "You do not have permission to perform this action",
+      "category": "featured-content (Auth)"
+    },
+    {
+      "name": "GET /api/v1/giftcards",
+      "expected": "200 or 201",
+      "got": 401,
+      "path": "/api/v1/giftcards",
+      "error": "You are not logged in! Please log in to get access.",
+      "category": "giftcard (Admin)"
+    },
+    {
+      "name": "GET /api/v1/locations/nearby",
+      "expected": "200 or 201",
+      "got": 400,
+      "path": "/api/v1/locations/nearby",
+      "error": "Latitude and longitude are required",
+      "category": "location (Auth)"
+    },
+    {
+      "name": "GET /api/v1/locations",
+      "expected": "200 or 201",
+      "got": 401,
+      "path": "/api/v1/locations",
+      "error": "You are not logged in! Please log in to get access.",
+      "category": "location (Auth)"
+    },
+    {
+      "name": "GET /api/v1/locations/analytics",
+      "expected": "200 or 201",
+      "got": 403,
+      "path": "/api/v1/locations/analytics",
+      "error": "You do not have permission to perform this action",
+      "category": "location (Auth)"
+    },
+    {
+      "name": "GET /api/v1/locations/regions",
+      "expected": "200 or 201",
+      "got": 403,
+      "path": "/api/v1/locations/regions",
+      "error": "You do not have permission to perform this action",
+      "category": "location (Auth)"
+    },
+    {
+      "name": "GET /api/v1/locations/regions/analytics",
+      "expected": "200 or 201",
+      "got": 403,
+      "path": "/api/v1/locations/regions/analytics",
+      "error": "You do not have permission to perform this action",
+      "category": "location (Auth)"
+    },
+    {
+      "name": "GET /api/v1/new-arrivals/analytics/overview",
+      "expected": "200 or 201",
+      "got": 403,
+      "path": "/api/v1/new-arrivals/analytics/overview",
+      "error": "You do not have permission to perform this action",
+      "category": "new-arrival (Auth)"
+    },
+    {
+      "name": "DELETE /api/v1/new-arrivals/bulk-delete",
+      "expected": "200 or 201",
+      "got": 403,
+      "path": "/api/v1/new-arrivals/bulk-delete",
+      "error": "You do not have permission to perform this action",
+      "category": "new-arrival (Auth)"
+    },
+    {
+      "name": "GET /api/v1/newsletter/subscribers/active",
+      "expected": "200 or 201",
+      "got": 401,
+      "path": "/api/v1/newsletter/subscribers/active",
+      "error": "You are not logged in! Please log in to get access.",
+      "category": "newsletter (Admin)"
+    },
+    {
+      "name": "DELETE /api/v1/newsletter/subscribers/bulk-delete",
+      "expected": "200 or 201",
+      "got": 400,
+      "path": "/api/v1/newsletter/subscribers/bulk-delete",
+      "error": "Subscriber IDs array is required",
+      "category": "newsletter (Admin)"
+    },
+    {
+      "name": "POST /api/notifications/send",
+      "expected": "200 or 201",
+      "got": 500,
+      "path": "/api/notifications/send",
+      "error": "Failed to send notification",
+      "category": "notification (Admin)"
+    },
+    {
+      "name": "POST /api/notifications/send-multiple",
+      "expected": "200 or 201",
+      "got": 500,
+      "path": "/api/notifications/send-multiple",
+      "error": "Failed to send notifications",
+      "category": "notification (Admin)"
+    },
+    {
+      "name": "GET /api/notifications",
+      "expected": "200 or 201",
+      "got": 500,
+      "path": "/api/notifications",
+      "error": "Cannot read properties of undefined (reading 'jwt')",
+      "category": "notification (Admin)"
+    },
+    {
+      "name": "DELETE /api/notifications/preferences/fcm-token",
+      "expected": "200 or 201",
+      "got": 500,
+      "path": "/api/notifications/preferences/fcm-token",
+      "error": "Cannot destructure property 'token' of 'req.body' as it is undefined.",
+      "category": "notification (Admin)"
+    },
+    {
+      "name": "POST /api/notifications/send-notification",
+      "expected": "200 or 201",
+      "got": 500,
+      "path": "/api/notifications/send-notification",
+      "error": "Cannot destructure property 'userId' of 'req.body' as it is undefined.",
+      "category": "notification (Admin)"
+    },
+    {
+      "name": "GET /api/v1/orders/track",
+      "expected": "200 or 201",
+      "got": 400,
+      "path": "/api/v1/orders/track",
+      "error": "Order number is required",
+      "category": "order (Admin)"
+    },
+    {
+      "name": "GET /api/v1/comparisons",
+      "expected": "200 or 201",
+      "got": 401,
+      "path": "/api/v1/comparisons",
+      "error": "You are not logged in! Please log in to get access.",
+      "category": "productComparison (Admin)"
+    },
+    {
+      "name": "GET /api/v1/review-media",
+      "expected": "200 or 201",
+      "got": 500,
+      "path": "/api/v1/review-media",
+      "error": "Cannot populate path `reviewId` because it is not in your schema. Set the `strictPopulate` option to false to override.",
+      "category": "review-media (Auth)"
+    },
+    {
+      "name": "DELETE /api/v1/review-media/bulk-delete",
+      "expected": "200 or 201",
+      "got": 500,
+      "path": "/api/v1/review-media/bulk-delete",
+      "error": "Cast to ObjectId failed for value \"bulk-delete\" (type string) at path \"_id\" for model \"ReviewMedia\"",
+      "category": "review-media (Auth)"
+    },
+    {
+      "name": "GET /api/v1/review-media/moderation/queue",
+      "expected": "200 or 201",
+      "got": 403,
+      "path": "/api/v1/review-media/moderation/queue",
+      "error": "You do not have permission to perform this action",
+      "category": "review-media (Auth)"
+    },
+    {
+      "name": "GET /api/v1/review-media/analytics/overview",
+      "expected": "200 or 201",
+      "got": 403,
+      "path": "/api/v1/review-media/analytics/overview",
+      "error": "You do not have permission to perform this action",
+      "category": "review-media (Auth)"
+    },
+    {
+      "name": "GET /api/v1/review-media/analytics/stats",
+      "expected": "200 or 201",
+      "got": 403,
+      "path": "/api/v1/review-media/analytics/stats",
+      "error": "You do not have permission to perform this action",
+      "category": "review-media (Auth)"
+    },
+    {
+      "name": "GET /api/v1/review-replies/search",
+      "expected": "200 or 201",
+      "got": 400,
+      "path": "/api/v1/review-replies/search",
+      "error": "Please provide search query",
+      "category": "review-reply (Admin)"
+    },
+    {
+      "name": "GET /api/v1/seo/pages",
+      "expected": "200 or 201",
+      "got": 403,
+      "path": "/api/v1/seo/pages",
+      "error": "You do not have permission to perform this action",
+      "category": "seo (Auth)"
+    },
+    {
+      "name": "GET /api/v1/seo/schema-markups",
+      "expected": "200 or 201",
+      "got": 403,
+      "path": "/api/v1/seo/schema-markups",
+      "error": "You do not have permission to perform this action",
+      "category": "seo (Auth)"
+    },
+    {
+      "name": "GET /api/v1/seo/meta-tags",
+      "expected": "200 or 201",
+      "got": 403,
+      "path": "/api/v1/seo/meta-tags",
+      "error": "You do not have permission to perform this action",
+      "category": "seo (Auth)"
+    },
+    {
+      "name": "GET /api/v1/seo/redirect-rules",
+      "expected": "200 or 201",
+      "got": 403,
+      "path": "/api/v1/seo/redirect-rules",
+      "error": "You do not have permission to perform this action",
+      "category": "seo (Auth)"
+    },
+    {
+      "name": "GET /api/v1/seo/audits",
+      "expected": "200 or 201",
+      "got": 403,
+      "path": "/api/v1/seo/audits",
+      "error": "You do not have permission to perform this action",
+      "category": "seo (Auth)"
+    },
+    {
+      "name": "GET /api/v1/seo/analytics",
+      "expected": "200 or 201",
+      "got": 403,
+      "path": "/api/v1/seo/analytics",
+      "error": "You do not have permission to perform this action",
+      "category": "seo (Auth)"
+    },
+    {
+      "name": "GET /api/v1/settings",
+      "expected": "200 or 201",
+      "got": 401,
+      "path": "/api/v1/settings",
+      "error": "You are not logged in! Please log in to get access.",
+      "category": "settings (Admin)"
+    },
+    {
+      "name": "GET /api/v1/social-links/analytics/overview",
+      "expected": "200 or 201",
+      "got": 403,
+      "path": "/api/v1/social-links/analytics/overview",
+      "error": "You do not have permission to perform this action",
+      "category": "social-link (Auth)"
+    },
+    {
+      "name": "DELETE /api/v1/social-links/bulk-delete",
+      "expected": "200 or 201",
+      "got": 403,
+      "path": "/api/v1/social-links/bulk-delete",
+      "error": "You do not have permission to perform this action",
+      "category": "social-link (Auth)"
+    },
+    {
+      "name": "GET /api/v1/uploads",
+      "expected": "200 or 201",
+      "got": 401,
+      "path": "/api/v1/uploads",
+      "error": "You are not logged in! Please log in to get access.",
+      "category": "upload (Auth)"
+    },
+    {
+      "name": "GET /api/v1/uploads/search",
+      "expected": "200 or 201",
+      "got": 500,
+      "path": "/api/v1/uploads/search",
+      "error": "query requires text score metadata, but it is not available",
+      "category": "upload (Auth)"
+    },
+    {
+      "name": "GET /api/v1/uploads/folders",
+      "expected": "200 or 201",
+      "got": 500,
+      "path": "/api/v1/uploads/folders",
+      "error": "Cast to ObjectId failed for value \"folders\" (type string) at path \"_id\" for model \"FileUpload\"",
+      "category": "upload (Auth)"
+    },
+    {
+      "name": "DELETE /api/v1/users/delete-me",
+      "expected": "200 or 201",
+      "got": 204,
+      "path": "/api/v1/users/delete-me",
+      "error": "{}",
+      "category": "user (Admin)"
+    },
+    {
+      "name": "GET /api/v1/users/wishlist",
+      "expected": "200 or 201",
+      "got": 401,
+      "path": "/api/v1/users/wishlist",
+      "error": "Your account has been deactivated. Please contact support.",
+      "category": "user (Admin)"
+    },
+    {
+      "name": "GET /api/v1/wishlist",
+      "expected": "200 or 201",
+      "got": 401,
+      "path": "/api/v1/wishlist",
+      "error": "You are not logged in! Please log in to get access.",
+      "category": "wishlist (Auth)"
+    },
+    {
+      "name": "DELETE /api/v1/wishlist/bulk/remove",
+      "expected": "200 or 201",
+      "got": 400,
+      "path": "/api/v1/wishlist/bulk/remove",
+      "error": "Item IDs array is required",
+      "category": "wishlist (Auth)"
+    }
+  ]
+}

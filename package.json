@@ -1,0 +1,17 @@
+{
+  "name": "vardhman_mills",
+  "version": "1.0.0",
+  "scripts": {
+    "frontend": "cd frontend && npm run dev",
+    "backend": "cd backend && npm run dev",
+    "dev": "concurrently \"npm run frontend\" \"npm run backend\"",
+    "clean": "rimraf **/dist **/build **/.next",
+    "install-all": "concurrently \"cd frontend && npm install\" \"cd backend && npm install\""
+  },
+  "devDependencies": {
+    "rimraf": "^6.0.1"
+  },
+  "dependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
