@@ -7,6 +7,8 @@ build/
 .env.development.local
 .env.test.local
 .env.production.local
+.env.example
+.env.test
 .DS_Store
 .vscode/
 .idea/
