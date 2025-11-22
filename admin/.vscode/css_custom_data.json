@@ -1,0 +1,25 @@
+{
+  "version": 1.1,
+  "atDirectives": [
+    {
+      "name": "@tailwind",
+      "description": "Injects Tailwind CSS styles into your CSS."
+    },
+    {
+      "name": "@apply",
+      "description": "Allows you to apply utility classes in custom CSS."
+    },
+    {
+      "name": "@layer",
+      "description": "Groups styles into layers to control their order."
+    },
+    {
+      "name": "@responsive",
+      "description": "Generates responsive variants of utilities."
+    },
+    {
+      "name": "@screen",
+      "description": "Creates media queries for named screens."
+    }
+  ]
+}

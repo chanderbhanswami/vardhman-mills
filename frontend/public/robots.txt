@@ -1,0 +1,105 @@
+# robots.txt for Vardhman Textiles
+# https://vardhmantextiles.com
+
+# Allow all search engines to crawl the site
+User-agent: *
+Allow: /
+
+# Disallow admin and private pages
+Disallow: /admin/
+Disallow: /api/
+Disallow: /_next/
+Disallow: /account/
+Disallow: /checkout/
+Disallow: /cart/
+Disallow: /wishlist/
+
+# Allow product pages
+Allow: /products/
+Allow: /categories/
+Allow: /brands/
+Allow: /collections/
+
+# Allow static assets
+Allow: /images/
+Allow: /icons/
+Allow: /*.css$
+Allow: /*.js$
+
+# Disallow search result pages with parameters
+Disallow: /search?*
+Disallow: /*?*sort=
+Disallow: /*?*filter=
+Disallow: /*&*
+
+# Disallow login/register pages
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /reset-password
+
+# Disallow API routes
+Disallow: /api/*
+
+# Disallow temporary/test pages
+Disallow: /test/
+Disallow: /temp/
+Disallow: /draft/
+
+# Allow specific search engines
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+User-agent: Googlebot-Image
+Allow: /images/
+Allow: /products/*/images/
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Slurp
+Allow: /
+Crawl-delay: 1
+
+User-agent: DuckDuckBot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Baiduspider
+Allow: /
+Crawl-delay: 2
+
+User-agent: YandexBot
+Allow: /
+Crawl-delay: 2
+
+# Disallow bad bots
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: BLEXBot
+Disallow: /
+
+User-agent: Screaming Frog SEO Spider
+Disallow: /
+
+# Sitemap location
+Sitemap: https://vardhmantextiles.com/sitemap.xml
+Sitemap: https://vardhmantextiles.com/sitemap-0.xml
+Sitemap: https://vardhmantextiles.com/products-sitemap.xml
+Sitemap: https://vardhmantextiles.com/categories-sitemap.xml
+Sitemap: https://vardhmantextiles.com/brands-sitemap.xml
+
+# Host (preferred domain)
+Host: https://vardhmantextiles.com

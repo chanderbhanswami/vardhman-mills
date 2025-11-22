@@ -1,0 +1,28 @@
+# Security Contact Information
+# For reporting security vulnerabilities at Vardhman Textiles
+
+Contact: security@vardhmantextiles.com
+Contact: https://vardhmantextiles.com/security/report
+Expires: 2026-12-31T23:59:59.000Z
+Encryption: https://vardhmantextiles.com/.well-known/pgp-key.txt
+Acknowledgments: https://vardhmantextiles.com/security/hall-of-fame
+Preferred-Languages: en, hi
+Canonical: https://vardhmantextiles.com/.well-known/security.txt
+Policy: https://vardhmantextiles.com/security/disclosure-policy
+Hiring: https://vardhmantextiles.com/careers
+
+# Additional Information
+# We take security seriously. If you discover a security vulnerability,
+# please report it to us at security@vardhmantextiles.com
+# 
+# Please include:
+# - Description of the vulnerability
+# - Steps to reproduce
+# - Potential impact
+# - Suggested fix (if any)
+#
+# We will acknowledge receipt within 24 hours and provide regular updates.
+# We offer a responsible disclosure program with recognition in our
+# Security Hall of Fame.
+#
+# Thank you for helping keep Vardhman Textiles and our customers safe!

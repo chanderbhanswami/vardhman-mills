@@ -1,0 +1,319 @@
+/**
+ * Responsive Layout Utilities
+ * Add these classes to your components for proper responsive behavior
+ */
+
+/* Container Utilities */
+.container-responsive {
+  @apply w-full mx-auto px-4 sm:px-6 lg:px-8;
+  @apply max-w-7xl;
+}
+
+.container-narrow {
+  @apply w-full mx-auto px-4 sm:px-6 lg:px-8;
+  @apply max-w-5xl;
+}
+
+.container-wide {
+  @apply w-full mx-auto px-4 sm:px-6 lg:px-8;
+  @apply max-w-screen-2xl;
+}
+
+/* Section Spacing */
+.section-spacing {
+  @apply py-12 sm:py-16 lg:py-20;
+}
+
+.section-spacing-sm {
+  @apply py-8 sm:py-10 lg:py-12;
+}
+
+.section-spacing-lg {
+  @apply py-16 sm:py-20 lg:py-24;
+}
+
+/* Text Contrast Safe Colors */
+.text-contrast-primary {
+  @apply text-gray-900 dark:text-white;
+}
+
+.text-contrast-secondary {
+  @apply text-gray-700 dark:text-gray-200;
+}
+
+.text-contrast-muted {
+  @apply text-gray-600 dark:text-gray-300;
+}
+
+.text-contrast-subtle {
+  @apply text-gray-500 dark:text-gray-400;
+}
+
+/* Background with Safe Text Colors */
+.bg-primary-safe {
+  @apply bg-primary-600 text-white;
+}
+
+.bg-secondary-safe {
+  @apply bg-secondary-100 text-secondary-900 dark:bg-secondary-800 dark:text-white;
+}
+
+.bg-card-safe {
+  @apply bg-white text-gray-900 dark:bg-gray-800 dark:text-white;
+}
+
+/* Button Contrast Safe */
+.btn-primary-safe {
+  @apply bg-primary-600 hover:bg-primary-700 text-white;
+  @apply focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
+}
+
+.btn-secondary-safe {
+  @apply bg-secondary-200 hover:bg-secondary-300 text-secondary-900;
+  @apply dark:bg-secondary-700 dark:hover:bg-secondary-600 dark:text-white;
+}
+
+/* Card Utilities */
+.card-responsive {
+  @apply bg-white dark:bg-gray-800 rounded-lg shadow-md;
+  @apply p-4 sm:p-6 lg:p-8;
+  @apply border border-gray-200 dark:border-gray-700;
+}
+
+.card-hover {
+  @apply transition-all duration-300 ease-in-out;
+  @apply hover:shadow-lg hover:-translate-y-1;
+}
+
+/* Grid Responsive */
+.grid-responsive-1 {
+  @apply grid grid-cols-1;
+}
+
+.grid-responsive-2 {
+  @apply grid grid-cols-1 sm:grid-cols-2;
+  @apply gap-4 sm:gap-6 lg:gap-8;
+}
+
+.grid-responsive-3 {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3;
+  @apply gap-4 sm:gap-6 lg:gap-8;
+}
+
+.grid-responsive-4 {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
+  @apply gap-4 sm:gap-6 lg:gap-8;
+}
+
+/* Flex Responsive */
+.flex-responsive {
+  @apply flex flex-col sm:flex-row;
+  @apply gap-4 sm:gap-6;
+}
+
+.flex-responsive-center {
+  @apply flex flex-col sm:flex-row items-center justify-between;
+  @apply gap-4 sm:gap-6;
+}
+
+/* Typography Responsive */
+.heading-1-responsive {
+  @apply text-3xl sm:text-4xl lg:text-5xl xl:text-6xl;
+  @apply font-bold leading-tight;
+  @apply text-contrast-primary;
+}
+
+.heading-2-responsive {
+  @apply text-2xl sm:text-3xl lg:text-4xl;
+  @apply font-semibold leading-tight;
+  @apply text-contrast-primary;
+}
+
+.heading-3-responsive {
+  @apply text-xl sm:text-2xl lg:text-3xl;
+  @apply font-semibold leading-snug;
+  @apply text-contrast-primary;
+}
+
+.body-responsive {
+  @apply text-base sm:text-lg;
+  @apply leading-relaxed;
+  @apply text-contrast-secondary;
+}
+
+.body-small-responsive {
+  @apply text-sm sm:text-base;
+  @apply leading-relaxed;
+  @apply text-contrast-muted;
+}
+
+/* Spacing Utilities */
+.spacing-tight {
+  @apply space-y-2 sm:space-y-3 lg:space-y-4;
+}
+
+.spacing-normal {
+  @apply space-y-4 sm:space-y-6 lg:space-y-8;
+}
+
+.spacing-loose {
+  @apply space-y-6 sm:space-y-8 lg:space-y-10;
+}
+
+/* Image Responsive */
+.img-responsive {
+  @apply w-full h-auto object-cover;
+}
+
+.img-responsive-square {
+  @apply w-full aspect-square object-cover;
+}
+
+.img-responsive-video {
+  @apply w-full aspect-video object-cover;
+}
+
+/* Link Safe Colors */
+.link-safe {
+  @apply text-primary-600 hover:text-primary-700;
+  @apply dark:text-primary-400 dark:hover:text-primary-300;
+  @apply underline-offset-4 hover:underline;
+}
+
+/* Badge/Tag Safe Colors */
+.badge-primary-safe {
+  @apply bg-primary-100 text-primary-800;
+  @apply dark:bg-primary-900 dark:text-primary-200;
+  @apply px-2 py-1 rounded-full text-xs font-medium;
+}
+
+.badge-secondary-safe {
+  @apply bg-secondary-100 text-secondary-800;
+  @apply dark:bg-secondary-800 dark:text-secondary-200;
+  @apply px-2 py-1 rounded-full text-xs font-medium;
+}
+
+.badge-success-safe {
+  @apply bg-green-100 text-green-800;
+  @apply dark:bg-green-900 dark:text-green-200;
+  @apply px-2 py-1 rounded-full text-xs font-medium;
+}
+
+.badge-warning-safe {
+  @apply bg-yellow-100 text-yellow-800;
+  @apply dark:bg-yellow-900 dark:text-yellow-200;
+  @apply px-2 py-1 rounded-full text-xs font-medium;
+}
+
+.badge-error-safe {
+  @apply bg-red-100 text-red-800;
+  @apply dark:bg-red-900 dark:text-red-200;
+  @apply px-2 py-1 rounded-full text-xs font-medium;
+}
+
+/* Form Elements Safe */
+.input-safe {
+  @apply w-full px-4 py-2 rounded-lg;
+  @apply bg-white dark:bg-gray-800;
+  @apply border border-gray-300 dark:border-gray-600;
+  @apply text-gray-900 dark:text-white;
+  @apply placeholder:text-gray-500 dark:placeholder:text-gray-400;
+  @apply focus:ring-2 focus:ring-primary-500 focus:border-transparent;
+}
+
+/* Product Card Specific */
+.product-card {
+  @apply card-responsive card-hover;
+  @apply overflow-hidden;
+}
+
+.product-image-container {
+  @apply relative w-full aspect-square overflow-hidden;
+  @apply bg-gray-100 dark:bg-gray-700;
+}
+
+.product-title {
+  @apply text-lg font-semibold line-clamp-2;
+  @apply text-contrast-primary;
+}
+
+.product-price {
+  @apply text-xl font-bold;
+  @apply text-primary-600 dark:text-primary-400;
+}
+
+.product-description {
+  @apply text-sm line-clamp-3;
+  @apply text-contrast-muted;
+}
+
+/* Category Card Specific */
+.category-card {
+  @apply card-responsive card-hover;
+  @apply text-center;
+}
+
+.category-image-container {
+  @apply relative w-full h-48 overflow-hidden rounded-t-lg;
+  @apply bg-gray-100 dark:bg-gray-700;
+}
+
+.category-title {
+  @apply text-xl font-semibold;
+  @apply text-contrast-primary;
+}
+
+/* Animation Classes */
+.fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Accessibility */
+.focus-visible-safe {
+  @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2;
+}
+
+/* Mobile Menu */
+.mobile-menu-safe {
+  @apply bg-white dark:bg-gray-800;
+  @apply border-t border-gray-200 dark:border-gray-700;
+}
+
+/* Footer Safe */
+.footer-safe {
+  @apply bg-gray-100 dark:bg-gray-900;
+  @apply border-t border-gray-200 dark:border-gray-800;
+}
+
+.footer-text-safe {
+  @apply text-gray-600 dark:text-gray-300;
+}
+
+.footer-link-safe {
+  @apply text-gray-700 hover:text-primary-600;
+  @apply dark:text-gray-300 dark:hover:text-primary-400;
+}

@@ -1,0 +1,65 @@
+/* TEAM */
+
+Project Manager: Vardhman Mills Team
+Site: https://vardhmantextiles.com
+Location: Punjab, India
+
+/* THANKS */
+
+To all our customers for their continued support
+To the open-source community for amazing tools
+
+/* SITE */
+
+Standards: HTML5, CSS3, JavaScript ES6+, TypeScript
+Components: Next.js 14, React 18, Tailwind CSS
+Software: VS Code, Git, Node.js
+Tools: Vercel, GitHub Actions, ESLint, Prettier
+
+Last update: 2025/10/27
+Language: English / Hindi
+Doctype: HTML5
+IDE: Visual Studio Code
+
+/* ABOUT */
+
+Vardhman Textiles is India's leading textile manufacturer
+with over 50 years of excellence in quality textiles and
+home decor products.
+
+We specialize in:
+- Premium Bedsheets
+- Luxury Towels
+- Elegant Curtains
+- Home Furnishings
+- Cotton Fabrics
+- Blankets & Quilts
+
+Mission: To provide premium quality textiles that bring
+comfort and elegance to every home.
+
+Vision: To be the most trusted textile brand in India
+and expand globally while maintaining our commitment
+to quality and sustainability.
+
+Values:
+- Quality First
+- Customer Satisfaction
+- Sustainability
+- Innovation
+- Integrity
+
+/* CONTACT */
+
+Website: https://vardhmantextiles.com
+Email: info@vardhmantextiles.com
+Support: support@vardhmantextiles.com
+Phone: +91-XXX-XXX-XXXX
+
+Social Media:
+Facebook: https://facebook.com/vardhmantextiles
+Instagram: https://instagram.com/vardhmantextiles
+Twitter: https://twitter.com/vardhmantextiles
+LinkedIn: https://linkedin.com/company/vardhmantextiles
+Pinterest: https://pinterest.com/vardhmantextiles
+YouTube: https://youtube.com/@vardhmantextiles

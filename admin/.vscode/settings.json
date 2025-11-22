@@ -1,0 +1,31 @@
+{
+  "css.validate": false,
+  "scss.validate": false,
+  "less.validate": false,
+  "css.lint.unknownAtRules": "ignore",
+  "css.lint.unknownProperties": "ignore",
+  "css.customData": [".vscode/css_custom_data.json"],
+  "tailwindCSS.includeLanguages": {
+    "css": "css",
+    "html": "html",
+    "javascript": "javascript",
+    "typescript": "typescript",
+    "tsx": "typescriptreact",
+    "jsx": "javascriptreact"
+  },
+  "tailwindCSS.experimental.classRegex": [
+    ["class[Name]*\\s*[:=]\\s*['\"]([^'\"]*)['\"]", "([^'\"]*)"],
+    "className\\s*=\\s*{([^}]*)}"
+  ],
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
+  "emmet.includeLanguages": {
+    "tailwindcss": "css"
+  },
+  "editor.quickSuggestions": {
+    "strings": true
+  },
+  "css.completion.completePropertyWithSemicolon": false,
+  "tailwindCSS.validate": true
+}

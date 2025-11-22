@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Main sitemap -->
+  <sitemap>
+    <loc>https://vardhmantextiles.com/sitemap-0.xml</loc>
+    <lastmod>2025-10-27T00:00:00+00:00</lastmod>
+  </sitemap>
+  
+  <!-- Products sitemap -->
+  <sitemap>
+    <loc>https://vardhmantextiles.com/products-sitemap.xml</loc>
+    <lastmod>2025-10-27T00:00:00+00:00</lastmod>
+  </sitemap>
+  
+  <!-- Categories sitemap -->
+  <sitemap>
+    <loc>https://vardhmantextiles.com/categories-sitemap.xml</loc>
+    <lastmod>2025-10-27T00:00:00+00:00</lastmod>
+  </sitemap>
+  
+  <!-- Brands sitemap -->
+  <sitemap>
+    <loc>https://vardhmantextiles.com/brands-sitemap.xml</loc>
+    <lastmod>2025-10-27T00:00:00+00:00</lastmod>
+  </sitemap>
+  
+  <!-- Collections sitemap -->
+  <sitemap>
+    <loc>https://vardhmantextiles.com/collections-sitemap.xml</loc>
+    <lastmod>2025-10-27T00:00:00+00:00</lastmod>
+  </sitemap>
+  
+  <!-- Blog sitemap -->
+  <sitemap>
+    <loc>https://vardhmantextiles.com/blog-sitemap.xml</loc>
+    <lastmod>2025-10-27T00:00:00+00:00</lastmod>
+  </sitemap>
+</sitemapindex>

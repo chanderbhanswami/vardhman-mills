@@ -1,0 +1,292 @@
+/* NProgress Styling - Loading Progress Bar */
+
+/* Main Progress Bar */
+#nprogress {
+  pointer-events: none;
+  z-index: 9999;
+}
+
+#nprogress .bar {
+  background: var(--primary-500, #3B82F6);
+  position: fixed;
+  z-index: 9999;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  transition: all 0.3s ease;
+}
+
+/* Gradient Background */
+#nprogress .bar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--primary-400, #60A5FA) 50%,
+    var(--primary-500, #3B82F6) 100%
+  );
+  opacity: 0.8;
+}
+
+/* Fade the right side out */
+#nprogress .bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100px;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    var(--primary-500, #3B82F6) 0%,
+    transparent 100%
+  );
+  opacity: 0.6;
+}
+
+/* Peg - The moving indicator */
+#nprogress .peg {
+  display: block;
+  position: absolute;
+  right: 0px;
+  width: 100px;
+  height: 100%;
+  box-shadow: 0 0 10px var(--primary-500, #3B82F6), 0 0 5px var(--primary-500, #3B82F6);
+  opacity: 1.0;
+  transform: rotate(3deg) translate(0px, -4px);
+}
+
+/* Spinner */
+#nprogress .spinner {
+  display: block;
+  position: fixed;
+  z-index: 9999;
+  top: 20px;
+  right: 20px;
+}
+
+#nprogress .spinner-icon {
+  width: 18px;
+  height: 18px;
+  box-sizing: border-box;
+  border: solid 2px transparent;
+  border-top-color: var(--primary-500, #3B82F6);
+  border-left-color: var(--primary-500, #3B82F6);
+  border-radius: 50%;
+  animation: nprogress-spinner 400ms linear infinite;
+}
+
+/* Animation */
+@keyframes nprogress-spinner {
+  0% { 
+    transform: rotate(0deg); 
+  }
+  100% { 
+    transform: rotate(360deg); 
+  }
+}
+
+/* Custom Theming */
+.nprogress-custom-parent {
+  overflow: hidden;
+  position: relative;
+}
+
+.nprogress-custom-parent #nprogress .bar,
+.nprogress-custom-parent #nprogress .spinner {
+  position: absolute;
+}
+
+/* Dark Theme Support */
+[data-theme="dark"] #nprogress .bar {
+  background: var(--primary-400, #60A5FA);
+}
+
+[data-theme="dark"] #nprogress .bar::before {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--primary-300, #93C5FD) 50%,
+    var(--primary-400, #60A5FA) 100%
+  );
+}
+
+[data-theme="dark"] #nprogress .bar::after {
+  background: linear-gradient(
+    90deg,
+    var(--primary-400, #60A5FA) 0%,
+    transparent 100%
+  );
+}
+
+[data-theme="dark"] #nprogress .peg {
+  box-shadow: 0 0 10px var(--primary-400, #60A5FA), 0 0 5px var(--primary-400, #60A5FA);
+}
+
+[data-theme="dark"] #nprogress .spinner-icon {
+  border-top-color: var(--primary-400, #60A5FA);
+  border-left-color: var(--primary-400, #60A5FA);
+}
+
+/* E-commerce Themed Progress Bar */
+.nprogress-ecommerce #nprogress .bar {
+  background: linear-gradient(
+    90deg,
+    var(--success-500, #10B981) 0%,
+    var(--primary-500, #3B82F6) 50%,
+    var(--purple-500, #8B5CF6) 100%
+  );
+  height: 4px;
+}
+
+.nprogress-ecommerce #nprogress .peg {
+  box-shadow: 
+    0 0 15px var(--primary-500, #3B82F6), 
+    0 0 8px var(--primary-400, #60A5FA),
+    0 0 3px var(--primary-300, #93C5FD);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  #nprogress .spinner {
+    top: 15px;
+    right: 15px;
+  }
+  
+  #nprogress .spinner-icon {
+    width: 16px;
+    height: 16px;
+  }
+  
+  #nprogress .bar {
+    height: 2px;
+  }
+}
+
+@media (max-width: 480px) {
+  #nprogress .spinner {
+    top: 10px;
+    right: 10px;
+  }
+  
+  #nprogress .spinner-icon {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  #nprogress .spinner-icon {
+    animation: none;
+  }
+  
+  #nprogress .bar {
+    transition: none;
+  }
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  #nprogress .bar {
+    background: #000000;
+    height: 4px;
+  }
+  
+  #nprogress .spinner-icon {
+    border-top-color: #000000;
+    border-left-color: #000000;
+    border-width: 3px;
+  }
+}
+
+/* Custom Color Variants */
+.nprogress-success #nprogress .bar {
+  background: var(--success-500, #10B981);
+}
+
+.nprogress-success #nprogress .peg {
+  box-shadow: 0 0 10px var(--success-500, #10B981), 0 0 5px var(--success-500, #10B981);
+}
+
+.nprogress-success #nprogress .spinner-icon {
+  border-top-color: var(--success-500, #10B981);
+  border-left-color: var(--success-500, #10B981);
+}
+
+.nprogress-warning #nprogress .bar {
+  background: var(--warning-500, #F59E0B);
+}
+
+.nprogress-warning #nprogress .peg {
+  box-shadow: 0 0 10px var(--warning-500, #F59E0B), 0 0 5px var(--warning-500, #F59E0B);
+}
+
+.nprogress-warning #nprogress .spinner-icon {
+  border-top-color: var(--warning-500, #F59E0B);
+  border-left-color: var(--warning-500, #F59E0B);
+}
+
+.nprogress-error #nprogress .bar {
+  background: var(--error-500, #EF4444);
+}
+
+.nprogress-error #nprogress .peg {
+  box-shadow: 0 0 10px var(--error-500, #EF4444), 0 0 5px var(--error-500, #EF4444);
+}
+
+.nprogress-error #nprogress .spinner-icon {
+  border-top-color: var(--error-500, #EF4444);
+  border-left-color: var(--error-500, #EF4444);
+}
+
+/* Performance Optimizations */
+#nprogress .bar,
+#nprogress .peg,
+#nprogress .spinner {
+  will-change: transform, opacity;
+}
+
+/* Remove the spinner on certain pages */
+.no-nprogress-spinner #nprogress .spinner {
+  display: none;
+}
+
+/* Slow connection indicator */
+.nprogress-slow #nprogress .bar {
+  background: var(--warning-500, #F59E0B);
+  animation: nprogress-pulse 1s ease-in-out infinite alternate;
+}
+
+@keyframes nprogress-pulse {
+  0% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Custom positioning for fixed headers */
+.has-fixed-header #nprogress .bar {
+  top: 60px;
+}
+
+@media (max-width: 768px) {
+  .has-fixed-header #nprogress .bar {
+    top: 50px;
+  }
+}
+
+/* Hide on print */
+@media print {
+  #nprogress {
+    display: none !important;
+  }
+}

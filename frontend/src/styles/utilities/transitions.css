@@ -1,0 +1,658 @@
+/* Transition Effects and Smooth Interactions */
+
+/* Base Transition Classes */
+.transition-none { transition: none; }
+.transition-all { transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1); }
+.transition-colors { transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1), background-color 150ms cubic-bezier(0.4, 0, 0.2, 1), border-color 150ms cubic-bezier(0.4, 0, 0.2, 1), text-decoration-color 150ms cubic-bezier(0.4, 0, 0.2, 1), fill 150ms cubic-bezier(0.4, 0, 0.2, 1), stroke 150ms cubic-bezier(0.4, 0, 0.2, 1); }
+.transition-opacity { transition: opacity 150ms cubic-bezier(0.4, 0, 0.2, 1); }
+.transition-shadow { transition: box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1); }
+.transition-transform { transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1); }
+
+/* Duration Classes */
+.duration-75 { transition-duration: 75ms; }
+.duration-100 { transition-duration: 100ms; }
+.duration-150 { transition-duration: 150ms; }
+.duration-200 { transition-duration: 200ms; }
+.duration-300 { transition-duration: 300ms; }
+.duration-500 { transition-duration: 500ms; }
+.duration-700 { transition-duration: 700ms; }
+.duration-1000 { transition-duration: 1000ms; }
+
+/* Timing Function Classes */
+.ease-linear { transition-timing-function: linear; }
+.ease-in { transition-timing-function: cubic-bezier(0.4, 0, 1, 1); }
+.ease-out { transition-timing-function: cubic-bezier(0, 0, 0.2, 1); }
+.ease-in-out { transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); }
+
+/* Custom Easing Functions */
+.ease-spring { transition-timing-function: cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.ease-bounce { transition-timing-function: cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+.ease-elastic { transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+.ease-back-in { transition-timing-function: cubic-bezier(0.36, 0, 0.66, -0.56); }
+.ease-back-out { transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1); }
+.ease-back-in-out { transition-timing-function: cubic-bezier(0.68, -0.6, 0.32, 1.6); }
+
+/* Delay Classes */
+.delay-75 { transition-delay: 75ms; }
+.delay-100 { transition-delay: 100ms; }
+.delay-150 { transition-delay: 150ms; }
+.delay-200 { transition-delay: 200ms; }
+.delay-300 { transition-delay: 300ms; }
+.delay-500 { transition-delay: 500ms; }
+.delay-700 { transition-delay: 700ms; }
+.delay-1000 { transition-delay: 1000ms; }
+
+/* Specific Property Transitions */
+.transition-width { transition-property: width; transition-duration: 300ms; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); }
+.transition-height { transition-property: height; transition-duration: 300ms; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); }
+.transition-spacing { transition-property: margin, padding; transition-duration: 300ms; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); }
+.transition-size { transition-property: width, height; transition-duration: 300ms; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); }
+
+/* Interactive Element Transitions */
+
+/* Button Transitions */
+.btn-transition {
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-transition:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-transition:active {
+  transform: translateY(0);
+  transition-duration: 100ms;
+}
+
+.btn-scale-transition {
+  transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-scale-transition:hover {
+  transform: scale(1.05);
+}
+
+.btn-scale-transition:active {
+  transform: scale(0.98);
+}
+
+/* Link Transitions */
+.link-transition {
+  transition: color 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.link-underline {
+  position: relative;
+  text-decoration: none;
+}
+
+.link-underline::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: currentColor;
+  transition: width 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.link-underline:hover::after {
+  width: 100%;
+}
+
+.link-underline-center::after {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Card Transitions */
+.card-transition {
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover {
+  transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1), 
+              box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.card-scale {
+  transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-scale:hover {
+  transform: scale(1.02);
+}
+
+/* Image Transitions */
+.img-transition {
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.img-zoom {
+  overflow: hidden;
+}
+
+.img-zoom img {
+  transition: transform 400ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.img-zoom:hover img {
+  transform: scale(1.1);
+}
+
+.img-fade {
+  transition: opacity 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.img-fade:hover {
+  opacity: 0.8;
+}
+
+/* Form Element Transitions */
+.input-transition {
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.input-transition:focus {
+  outline: none;
+  border-color: var(--primary-500);
+  box-shadow: 0 0 0 3px var(--primary-100);
+}
+
+.input-glow {
+  transition: box-shadow 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.input-glow:focus {
+  box-shadow: 0 0 0 3px var(--primary-100), 0 0 20px var(--primary-200);
+}
+
+.label-float {
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.checkbox-transition {
+  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.radio-transition {
+  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Navigation Transitions */
+.nav-transition {
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-slide {
+  transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-fade {
+  transition: opacity 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dropdown-transition {
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: top;
+}
+
+.dropdown-enter {
+  opacity: 0;
+  transform: scaleY(0.8) translateY(-10px);
+}
+
+.dropdown-enter-active {
+  opacity: 1;
+  transform: scaleY(1) translateY(0);
+}
+
+.dropdown-exit {
+  opacity: 1;
+  transform: scaleY(1) translateY(0);
+}
+
+.dropdown-exit-active {
+  opacity: 0;
+  transform: scaleY(0.8) translateY(-10px);
+}
+
+/* Modal Transitions */
+.modal-backdrop {
+  transition: opacity 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal-content {
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal-enter {
+  opacity: 0;
+  transform: scale(0.9) translateY(-20px);
+}
+
+.modal-enter-active {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
+.modal-exit {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
+.modal-exit-active {
+  opacity: 0;
+  transform: scale(0.9) translateY(-20px);
+}
+
+/* Toast/Notification Transitions */
+.toast-transition {
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.toast-enter {
+  opacity: 0;
+  transform: translateX(100%);
+}
+
+.toast-enter-active {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.toast-exit {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.toast-exit-active {
+  opacity: 0;
+  transform: translateX(100%);
+}
+
+/* Sidebar/Drawer Transitions */
+.sidebar-transition {
+  transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.drawer-overlay {
+  transition: opacity 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.drawer-content {
+  transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Accordion Transitions */
+.accordion-transition {
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.accordion-content {
+  overflow: hidden;
+  transition: max-height 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.accordion-icon {
+  transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.accordion-open .accordion-icon {
+  transform: rotate(180deg);
+}
+
+/* Tab Transitions */
+.tab-transition {
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tab-content {
+  transition: opacity 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tab-indicator {
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Progress Bar Transitions */
+.progress-transition {
+  transition: width 500ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.progress-indeterminate {
+  animation: progressIndeterminate 2s infinite linear;
+}
+
+/* Loading State Transitions */
+.loading-fade {
+  transition: opacity 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.skeleton-transition {
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Scroll Transitions */
+.scroll-smooth {
+  scroll-behavior: smooth;
+}
+
+.scroll-transition {
+  transition: transform 100ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* State-based Transitions */
+.hover-lift {
+  transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+}
+
+.hover-glow {
+  transition: box-shadow 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-glow:hover {
+  box-shadow: 0 0 20px rgba(var(--primary-500-rgb), 0.3);
+}
+
+.hover-rotate {
+  transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-rotate:hover {
+  transform: rotate(5deg);
+}
+
+.hover-scale {
+  transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-scale:hover {
+  transform: scale(1.05);
+}
+
+.hover-blur {
+  transition: filter 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-blur:hover {
+  filter: blur(2px);
+}
+
+.hover-brightness {
+  transition: filter 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-brightness:hover {
+  filter: brightness(1.1);
+}
+
+/* Focus Transitions */
+.focus-ring {
+  transition: box-shadow 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.focus-ring:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--primary-100);
+}
+
+.focus-visible-ring:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--primary-100);
+}
+
+/* Active State Transitions */
+.active-scale {
+  transition: transform 100ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.active-scale:active {
+  transform: scale(0.95);
+}
+
+/* Color Theme Transitions */
+.theme-transition {
+  transition: background-color 200ms cubic-bezier(0.4, 0, 0.2, 1),
+              color 200ms cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Layout Transitions */
+.layout-transition {
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.collapse-transition {
+  overflow: hidden;
+  transition: height 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.expand-transition {
+  overflow: hidden;
+  transition: max-height 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Visibility Transitions */
+.fade-in {
+  opacity: 0;
+  transition: opacity 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fade-in.visible {
+  opacity: 1;
+}
+
+.slide-in {
+  transform: translateY(20px);
+  opacity: 0;
+  transition: all 400ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.slide-in.visible {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* E-commerce Specific Transitions */
+.product-card-transition {
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.product-image-transition {
+  transition: transform 400ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.price-transition {
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cart-item-transition {
+  transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.wishlist-transition {
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Search Results Transitions */
+.search-result-transition {
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.search-highlight {
+  transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Pagination Transitions */
+.pagination-transition {
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Filter Transitions */
+.filter-transition {
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.filter-slide {
+  transition: max-height 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+/* Sort Transitions */
+.sort-transition {
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Rating Transitions */
+.rating-transition {
+  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.star-transition {
+  transition: color 200ms cubic-bezier(0.4, 0, 0.2, 1),
+              transform 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.star-transition:hover {
+  transform: scale(1.2);
+}
+
+/* Review Transitions */
+.review-transition {
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Quantity Selector Transitions */
+.quantity-transition {
+  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Checkout Transitions */
+.checkout-step-transition {
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.payment-transition {
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Error State Transitions */
+.error-shake {
+  animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
+.error-highlight {
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Success State Transitions */
+.success-bounce {
+  animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.success-glow {
+  transition: box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Loading Overlay Transitions */
+.loading-overlay {
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.loading-spinner {
+  transition: opacity 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Tooltip Transitions */
+.tooltip-transition {
+  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tooltip-enter {
+  opacity: 0;
+  transform: translateY(5px);
+}
+
+.tooltip-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Popover Transitions */
+.popover-transition {
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Responsive Transition Controls */
+@media (max-width: 768px) {
+  .mobile-fast-transition {
+    transition-duration: 150ms !important;
+  }
+  
+  .mobile-no-transition {
+    transition: none !important;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .transition-all,
+  .transition-colors,
+  .transition-opacity,
+  .transition-shadow,
+  .transition-transform,
+  .btn-transition,
+  .card-transition,
+  .img-transition,
+  .input-transition,
+  .nav-transition,
+  .modal-content,
+  .toast-transition,
+  .accordion-transition,
+  .tab-transition,
+  .progress-transition,
+  .theme-transition,
+  .layout-transition {
+    transition-duration: 0.01ms !important;
+  }
+  
+  .hover-lift:hover,
+  .hover-scale:hover,
+  .hover-rotate:hover {
+    transform: none !important;
+  }
+}
+
+/* Print Media - Disable Transitions */
+@media print {
+  * {
+    transition: none !important;
+  }
+}
+
+/* Performance Optimizations */
+.gpu-accelerated-transition {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Will-change optimizations */
+.will-change-transform { will-change: transform; }
+.will-change-opacity { will-change: opacity; }
+.will-change-scroll { will-change: scroll-position; }
+.will-change-contents { will-change: contents; }
+.will-change-auto { will-change: auto; }
