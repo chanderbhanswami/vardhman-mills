@@ -217,7 +217,7 @@ export async function GET(request: NextRequest) {
 
     // Build backend URL
     const backendUrl = new URL(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/products/featured`
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/products/featured`
     );
 
     Object.entries(queryParams).forEach(([key, value]) => {
@@ -392,7 +392,7 @@ export async function POST(request: NextRequest) {
       const featureData = validationResult.data;
 
       // Make request to backend
-      const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/products/featured/bulk`;
+      const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/products/featured/bulk`;
       
       const response = await fetch(backendUrl, {
         method: 'POST',
@@ -472,7 +472,7 @@ export async function POST(request: NextRequest) {
       const featureData = validationResult.data;
 
       // Make request to backend
-      const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/products/featured`;
+      const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/products/featured`;
       
       const response = await fetch(backendUrl, {
         method: 'POST',
@@ -652,7 +652,7 @@ export async function PATCH(request: NextRequest) {
     const updateData = validationResult.data;
 
     // Make request to backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/products/featured/${updateData.featuredId}`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/products/featured/${updateData.featuredId}`;
     
     const response = await fetch(backendUrl, {
       method: 'PATCH',
@@ -820,7 +820,7 @@ export async function DELETE(request: NextRequest) {
 
     // Make request to backend
     const backendUrl = new URL(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/products/featured`
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/products/featured`
     );
     backendUrl.searchParams.append('ids', ids);
     
@@ -894,3 +894,4 @@ export async function DELETE(request: NextRequest) {
     );
   }
 }
+

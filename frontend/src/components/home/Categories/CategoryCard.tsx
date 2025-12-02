@@ -74,6 +74,12 @@ export interface Category {
     slug: string;
     productCount: number;
   }>;
+  children?: Array<{
+    id: string;
+    name: string;
+    slug: string;
+    productCount: number;
+  }>;
   isHot?: boolean;
   isNew?: boolean;
   isFeatured?: boolean;
@@ -161,14 +167,17 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
     }
   }, [size]);
 
-  const hasSubcategories = category.subcategories && category.subcategories.length > 0;
+  const hasSubcategories = (category.subcategories && category.subcategories.length > 0) || (category.children && category.children.length > 0);
 
   const displaySubcategories = useMemo(() => {
     if (!hasSubcategories) return [];
-    return category.subcategories!.slice(0, 3);
-  }, [category.subcategories, hasSubcategories]);
+    const subs = category.subcategories || category.children || [];
+    return subs.slice(0, 3);
+  }, [category.subcategories, category.children, hasSubcategories]);
 
-  const CategoryIcon = category.icon || TagIcon;
+  const CategoryIcon = (typeof category.icon === 'function' || typeof category.icon === 'object') && category.icon !== null
+    ? category.icon as React.ComponentType<{ className?: string }>
+    : TagIcon;
 
   // ============================================================================
   // HANDLERS
@@ -241,7 +250,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
         transition={{ type: 'spring', stiffness: 260, damping: 20 }}
         className={cn(
           'absolute top-4 left-4 z-20',
-          'bg-white/90 backdrop-blur-sm rounded-full p-3 shadow-lg'
+          'bg-background/90 backdrop-blur-sm rounded-full p-3 shadow-lg'
         )}
         style={{
           backgroundColor: category.color ? `${category.color}20` : undefined,
@@ -264,8 +273,8 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
         category.theme === 'dark'
           ? 'bg-gradient-to-t from-black/80 via-black/40 to-transparent'
           : category.theme === 'gradient'
-          ? 'bg-gradient-to-t from-purple-900/80 via-pink-800/40 to-transparent'
-          : 'bg-gradient-to-t from-gray-900/80 via-gray-900/40 to-transparent'
+            ? 'bg-gradient-to-t from-purple-900/80 via-pink-800/40 to-transparent'
+            : 'bg-gradient-to-t from-gray-900/80 via-gray-900/40 to-transparent'
       )}
     />
   );
@@ -290,22 +299,22 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
               'bg-white/90 backdrop-blur-sm',
               'hover:bg-white hover:shadow-md',
               'transition-all duration-200',
-              'text-sm text-gray-800 font-medium'
+              'text-sm text-foreground font-medium'
             )}
           >
             <div className="flex items-center justify-between">
               <span>{subcategory.name}</span>
               {showCount && (
-                <span className="text-xs text-gray-500">
+                <span className="text-xs text-muted-foreground">
                   {subcategory.productCount}
                 </span>
               )}
             </div>
           </Link>
         ))}
-        {category.subcategories!.length > 3 && (
+        {(category.subcategories?.length || category.children?.length || 0) > 3 && (
           <div className="text-center text-xs text-white/80">
-            +{category.subcategories!.length - 3} more
+            +{(category.subcategories?.length || category.children?.length || 0) - 3} more
           </div>
         )}
       </motion.div>
@@ -324,7 +333,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
         >
           <ShoppingBagIcon className="w-4 h-4 text-white/80" />
           <span className={cn('text-white/80 font-medium', sizeClasses.count)}>
-            {category.productCount.toLocaleString()} products
+            {(category.productCount || 0).toLocaleString()} products
           </span>
         </motion.div>
       )}
@@ -361,7 +370,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
       >
         <Button
           size="sm"
-          className="bg-white text-gray-900 hover:bg-gray-100 group"
+          className="bg-background text-foreground hover:bg-accent group"
         >
           Explore
           <ArrowRightIcon className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
@@ -405,7 +414,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
                     onLoad={handleImageLoad}
                   />
                   {!isImageLoaded && (
-                    <div className="absolute inset-0 bg-gray-200 animate-pulse" />
+                    <div className="absolute inset-0 bg-muted animate-pulse" />
                   )}
                 </div>
 
@@ -415,12 +424,12 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
                     {category.name}
                   </h3>
                   {showCount && (
-                    <p className="text-sm text-gray-600">
-                      {category.productCount.toLocaleString()} products
+                    <p className="text-sm text-muted-foreground">
+                      {(category.productCount || 0).toLocaleString()} products
                     </p>
                   )}
                   {category.description && (
-                    <p className="text-xs text-gray-500 line-clamp-1 mt-1">
+                    <p className="text-xs text-muted-foreground line-clamp-1 mt-1">
                       {category.description}
                     </p>
                   )}
@@ -466,7 +475,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
                   onLoad={handleImageLoad}
                 />
                 {!isImageLoaded && (
-                  <div className="absolute inset-0 bg-gray-200 animate-pulse" />
+                  <div className="absolute inset-0 bg-muted animate-pulse" />
                 )}
               </div>
 

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
+import {
   QuestionMarkCircleIcon,
   BugAntIcon,
   ChatBubbleLeftRightIcon,
@@ -21,7 +21,7 @@ import {
   ArrowRightIcon,
   ArrowLeftIcon
 } from '@heroicons/react/24/outline';
-import { 
+import {
   CheckCircleIcon as CheckCircleIconSolid
 } from '@heroicons/react/24/solid';
 import { Card } from '@/components/ui/Card';
@@ -51,7 +51,7 @@ export interface HelpFormData {
   type: HelpRequestType;
   category: string;
   priority: Priority;
-  
+
   // Details step
   subject: string;
   description: string;
@@ -61,7 +61,7 @@ export interface HelpFormData {
   browserInfo?: string;
   deviceInfo?: string;
   attachments: HelpFormAttachment[];
-  
+
   // Contact step
   firstName: string;
   lastName: string;
@@ -70,7 +70,7 @@ export interface HelpFormData {
   company?: string;
   preferredContact: 'email' | 'phone' | 'chat';
   urgencyLevel: 'can_wait' | 'business_hours' | 'urgent';
-  
+
   // Additional
   orderId?: string;
   accountId?: string;
@@ -118,8 +118,8 @@ const containerVariants = {
 
 const stepVariants = {
   hidden: { opacity: 0, x: 20 },
-  visible: { 
-    opacity: 1, 
+  visible: {
+    opacity: 1,
     x: 0,
     transition: { duration: 0.3 }
   },
@@ -209,27 +209,27 @@ const helpCategories: HelpCategory[] = [
 // Utility functions
 const getPriorityConfig = (priority: Priority) => {
   const configs = {
-    low: { 
-      color: 'text-green-600', 
-      bgColor: 'bg-green-100', 
+    low: {
+      color: 'text-green-600',
+      bgColor: 'bg-green-100',
       label: 'Low',
       description: 'General questions, not urgent'
     },
-    medium: { 
-      color: 'text-yellow-600', 
-      bgColor: 'bg-yellow-100', 
+    medium: {
+      color: 'text-yellow-600',
+      bgColor: 'bg-yellow-100',
       label: 'Medium',
       description: 'Issue affects work but workaround exists'
     },
-    high: { 
-      color: 'text-orange-600', 
-      bgColor: 'bg-orange-100', 
+    high: {
+      color: 'text-orange-600',
+      bgColor: 'bg-orange-100',
       label: 'High',
       description: 'Issue significantly affects operations'
     },
-    urgent: { 
-      color: 'text-red-600', 
-      bgColor: 'bg-red-100', 
+    urgent: {
+      color: 'text-red-600',
+      bgColor: 'bg-red-100',
       label: 'Urgent',
       description: 'Critical issue affecting business'
     }
@@ -239,13 +239,13 @@ const getPriorityConfig = (priority: Priority) => {
 
 const validateStep = (step: FormStep, data: Partial<HelpFormData>) => {
   const errors: Record<string, string> = {};
-  
+
   switch (step) {
     case 'category':
       if (!data.type) errors.type = 'Please select a category';
       if (!data.priority) errors.priority = 'Please select priority level';
       break;
-      
+
     case 'details':
       if (!data.subject?.trim()) errors.subject = 'Subject is required';
       if (!data.description?.trim()) errors.description = 'Description is required';
@@ -255,7 +255,7 @@ const validateStep = (step: FormStep, data: Partial<HelpFormData>) => {
         if (!data.actualBehavior?.trim()) errors.actualBehavior = 'Actual behavior is required for bug reports';
       }
       break;
-      
+
     case 'contact':
       if (!data.firstName?.trim()) errors.firstName = 'First name is required';
       if (!data.lastName?.trim()) errors.lastName = 'Last name is required';
@@ -267,12 +267,12 @@ const validateStep = (step: FormStep, data: Partial<HelpFormData>) => {
         errors.phone = 'Phone number is required when phone is preferred contact method';
       }
       break;
-      
+
     case 'review':
       if (!data.agreeToTerms) errors.agreeToTerms = 'Please agree to terms and conditions';
       break;
   }
-  
+
   return errors;
 };
 
@@ -355,7 +355,7 @@ const HelpForm: React.FC<HelpFormProps> = ({
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
     const currentAttachments = formData.attachments || [];
-    
+
     if (currentAttachments.length + files.length > maxAttachments) {
       setErrors(prev => ({ ...prev, attachments: `Maximum ${maxAttachments} files allowed` }));
       return;
@@ -393,7 +393,7 @@ const HelpForm: React.FC<HelpFormProps> = ({
       setErrors(stepErrors);
       return;
     }
-    
+
     setErrors({});
     const steps: FormStep[] = ['category', 'details', 'contact', 'review', 'submitted'];
     const currentIndex = steps.indexOf(currentStep);
@@ -960,7 +960,7 @@ const HelpForm: React.FC<HelpFormProps> = ({
                   className="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 />
                 <span className="text-sm text-gray-700">
-                  I agree to the <a href="#" className="text-blue-600 hover:underline">Terms and Conditions</a> and <a href="#" className="text-blue-600 hover:underline">Privacy Policy</a> *
+                  I agree to the <a href="/terms" className="text-primary hover:underline">Terms and Conditions</a> and <a href="/privacy" className="text-primary hover:underline">Privacy Policy</a> *
                 </span>
               </label>
               {errors.agreeToTerms && (
@@ -1033,7 +1033,7 @@ const HelpForm: React.FC<HelpFormProps> = ({
               className={cn(
                 "bg-blue-600 h-2 rounded-full transition-all duration-300 ease-in-out",
                 getStepProgress(currentStep) >= 25 && "w-1/4",
-                getStepProgress(currentStep) >= 50 && "w-1/2", 
+                getStepProgress(currentStep) >= 50 && "w-1/2",
                 getStepProgress(currentStep) >= 75 && "w-3/4",
                 getStepProgress(currentStep) >= 100 && "w-full",
                 getStepProgress(currentStep) < 25 && "w-0"

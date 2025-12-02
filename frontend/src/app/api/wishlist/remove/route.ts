@@ -121,7 +121,7 @@ export async function DELETE(request: NextRequest) {
     };
 
     // Make request to backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/wishlist/remove`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/wishlist/remove`;
     
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
@@ -308,7 +308,7 @@ export async function POST(request: NextRequest) {
     };
 
     // Make request to backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/wishlist/toggle`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/wishlist/toggle`;
     
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
@@ -476,7 +476,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Make request to backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/wishlist/item`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/wishlist/item`;
     
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
@@ -557,3 +557,4 @@ export async function PATCH(request: NextRequest) {
     );
   }
 }
+

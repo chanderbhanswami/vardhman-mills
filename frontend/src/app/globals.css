@@ -1,2 +1,84 @@
-/* Main global styles file */
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Brand Colors */
+    --brand-primary: 43 80% 48%;      /* #DFA617 */
+    --brand-secondary: 0 0% 89%;      /* #E2E2E2 */
+    --brand-black: 0 0% 0%;           /* #000000 */
+    --brand-white: 0 0% 100%;         /* #FFFFFF */
+
+    /* Semantic Tokens - Light Mode */
+    --background: 0 0% 100%;          /* #FFFFFF */
+    --foreground: 0 0% 0%;            /* #000000 */
+
+    --card: 0 0% 100%;                /* #FFFFFF */
+    --card-foreground: 0 0% 0%;       /* #000000 */
+
+    --popover: 0 0% 100%;             /* #FFFFFF */
+    --popover-foreground: 0 0% 0%;    /* #000000 */
+
+    --primary: 43 80% 48%;            /* #DFA617 */
+    --primary-foreground: 0 0% 100%;  /* #FFFFFF */
+
+    --secondary: 0 0% 89%;            /* #E2E2E2 */
+    --secondary-foreground: 0 0% 0%;  /* #000000 */
+
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
+
+    --accent: 0 0% 96%;
+    --accent-foreground: 0 0% 9%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 0% 89%;               /* #E2E2E2 */
+    --input: 0 0% 89%;                /* #E2E2E2 */
+    --ring: 43 80% 48%;               /* #DFA617 */
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    /* Semantic Tokens - Dark Mode */
+    --background: 0 0% 0%;            /* #000000 */
+    --foreground: 0 0% 100%;          /* #FFFFFF */
+
+    --card: 0 0% 5%;                  /* Slightly lighter than pure black for depth */
+    --card-foreground: 0 0% 100%;     /* #FFFFFF */
+
+    --popover: 0 0% 5%;
+    --popover-foreground: 0 0% 100%;
+
+    --primary: 43 80% 48%;            /* #DFA617 */
+    --primary-foreground: 0 0% 100%;  /* #FFFFFF */
+
+    --secondary: 0 0% 15%;            /* Dark grey for secondary in dark mode to maintain contrast */
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 65%;
+
+    --accent: 0 0% 15%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 20%;               /* Darker border for dark mode */
+    --input: 0 0% 20%;
+    --ring: 43 80% 48%;               /* #DFA617 */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}

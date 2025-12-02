@@ -56,6 +56,9 @@ import {
   CategoryCarousel,
 } from '@/components/home';
 
+// API Hooks
+import { useCategories } from '@/lib/api/categoryApi';
+
 // Types
 import type { Category } from '@/types/product.types';
 import { formatNumber } from '@/lib/format';
@@ -137,10 +140,6 @@ const SORT_OPTIONS: Array<{ value: SortOption; label: string }> = [
   { value: 'newest', label: 'Newest First' },
 ];
 
-// Mock categories data (replace with actual API call)
-const MOCK_CATEGORIES: Category[] = [];
-const MOCK_FEATURED_CATEGORIES: Category[] = [];
-
 // ============================================================================
 // COMPONENT
 // ============================================================================
@@ -150,11 +149,20 @@ export default function CategoriesPage() {
   const searchParams = useSearchParams();
 
   // ============================================================================
-  // STATE
+  // STATE & DATA FETCHING
   // ============================================================================
 
-  const [categories] = useState<Category[]>(MOCK_CATEGORIES);
-  const [featuredCategories] = useState<Category[]>(MOCK_FEATURED_CATEGORIES);
+  // Fetch categories from API
+  const { 
+    data: categoriesResponse, 
+    isLoading: isLoadingCategories,
+    isError: isErrorCategories 
+  } = useCategories();
+
+  const categories = useMemo(() => categoriesResponse?.data?.categories || [], [categoriesResponse]);
+  const featuredCategories = useMemo(() => categories.filter(c => c.isFeatured), [categories]);
+  const isLoadingFeatured = isLoadingCategories;
+
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [sortBy, setSortBy] = useState<SortOption>('name');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -423,6 +431,19 @@ export default function CategoriesPage() {
   );
 
   const renderFeaturedShowcase = () => {
+    if (isLoadingFeatured) {
+      return (
+        <section className="my-12">
+          <div className="h-8 w-48 bg-gray-200 dark:bg-gray-700 rounded mb-4 animate-pulse" />
+          <div className="h-4 w-64 bg-gray-200 dark:bg-gray-700 rounded mb-6 animate-pulse" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse" />
+            <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse" />
+          </div>
+        </section>
+      );
+    }
+
     if (featuredCategories.length === 0) return null;
 
     return (
@@ -692,6 +713,24 @@ export default function CategoriesPage() {
   );
 
   const renderCategories = () => {
+    if (isLoadingCategories) {
+      return (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <Card key={i} className="h-[300px] animate-pulse bg-gray-100 dark:bg-gray-800" />
+          ))}
+        </div>
+      );
+    }
+
+    if (isErrorCategories) {
+      return (
+        <Card className="p-12 text-center text-red-500">
+          <p>Failed to load categories. Please try again later.</p>
+        </Card>
+      );
+    }
+
     if (filteredCategories.length === 0) {
       return (
         <Card className="p-12 text-center">

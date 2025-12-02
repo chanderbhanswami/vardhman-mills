@@ -194,7 +194,7 @@ export async function GET(request: NextRequest) {
 
     // Build backend URL
     const backendUrl = new URL(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/reviews`
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/reviews`
     );
 
     Object.entries(queryParams).forEach(([key, value]) => {
@@ -371,7 +371,7 @@ export async function POST(request: NextRequest) {
     };
 
     // Make request to backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/reviews`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/reviews`;
     
     const response = await fetch(backendUrl, {
       method: 'POST',
@@ -546,7 +546,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Make request to backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/reviews/${body.reviewId}`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/reviews/${body.reviewId}`;
     
     const response = await fetch(backendUrl, {
       method: 'PATCH',
@@ -696,7 +696,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Make request to backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/reviews/${reviewId}`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/reviews/${reviewId}`;
     
     const response = await fetch(backendUrl, {
       method: 'DELETE',
@@ -781,3 +781,4 @@ export async function DELETE(request: NextRequest) {
     );
   }
 }
+

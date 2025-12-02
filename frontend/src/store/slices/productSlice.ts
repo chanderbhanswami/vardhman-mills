@@ -13,13 +13,13 @@ export const fetchProducts = createAsyncThunk(
     search?: string;
   } = {}) => {
     const queryParams = new URLSearchParams();
-    
+
     if (params.page) queryParams.append('page', params.page.toString());
     if (params.limit) queryParams.append('limit', params.limit.toString());
     if (params.category) queryParams.append('category', params.category);
     if (params.sort) queryParams.append('sort', params.sort);
     if (params.search) queryParams.append('search', params.search);
-    
+
     // Add filter parameters
     if (params.filters) {
       if (params.filters.priceRange?.min) queryParams.append('minPrice', params.filters.priceRange.min.amount.toString());
@@ -34,7 +34,7 @@ export const fetchProducts = createAsyncThunk(
     if (!response.ok) {
       throw new Error('Failed to fetch products');
     }
-    
+
     return response.json();
   }
 );
@@ -67,7 +67,7 @@ export const fetchProductReviews = createAsyncThunk(
     const queryParams = new URLSearchParams();
     if (params.page) queryParams.append('page', params.page.toString());
     if (params.limit) queryParams.append('limit', params.limit.toString());
-    
+
     const response = await fetch(`/api/products/${params.productId}/reviews?${queryParams}`);
     if (!response.ok) {
       throw new Error('Failed to fetch product reviews');
@@ -90,10 +90,44 @@ export const addProductReview = createAsyncThunk(
         title: params.title,
       }),
     });
-    
+
     if (!response.ok) {
       throw new Error('Failed to add review');
     }
+    return response.json();
+  }
+);
+
+export const fetchBestSellers = createAsyncThunk(
+  'product/fetchBestSellers',
+  async (params: {
+    page?: number;
+    limit?: number;
+    period?: string;
+    category?: string;
+    minPrice?: number;
+    maxPrice?: number;
+    sortBy?: string;
+    sortOrder?: string;
+    inStock?: boolean;
+  } = {}) => {
+    const queryParams = new URLSearchParams();
+
+    if (params.page) queryParams.append('page', params.page.toString());
+    if (params.limit) queryParams.append('limit', params.limit.toString());
+    if (params.period) queryParams.append('period', params.period);
+    if (params.category) queryParams.append('category', params.category);
+    if (params.minPrice) queryParams.append('minPrice', params.minPrice.toString());
+    if (params.maxPrice) queryParams.append('maxPrice', params.maxPrice.toString());
+    if (params.sortBy) queryParams.append('sortBy', params.sortBy);
+    if (params.sortOrder) queryParams.append('sortOrder', params.sortOrder);
+    if (params.inStock !== undefined) queryParams.append('inStock', params.inStock.toString());
+
+    const response = await fetch(`/api/bestsellers?${queryParams}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch best sellers');
+    }
+
     return response.json();
   }
 );
@@ -103,7 +137,7 @@ interface ProductState {
   products: Product[];
   featuredProducts: Product[];
   relatedProducts: Product[];
-  
+
   // Current product details
   currentProduct: Product | null;
   currentProductReviews: {
@@ -118,19 +152,19 @@ interface ProductState {
     averageRating: number;
     totalReviews: number;
   };
-  
+
   // Loading states
   isLoading: boolean;
   isLoadingProduct: boolean;
   isLoadingReviews: boolean;
   isSubmittingReview: boolean;
-  
+
   // Pagination and filters
   pagination: PaginationMeta;
   filters: ProductFilters;
   sortBy: string;
   searchQuery: string;
-  
+
   // UI state
   viewMode: 'grid' | 'list';
   selectedFilters: {
@@ -141,12 +175,12 @@ interface ProductState {
     brands: string[];
     rating?: number;
   };
-  
+
   // Error handling
   error: string | null;
   productError: string | null;
   reviewError: string | null;
-  
+
   // Cache management
   lastFetch: number;
   cacheExpiry: number;
@@ -206,7 +240,7 @@ const productSlice = createSlice({
     setFilters: (state, action: PayloadAction<ProductFilters>) => {
       state.filters = action.payload;
     },
-    
+
     clearFilters: (state) => {
       state.filters = {};
       state.selectedFilters = {
@@ -215,25 +249,25 @@ const productSlice = createSlice({
         brands: [],
       };
     },
-    
+
     setSelectedFilters: (state, action: PayloadAction<Partial<ProductState['selectedFilters']>>) => {
       state.selectedFilters = { ...state.selectedFilters, ...action.payload };
     },
-    
+
     // Search and sort
     setSearchQuery: (state, action: PayloadAction<string>) => {
       state.searchQuery = action.payload;
     },
-    
+
     setSortBy: (state, action: PayloadAction<string>) => {
       state.sortBy = action.payload;
     },
-    
+
     // UI state
     setViewMode: (state, action: PayloadAction<'grid' | 'list'>) => {
       state.viewMode = action.payload;
     },
-    
+
     // Product management
     clearCurrentProduct: (state) => {
       state.currentProduct = null;
@@ -244,19 +278,19 @@ const productSlice = createSlice({
         totalReviews: 0,
       };
     },
-    
+
     // Error handling
     clearError: (state) => {
       state.error = null;
       state.productError = null;
       state.reviewError = null;
     },
-    
+
     // Cache management
     invalidateCache: (state) => {
       state.lastFetch = 0;
     },
-    
+
     // Featured products
     setFeaturedProducts: (state, action: PayloadAction<Product[]>) => {
       state.featuredProducts = action.payload;
@@ -351,6 +385,29 @@ const productSlice = createSlice({
         state.isSubmittingReview = false;
         state.reviewError = action.error.message || 'Failed to add review';
       });
+
+    // Fetch best sellers
+    builder
+      .addCase(fetchBestSellers.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchBestSellers.fulfilled, (state, action) => {
+        state.isLoading = false;
+        // Map products to ensure they are treated as best sellers if needed, 
+        // but primarily just populate the products list
+        state.products = (action.payload.data?.products || []).map((p: Product) => ({
+          ...p,
+          isBestseller: true // Ensure client-side filtering works if kept
+        }));
+        state.pagination = action.payload.data?.pagination || state.pagination;
+        state.lastFetch = Date.now();
+        state.error = null;
+      })
+      .addCase(fetchBestSellers.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || 'Failed to fetch best sellers';
+      });
   },
 });
 
@@ -385,7 +442,7 @@ export const selectSearchQuery = (state: { product: ProductState }) => state.pro
 // Complex selectors
 export const selectFilteredProducts = (state: { product: ProductState }) => {
   const { products, selectedFilters } = state.product;
-  
+
   return products.filter(product => {
     // Price range filter
     if (selectedFilters.priceRange) {
@@ -393,38 +450,38 @@ export const selectFilteredProducts = (state: { product: ProductState }) => {
       const price = product.variants?.[0]?.pricing?.basePrice?.amount || product.pricing?.basePrice?.amount || 0;
       if (price < min || price > max) return false;
     }
-    
+
     // Color filter
     if (selectedFilters.colors.length > 0) {
       const productColors = product.colors?.map(c => c.name) || [];
       if (!selectedFilters.colors.some(color => productColors.includes(color))) return false;
     }
-    
+
     // Size filter
     if (selectedFilters.sizes.length > 0) {
       const productSizes = product.sizes?.map(s => s.name) || [];
       if (!selectedFilters.sizes.some(size => productSizes.includes(size))) return false;
     }
-    
+
     // Brand filter
     if (selectedFilters.brands.length > 0) {
       const brandName = typeof product.brand === 'string' ? product.brand : product.brand?.name || '';
       if (!selectedFilters.brands.includes(brandName)) return false;
     }
-    
+
     // Rating filter
     if (selectedFilters.rating) {
       const avgRating = typeof product.rating === 'number' ? product.rating : product.rating?.average || 0;
       if (avgRating < selectedFilters.rating) return false;
     }
-    
+
     return true;
   });
 };
 
 export const selectProductStats = (state: { product: ProductState }) => {
   const { products } = state.product;
-  
+
   return {
     totalProducts: products.length,
     averagePrice: products.reduce((sum, p) => {

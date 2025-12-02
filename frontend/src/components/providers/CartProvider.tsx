@@ -182,7 +182,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const retryAttempts = useRef<Map<string, number>>(new Map());
 
   // Configuration
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
   const SYNC_DELAY = 2000; // 2 seconds
   const MAX_RETRY_ATTEMPTS = 3;
   
@@ -893,3 +893,4 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
 };
 
 export default CartProvider;
+

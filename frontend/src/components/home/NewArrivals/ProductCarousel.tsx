@@ -125,7 +125,7 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
   // ============================================================================
 
   const totalItems = useMemo(() => products.length, [products.length]);
-  
+
   const maxIndex = useMemo(() => {
     return Math.max(0, totalItems - itemsShown);
   }, [totalItems, itemsShown]);
@@ -191,7 +191,7 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
   const goToIndex = useCallback(
     (index: number) => {
       let newIndex = index;
-      
+
       if (infinite) {
         if (newIndex < 0) {
           newIndex = maxIndex;
@@ -201,7 +201,7 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
       } else {
         newIndex = Math.max(0, Math.min(maxIndex, newIndex));
       }
-      
+
       setCurrentIndex(newIndex);
       console.log('Carousel index:', newIndex);
     },
@@ -224,11 +224,11 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
 
   const startAutoPlay = useCallback(() => {
     if (intervalRef.current) return;
-    
+
     intervalRef.current = setInterval(() => {
       goToNext();
     }, interval);
-    
+
     console.log('Carousel autoplay started');
   }, [interval, goToNext]);
 
@@ -251,7 +251,7 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
     } else {
       stopAutoPlay();
     }
-    
+
     return () => stopAutoPlay();
   }, [isPlaying, isPaused, startAutoPlay, stopAutoPlay]);
 
@@ -262,7 +262,7 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
   const handleDragEnd = useCallback(
     (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
       const { offset, velocity } = info;
-      
+
       const shouldGoNext = offset.x < -DRAG_THRESHOLD || velocity.x < -DRAG_VELOCITY_THRESHOLD;
       const shouldGoPrevious = offset.x > DRAG_THRESHOLD || velocity.x > DRAG_VELOCITY_THRESHOLD;
 
@@ -329,13 +329,13 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
             size="sm"
             onClick={goToPrevious}
             disabled={!canGoPrevious}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white shadow-lg"
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-background/90 hover:bg-background shadow-lg"
             aria-label="Previous products"
           >
             <ChevronLeftIcon className="h-5 w-5" />
           </Button>
         </Tooltip>
-        
+
         <Tooltip content="Next">
           <Button
             variant="outline"
@@ -407,7 +407,7 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
               className="flex-shrink-0 animate-pulse"
               {...(itemWidth ? { style: { width: `${itemWidth}px` } } : {})}
             >
-              <div className="aspect-[3/4] bg-gray-200 rounded-lg mb-4" />
+              <div className="aspect-[3/4] bg-muted rounded-lg mb-4" />
               <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
               <div className="h-4 bg-gray-200 rounded w-1/2" />
             </div>

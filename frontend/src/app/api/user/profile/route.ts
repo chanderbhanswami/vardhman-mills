@@ -198,7 +198,7 @@ export async function GET(request: NextRequest) {
     if (includePaymentMethods) queryParams.append('includePaymentMethods', 'true');
 
     // Make request to backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/user/profile${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/user/profile${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
     
     const response = await fetch(backendUrl, {
       method: 'GET',
@@ -330,7 +330,7 @@ export async function PATCH(request: NextRequest) {
         throw error;
       }
 
-      const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/user/profile/password`;
+      const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/user/profile/password`;
       
       const response = await fetch(backendUrl, {
         method: 'PATCH',
@@ -409,7 +409,7 @@ export async function PATCH(request: NextRequest) {
         throw error;
       }
 
-      const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/user/profile/email`;
+      const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/user/profile/email`;
       
       const response = await fetch(backendUrl, {
         method: 'PATCH',
@@ -499,7 +499,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Make request to backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/user/profile`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/user/profile`;
     
     const response = await fetch(backendUrl, {
       method: 'PATCH',
@@ -624,7 +624,7 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/user/profile/verify/resend`;
+      const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/user/profile/verify/resend`;
       
       const response = await fetch(backendUrl, {
         method: 'POST',
@@ -688,7 +688,7 @@ export async function POST(request: NextRequest) {
       throw error;
     }
 
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/user/profile/verify`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/user/profile/verify`;
     
     const response = await fetch(backendUrl, {
       method: 'POST',
@@ -821,7 +821,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Make request to backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/user/profile`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/user/profile`;
     
     const response = await fetch(backendUrl, {
       method: 'DELETE',
@@ -915,3 +915,4 @@ export async function DELETE(request: NextRequest) {
     );
   }
 }
+

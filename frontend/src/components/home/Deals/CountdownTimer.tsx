@@ -138,7 +138,7 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({
         )}
         <div className="flex items-center gap-2">
           {/* Days */}
-          <div className="flex flex-col items-center bg-white dark:bg-gray-800 rounded-lg p-3 shadow-md min-w-[70px]">
+          <div className="flex flex-col items-center bg-background rounded-lg p-3 shadow-md min-w-[70px]">
             <motion.span
               key={timeLeft.days}
               initial={{ scale: 1.2, opacity: 0 }}

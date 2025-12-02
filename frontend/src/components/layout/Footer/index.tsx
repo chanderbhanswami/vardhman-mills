@@ -86,8 +86,8 @@ const Footer: React.FC<FooterProps> = ({
 
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
       transition: { duration: 0.4 }
     }
@@ -95,10 +95,10 @@ const Footer: React.FC<FooterProps> = ({
 
   const backToTopVariants = {
     hidden: { scale: 0, opacity: 0 },
-    visible: { 
-      scale: 1, 
+    visible: {
+      scale: 1,
       opacity: 1,
-      transition: { 
+      transition: {
         type: 'spring' as const,
         stiffness: 300,
         damping: 20
@@ -126,7 +126,7 @@ const Footer: React.FC<FooterProps> = ({
       <motion.footer
         id="main-footer"
         className={`
-          bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700
+          bg-background border-t border-border
           ${className}
         `}
         variants={containerVariants}
@@ -134,9 +134,9 @@ const Footer: React.FC<FooterProps> = ({
         animate={isVisible ? "visible" : "hidden"}
       >
         {/* Newsletter Section */}
-        <motion.div 
+        <motion.div
           variants={itemVariants}
-          className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-700 border-b border-gray-200 dark:border-gray-600"
+          className="bg-muted/30 border-b border-border"
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <NewsletterSignup />
@@ -144,24 +144,22 @@ const Footer: React.FC<FooterProps> = ({
         </motion.div>
 
         {/* Main Footer Content */}
-        <div className="bg-gray-50 dark:bg-gray-800">
+        <div className="bg-background">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
               {/* Company Information */}
-              <motion.div variants={itemVariants} className="lg:col-span-1">
+              <motion.div variants={itemVariants} className="lg:col-span-1 space-y-6">
                 <CompanyInfo />
-                <div className="mt-6">
-                  <ContactInfo variant="compact" />
-                </div>
+                <ContactInfo variant="compact" />
               </motion.div>
 
               {/* Quick Links */}
-              <motion.div variants={itemVariants}>
+              <motion.div variants={itemVariants} className="space-y-6">
                 <QuickLinks />
               </motion.div>
 
               {/* Customer Service */}
-              <motion.div variants={itemVariants}>
+              <motion.div variants={itemVariants} className="space-y-6">
                 <CustomerService />
               </motion.div>
 
@@ -175,25 +173,25 @@ const Footer: React.FC<FooterProps> = ({
         </div>
 
         {/* Bottom Footer */}
-        <motion.div 
+        <motion.div
           variants={itemVariants}
-          className="bg-gray-100 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700"
+          className="bg-muted/20 border-t border-border"
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="flex flex-col lg:flex-row items-center justify-between space-y-6 lg:space-y-0">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
               {/* Legal Links */}
-              <div className="flex flex-wrap items-center justify-center lg:justify-start">
+              <div className="w-full md:w-auto">
                 <LegalLinks />
               </div>
 
               {/* Payment Methods */}
-              <div className="flex items-center space-x-6">
+              <div className="w-full md:w-auto flex justify-center md:justify-end">
                 <PaymentMethods />
               </div>
             </div>
 
             {/* Copyright */}
-            <div className="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
+            <div className="mt-8 pt-8 border-t border-border text-center">
               <Copyright />
             </div>
           </div>

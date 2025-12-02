@@ -216,7 +216,7 @@ export async function GET(request: NextRequest) {
     if (category) queryParams.append('category', category);
 
     // Make request to backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/user/preferences${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/user/preferences${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
     
     const response = await fetch(backendUrl, {
       method: 'GET',
@@ -343,7 +343,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Make request to backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/user/preferences`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/user/preferences`;
     
     const response = await fetch(backendUrl, {
       method: 'PATCH',
@@ -483,7 +483,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Make request to backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/user/preferences/reset`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/user/preferences/reset`;
     
     const response = await fetch(backendUrl, {
       method: 'POST',
@@ -584,7 +584,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Make request to backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/user/preferences/export`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/user/preferences/export`;
     
     const response = await fetch(backendUrl, {
       method: 'GET',
@@ -650,3 +650,4 @@ export async function DELETE(request: NextRequest) {
     );
   }
 }
+

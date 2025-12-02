@@ -169,8 +169,8 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
     // Category filter
     if (filters.selectedCategory && filters.selectedCategory !== 'all') {
       result = result.filter(
-        (product) => 
-          product.categoryId === filters.selectedCategory || 
+        (product) =>
+          product.categoryId === filters.selectedCategory ||
           product.subcategoryId === filters.selectedCategory ||
           product.collectionIds?.includes(filters.selectedCategory)
       );
@@ -411,7 +411,7 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
                   <select
                     value={filters.sortBy}
                     onChange={(e) => handleSortChange(e.target.value as SortOption)}
-                    className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent"
                     aria-label="Sort products"
                     title="Sort products by"
                   >
@@ -477,7 +477,7 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
                 {filters.searchQuery && (
                   <Badge variant="secondary" className="gap-2">
                     Search: {filters.searchQuery}
-                    <button 
+                    <button
                       onClick={() => handleSearchChange('')}
                       aria-label="Remove search filter"
                       title="Remove search filter"
@@ -489,7 +489,7 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
                 {filters.selectedCategory !== 'all' && (
                   <Badge variant="secondary" className="gap-2">
                     Category: {categories.find((c) => c.id === filters.selectedCategory)?.name}
-                    <button 
+                    <button
                       onClick={() => handleCategoryChange('all')}
                       aria-label="Remove category filter"
                       title="Remove category filter"
@@ -522,7 +522,7 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
               transition={{ duration: 0.3 }}
               className="overflow-hidden"
             >
-              <div className="mt-4 p-6 bg-gray-50 dark:bg-gray-800 rounded-lg space-y-4">
+              <div className="mt-4 p-6 bg-muted rounded-lg space-y-4">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                     <FunnelIcon className="h-5 w-5 inline mr-2" />
@@ -606,7 +606,7 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
         </div>
       ) : filteredProducts.length === 0 ? (
         <div className="text-center py-16">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 mb-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-muted mb-4">
             <FunnelIcon className="h-8 w-8 text-gray-400" />
           </div>
           <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
@@ -677,7 +677,7 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
               >
                 Previous
               </Button>
-              
+
               {[...Array(totalPages)].map((_, index) => {
                 const page = index + 1;
                 // Show first, last, current, and adjacent pages
@@ -700,7 +700,7 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
                 }
                 return null;
               })}
-              
+
               <Button
                 variant="outline"
                 onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}

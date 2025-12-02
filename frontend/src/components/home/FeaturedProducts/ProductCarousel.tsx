@@ -145,7 +145,7 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
   const carouselRef = useRef<HTMLDivElement>(null);
   const autoPlayTimerRef = useRef<NodeJS.Timeout | null>(null);
   const dragX = useMotionValue(0);
-  
+
   // Transform drag value for smooth animations
   const dragOpacity = useTransform(dragX, [-100, 0, 100], [0.5, 1, 0.5]);
 
@@ -249,7 +249,7 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
   const goToSlide = useCallback(
     (index: number) => {
       const normalizedIndex = Math.max(0, Math.min(index, totalSlides - 1));
-      
+
       setState((prev) => ({
         ...prev,
         currentIndex: normalizedIndex,
@@ -268,10 +268,10 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
     setState((prev) => {
       const nextIndex = prev.currentIndex + 1;
       const newIndex = nextIndex >= totalSlides ? 0 : nextIndex;
-      
+
       console.log('Next slide:', newIndex);
       onSlideChange?.(newIndex);
-      
+
       return {
         ...prev,
         currentIndex: newIndex,
@@ -286,10 +286,10 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
     setState((prev) => {
       const prevIndex = prev.currentIndex - 1;
       const newIndex = prevIndex < 0 ? totalSlides - 1 : prevIndex;
-      
+
       console.log('Previous slide:', newIndex);
       onSlideChange?.(newIndex);
-      
+
       return {
         ...prev,
         currentIndex: newIndex,
@@ -338,7 +338,7 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
       }
 
       dragX.set(0);
-      
+
       if (state.isPlaying) {
         startAutoPlay();
       }
@@ -409,7 +409,7 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
             <Badge variant="default" className="text-xs">
               {state.currentIndex + 1} / {totalSlides}
             </Badge>
-            
+
             {autoPlay && (
               <Tooltip content={state.isPlaying ? 'Pause' : 'Play'}>
                 <Button
@@ -451,7 +451,7 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
               size="sm"
               onClick={goToPrev}
               disabled={!canGoPrev}
-              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm shadow-lg hover:bg-white dark:hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-background/90 backdrop-blur-sm shadow-lg hover:bg-background disabled:opacity-50 disabled:cursor-not-allowed"
               aria-label="Previous slide"
             >
               <ChevronLeftIcon className="h-5 w-5" />
@@ -461,7 +461,7 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
               size="sm"
               onClick={goToNext}
               disabled={!canGoNext}
-              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm shadow-lg hover:bg-white dark:hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-background/90 backdrop-blur-sm shadow-lg hover:bg-background disabled:opacity-50 disabled:cursor-not-allowed"
               aria-label="Next slide"
             >
               <ChevronRightIcon className="h-5 w-5" />

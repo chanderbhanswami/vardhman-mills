@@ -237,7 +237,7 @@ async function handleSubscribe(request: NextRequest, body: unknown) {
   }
 
   // Build backend request
-  const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/newsletter/subscribe`;
+  const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/newsletter/subscribe`;
   
   const response = await fetch(backendUrl, {
     method: 'POST',
@@ -345,7 +345,7 @@ async function handleVerify(request: NextRequest, body: unknown) {
   const { token } = validationResult.data;
 
   // Build backend request
-  const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/newsletter/verify`;
+  const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/newsletter/verify`;
   
   const response = await fetch(backendUrl, {
     method: 'POST',
@@ -443,7 +443,7 @@ async function handleUpdatePreferences(request: NextRequest, body: unknown) {
   const updateData = validationResult.data;
 
   // Build backend request
-  const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/newsletter/preferences`;
+  const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/newsletter/preferences`;
   
   const response = await fetch(backendUrl, {
     method: 'PATCH',
@@ -546,7 +546,7 @@ export async function GET(request: NextRequest) {
 
     // Build backend URL
     const backendUrl = new URL(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/newsletter/status`
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/newsletter/status`
     );
     backendUrl.searchParams.append('email', email);
     backendUrl.searchParams.append('token', token);
@@ -626,3 +626,4 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+

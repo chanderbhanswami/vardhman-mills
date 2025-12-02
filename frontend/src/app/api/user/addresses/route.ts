@@ -143,7 +143,7 @@ export async function GET(request: NextRequest) {
     if (includeArchived) queryParams.append('includeArchived', 'true');
 
     // Make request to backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/user/addresses${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/user/addresses${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
     
     const response = await fetch(backendUrl, {
       method: 'GET',
@@ -261,7 +261,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Make request to backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/user/addresses`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/user/addresses`;
     
     const response = await fetch(backendUrl, {
       method: 'POST',
@@ -395,7 +395,7 @@ export async function PATCH(request: NextRequest) {
       }
 
       // Make request to backend
-      const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/user/addresses/default`;
+      const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/user/addresses/default`;
       
       const response = await fetch(backendUrl, {
         method: 'PATCH',
@@ -462,7 +462,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Make request to backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/user/addresses`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/user/addresses`;
     
     const response = await fetch(backendUrl, {
       method: 'PATCH',
@@ -588,7 +588,7 @@ export async function DELETE(request: NextRequest) {
     const idsToDelete = addressId ? [addressId] : addressIds;
 
     // Make request to backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/user/addresses`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/user/addresses`;
     
     const response = await fetch(backendUrl, {
       method: 'DELETE',
@@ -677,3 +677,4 @@ export async function DELETE(request: NextRequest) {
     );
   }
 }
+

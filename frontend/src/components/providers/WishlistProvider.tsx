@@ -176,7 +176,7 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
   const analyticsQueue = useRef<Array<{ action: string; itemId?: string; timestamp: number }>>([]);
 
   // Configuration
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
   const SYNC_DELAY = 3000; // 3 seconds
   const MAX_COMPARISON_ITEMS = 4;
   
@@ -908,3 +908,4 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
 };
 
 export default WishlistProvider;
+

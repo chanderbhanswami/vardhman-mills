@@ -184,7 +184,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Make request to backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/orders/cancel`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/orders/cancel`;
     
     const response = await fetch(backendUrl, {
       method: 'POST',
@@ -360,7 +360,7 @@ export async function GET(request: NextRequest) {
 
     // Build backend URL
     const backendUrl = new URL(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/orders/cancel/policy`
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/orders/cancel/policy`
     );
     backendUrl.searchParams.append('orderId', orderId);
 
@@ -448,3 +448,4 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+

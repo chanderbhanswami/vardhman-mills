@@ -72,7 +72,7 @@ import {
 // Hooks and Utils
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { useToast } from '@/hooks/useToast';
-import { fetchProducts } from '@/store/slices/productSlice';
+import { fetchProducts, fetchBestSellers } from '@/store/slices/productSlice';
 import { cn } from '@/lib/utils/utils';
 import { formatNumber, formatCurrency } from '@/lib/format';
 
@@ -84,7 +84,7 @@ import type { Product, ProductFilters as ProductFilterType, ProductSortOption } 
 // ============================================================================
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-interface BestSellersPageProps {}
+interface BestSellersPageProps { }
 
 interface StatsCard {
   icon: React.ComponentType<{ className?: string }>;
@@ -174,7 +174,7 @@ const cardVariants = {
 // MAIN COMPONENT
 // ============================================================================
 
-export default function BestSellersPage({}: BestSellersPageProps) {
+export default function BestSellersPage({ }: BestSellersPageProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const dispatch = useAppDispatch();
@@ -206,7 +206,7 @@ export default function BestSellersPage({}: BestSellersPageProps) {
   // ============================================================================
 
   const bestSellerProducts = useMemo(() => {
-    return products.filter((product: Product) => product.isBestseller);
+    return products;
   }, [products]);
 
   const topProducts = useMemo(() => {
@@ -227,17 +227,19 @@ export default function BestSellersPage({}: BestSellersPageProps) {
 
   // Fetch products on mount and filter change
   useEffect(() => {
-    dispatch(fetchProducts({
-      ...filters,
+    dispatch(fetchBestSellers({
       page: currentPage,
       limit: DEFAULT_PAGE_SIZE,
+      sortBy: filters.sortBy,
+      category: filters.categoryIds?.[0], // Assuming single category selection for now
+      // Map other filters if needed
     }));
   }, [dispatch, filters, currentPage]);
 
   // Handle URL params
   useEffect(() => {
     if (!searchParams) return;
-    
+
     const page = searchParams.get('page');
     const sort = searchParams.get('sort');
     const category = searchParams.get('category');
@@ -561,7 +563,7 @@ export default function BestSellersPage({}: BestSellersPageProps) {
                         {/* Using BestSellersCard component for featured products in sidebar */}
                         <div className="space-y-2">
                           {bestSellerProducts.slice(0, 3).map((product: Product) => (
-                            <BestSellersCard 
+                            <BestSellersCard
                               key={product.id}
                               product={product}
                               variant="compact"
@@ -621,7 +623,7 @@ export default function BestSellersPage({}: BestSellersPageProps) {
                         {/* Using BestSellersCard for mobile filter panel */}
                         <div className="space-y-2">
                           {bestSellerProducts.slice(0, 3).map((product: Product) => (
-                            <BestSellersCard 
+                            <BestSellersCard
                               key={product.id}
                               product={product}
                               variant="compact"

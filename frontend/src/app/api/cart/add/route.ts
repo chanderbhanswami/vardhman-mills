@@ -178,7 +178,7 @@ export async function POST(request: NextRequest) {
     const accessToken = authHeader?.replace('Bearer ', '') || cookieStore.get('access_token')?.value;
 
     // Build backend request
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/cart/add`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/cart/add`;
     
     const backendRequestBody = {
       productId,
@@ -347,3 +347,4 @@ export async function GET() {
     }
   );
 }
+

@@ -95,6 +95,19 @@ export function useCart(): UseCartReturn {
       setItems(prev => {
         const existingItem = prev.find(item => item.productId === product.id);
         
+        // Calculate price
+        let priceAmount = 0;
+        if (product.pricing?.salePrice?.amount) {
+          priceAmount = product.pricing.salePrice.amount;
+        } else if (product.pricing?.basePrice?.amount) {
+          priceAmount = product.pricing.basePrice.amount;
+        } else if (typeof product.price === 'number') {
+          priceAmount = product.price;
+        }
+        
+        const currency = 'INR';
+        const formattedPrice = `₹${priceAmount}`;
+
         if (existingItem) {
           return prev.map(item =>
             item.productId === product.id
@@ -103,13 +116,13 @@ export function useCart(): UseCartReturn {
                   quantity: item.quantity + quantity,
                   total: {
                     ...item.total,
-                    amount: (item.quantity + quantity) * item.price.amount,
-                    formatted: `₹${(item.quantity + quantity) * item.price.amount}`,
+                    amount: (item.quantity + quantity) * priceAmount,
+                    formatted: `₹${(item.quantity + quantity) * priceAmount}`,
                   },
                   totalPrice: {
-                    ...item.total,
-                    amount: (item.quantity + quantity) * item.price.amount,
-                    formatted: `₹${(item.quantity + quantity) * item.price.amount}`,
+                    ...item.totalPrice,
+                    amount: (item.quantity + quantity) * priceAmount,
+                    formatted: `₹${(item.quantity + quantity) * priceAmount}`,
                   },
                   updatedAt: new Date(),
                 }
@@ -124,24 +137,24 @@ export function useCart(): UseCartReturn {
           product,
           quantity,
           price: {
-            amount: 500, // Default price
-            currency: 'INR' as const,
-            formatted: '₹500',
+            amount: priceAmount,
+            currency: currency as Currency,
+            formatted: formattedPrice,
           },
           unitPrice: {
-            amount: 500,
-            currency: 'INR' as const,
-            formatted: '₹500',
+            amount: priceAmount,
+            currency: currency as Currency,
+            formatted: formattedPrice,
           },
           total: {
-            amount: 500 * quantity,
-            currency: 'INR' as const,
-            formatted: `₹${500 * quantity}`,
+            amount: priceAmount * quantity,
+            currency: currency as Currency,
+            formatted: `₹${priceAmount * quantity}`,
           },
           totalPrice: {
-            amount: 500 * quantity,
-            currency: 'INR' as const,
-            formatted: `₹${500 * quantity}`,
+            amount: priceAmount * quantity,
+            currency: currency as Currency,
+            formatted: `₹${priceAmount * quantity}`,
           },
           addedAt: new Date(),
           updatedAt: new Date(),

@@ -40,12 +40,12 @@ import { AnnouncementBar } from '@/components/annoucement-bar';
 // Types
 // Dynamic layout imports for better performance
 const Header = dynamic(() => import('@/components/layout/Header'), {
-  loading: () => <div className="h-20 bg-white border-b" />,
+  loading: () => <div className="h-20 bg-background border-b border-border" />,
   ssr: false
 });
 
 const Footer = dynamic(() => import('@/components/layout/Footer'), {
-  loading: () => <div className="h-64 bg-gray-100" />,
+  loading: () => <div className="h-64 bg-muted" />,
   ssr: false
 });
 
@@ -55,7 +55,7 @@ const Breadcrumbs = dynamic(() => import('@/components/layout/Breadcrumbs'), {
 });
 
 const Sidebar = dynamic(() => import('@/components/layout/Sidebar'), {
-  loading: () => <div className="w-80 bg-white" />,
+  loading: () => <div className="w-80 bg-background" />,
   ssr: false
 });
 
@@ -171,32 +171,32 @@ export default function MainLayout({ children }: MainLayoutProps) {
   // Animation variants
   const layoutVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
-      transition: { 
+      transition: {
         duration: 0.4,
         ease: [0.4, 0, 0.2, 1] as [number, number, number, number]
       }
     },
-    exit: { 
-      opacity: 0, 
+    exit: {
+      opacity: 0,
       y: -20,
-      transition: { 
+      transition: {
         duration: 0.3
       }
     }
   };
 
   const drawerVariants = {
-    hidden: { 
+    hidden: {
       x: isMobile ? '-100%' : -320,
-      opacity: 0 
+      opacity: 0
     },
-    visible: { 
+    visible: {
       x: 0,
       opacity: 1,
-      transition: { 
+      transition: {
         type: 'spring' as const,
         stiffness: 300,
         damping: 30
@@ -206,7 +206,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
 
   const overlayVariants = {
     hidden: { opacity: 0 },
-    visible: { 
+    visible: {
       opacity: 1,
       transition: { duration: 0.2 }
     }
@@ -215,7 +215,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
   // Show loading screen on initial load
   if (!state.isMounted || state.isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <LoadingScreen />
       </div>
     );
@@ -224,152 +224,153 @@ export default function MainLayout({ children }: MainLayoutProps) {
   // Render main layout
   return (
     <ErrorBoundary onError={handleError}>
-            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
-              {/* SEO Head */}
-              <SEOHead
-                title="Vardhman Mills - Premium Fabrics & Textiles"
-                description="Shop premium quality fabrics and textiles from Vardhman Mills."
-                canonical={pathname || '/'}
-              />
+      <div className="min-h-screen bg-background transition-colors duration-300">
+        {/* SEO Head */}
+        <SEOHead
+          title="Vardhman Mills - Premium Fabrics & Textiles"
+          description="Shop premium quality fabrics and textiles from Vardhman Mills."
+          canonical={pathname || '/'}
+        />
 
-              {/* Skip to Content Link for Accessibility */}
-              <a
-                href="#main-content"
-                className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 z-[9999] bg-blue-600 text-white px-6 py-3 rounded-md font-medium shadow-lg"
-              >
-                Skip to main content
-              </a>
+        {/* Skip to Content Link for Accessibility */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 z-[9999] bg-primary text-primary-foreground px-6 py-3 rounded-md font-medium shadow-lg"
+        >
+          Skip to main content
+        </a>
 
-              {/* Scroll Progress Bar */}
-              {state.isScrolled && (
-                <div
-                  className="fixed top-0 left-0 right-0 h-1 z-[9999] bg-gray-200 dark:bg-gray-700"
-                  role="progressbar"
-                  aria-label={`Page scroll progress: ${Math.round(state.scrollProgress)}%`}
-                >
-                  <div 
-                    className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 transition-all duration-300"
-                    style={{ width: `${state.scrollProgress}%` } as React.CSSProperties}
+        {/* Scroll Progress Bar */}
+        {state.isScrolled && (
+          <div
+            className="fixed top-0 left-0 right-0 h-1 z-[9999] bg-muted"
+            role="progressbar"
+            aria-label={`Page scroll progress: ${Math.round(state.scrollProgress)}%`}
+          >
+            <div
+              className="h-full bg-primary transition-all duration-300"
+              style={{ width: `${state.scrollProgress}%` } as React.CSSProperties}
+            />
+          </div>
+        )}
+
+        {/* Announcement Bar */}
+        <Suspense fallback={<div className="h-10 bg-primary" />}>
+          <AnnouncementBar announcements={[]} />
+        </Suspense>
+
+        {/* Header */}
+        <Header
+          isScrolled={state.isScrolled}
+        />
+
+        {/* Mobile Sidebar Toggle Button */}
+        {showSidebar && !state.isSidebarOpen && isMobile && (
+          <button
+            onClick={handleToggleSidebar}
+            className="fixed bottom-4 left-4 z-50 p-3 bg-primary text-primary-foreground rounded-full shadow-lg hover:bg-primary/90 transition-colors"
+            aria-label="Open sidebar"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        )}
+
+        {/* Main Content Area */}
+        <div className="relative flex min-h-[calc(100vh-theme(spacing.64))]">
+          {/* Sidebar */}
+          <AnimatePresence>
+            {showSidebar && (state.isSidebarOpen || isDesktop) && (
+              <>
+                {/* Sidebar Overlay for Mobile */}
+                {isMobile && (
+                  <motion.div
+                    initial="hidden"
+                    animate="visible"
+                    exit="hidden"
+                    variants={overlayVariants}
+                    onClick={() => setState(prev => ({ ...prev, isSidebarOpen: false }))}
+                    className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
+                    aria-hidden="true"
                   />
-                </div>
-              )}
+                )}
 
-              {/* Announcement Bar */}
-              <Suspense fallback={<div className="h-10 bg-blue-600" />}>
-                <AnnouncementBar announcements={[]} />
-              </Suspense>
-              
-              {/* Header */}
-              <Header
-                isScrolled={state.isScrolled}
-              />
-
-              {/* Mobile Sidebar Toggle Button */}
-              {showSidebar && !state.isSidebarOpen && isMobile && (
-                <button
-                  onClick={handleToggleSidebar}
-                  className="fixed bottom-4 left-4 z-50 p-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors"
-                  aria-label="Open sidebar"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                  </svg>
-                </button>
-              )}
-
-              {/* Main Content Area */}
-              <div className="relative flex min-h-[calc(100vh-theme(spacing.64))]">
-                {/* Sidebar */}
-                <AnimatePresence>
-                  {showSidebar && (state.isSidebarOpen || isDesktop) && (
-                    <>
-                      {/* Sidebar Overlay for Mobile */}
-                      {isMobile && (
-                        <motion.div
-                          initial="hidden"
-                          animate="visible"
-                          exit="hidden"
-                          variants={overlayVariants}
-                          onClick={() => setState(prev => ({ ...prev, isSidebarOpen: false }))}
-                          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
-                          aria-hidden="true"
-                        />
-                      )}
-
-                      {/* Sidebar Component */}
-                      <motion.aside
-                        initial="hidden"
-                        animate="visible"
-                        exit="hidden"
-                        variants={drawerVariants}
-                        className={`
+                {/* Sidebar Component */}
+                <motion.aside
+                  initial="hidden"
+                  animate="visible"
+                  exit="hidden"
+                  variants={drawerVariants}
+                  className={`
                           ${isMobile ? 'fixed inset-y-0 left-0 z-50 w-80' : 'sticky top-20 h-[calc(100vh-5rem)]'}
-                          bg-white dark:bg-gray-800 shadow-lg overflow-y-auto
+                          bg-background shadow-lg overflow-y-auto border-r border-border
                         `}
-                      >
-                        <Sidebar
-                          type="account"
-                          isOpen={state.isSidebarOpen}
-                          onClose={() => setState(prev => ({ ...prev, isSidebarOpen: false }))}
-                          isMobile={isMobile}
-                        />
-                      </motion.aside>
-                    </>
-                  )}
-                </AnimatePresence>
-
-                {/* Main Content */}
-                <main 
-                  className="flex-1 w-full"
-                  id="main-content"
-                  role="main"
                 >
-                  {/* Breadcrumbs */}
-                  {showBreadcrumbs && (
-                    <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-20 z-30">
-                      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-                        <Breadcrumbs />
-                      </div>
-                    </div>
-                  )}
+                  <Sidebar
+                    type="account"
+                    isOpen={state.isSidebarOpen}
+                    onClose={() => setState(prev => ({ ...prev, isSidebarOpen: false }))}
+                    isMobile={isMobile}
+                  />
+                </motion.aside>
+              </>
+            )}
+          </AnimatePresence>
 
-                  {/* Page Content with Animation */}
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={pathname}
-                      initial="hidden"
-                      animate="visible"
-                      exit="exit"
-                      variants={layoutVariants}
-                      className="relative min-h-[calc(100vh-theme(spacing.40))]"
-                    >
-                      {children}
-                    </motion.div>
-                  </AnimatePresence>
-                </main>
+          {/* Main Content */}
+          <main
+            className="flex-1 w-full"
+            id="main-content"
+            role="main"
+          >
+            {/* Breadcrumbs */}
+            {showBreadcrumbs && (
+              <div className="bg-background border-b border-border sticky top-20 z-30">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+                  <Breadcrumbs />
+                </div>
               </div>
+            )}
 
-              {/* Footer */}
-              <Footer />
+            {/* Page Content with Animation */}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={pathname}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                variants={layoutVariants}
+                className="relative min-h-[calc(100vh-theme(spacing.40))]"
+              >
+                {children}
+              </motion.div>
+            </AnimatePresence>
+          </main>
+        </div>
 
-              {/* Back to Top Button */}
-              {state.isScrolled && <BackToTop />}
+        {/* Footer */}
+        <Footer />
 
-              {/* Toast Notifications */}
-              <Toaster
-                position="top-right"
-                toastOptions={{
-                  duration: 4000,
-                  style: {
-                    background: '#363636',
-                    color: '#fff',
-                  },
-                }}
-              />
+        {/* Back to Top Button */}
+        {state.isScrolled && <BackToTop />}
 
-              {/* Scroll to Top Component */}
-              <ScrollToTop />
-            </div>
+        {/* Toast Notifications */}
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            duration: 4000,
+            style: {
+              background: 'hsl(var(--popover))',
+              color: 'hsl(var(--popover-foreground))',
+              border: '1px solid hsl(var(--border))',
+            },
+          }}
+        />
+
+        {/* Scroll to Top Component */}
+        <ScrollToTop />
+      </div>
     </ErrorBoundary>
   );
 }

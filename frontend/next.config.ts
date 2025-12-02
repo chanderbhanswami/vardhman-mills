@@ -7,7 +7,7 @@ const nextConfig = {
         headers: [
           {
             key: 'Content-Security-Policy',
-            value: "connect-src 'self' http://localhost:5000 https://www.google-analytics.com https://api.razorpay.com https://checkout.razorpay.com",
+            value: "connect-src 'self' http://localhost:5000 http://192.168.1.7:5000 https://www.google-analytics.com https://api.razorpay.com https://checkout.razorpay.com",
           },
         ],
       },

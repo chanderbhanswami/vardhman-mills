@@ -9,6 +9,8 @@ import { ThemeProvider } from './ThemeProvider';
 import { WishlistProvider } from './WishlistProvider';
 import { QueryProvider } from './QueryProvider';
 
+import { StoreProvider } from '../../store/providers/storeProvider';
+
 // Global Provider Props
 interface GlobalProviderProps {
   children: React.ReactNode;
@@ -24,15 +26,17 @@ interface GlobalProviderProps {
  * GlobalProvider component that wraps the entire application with all necessary providers
  * 
  * Provider hierarchy (outside to inside):
- * 1. QueryProvider - React Query for server state management
- * 2. ThemeProvider - Theme and styling management
- * 3. AuthProvider - Authentication and session management
- * 4. NotificationProvider - Toast notifications and in-app notifications
- * 5. ModalProvider - Modal and dialog management
- * 6. CartProvider - Shopping cart management
- * 7. WishlistProvider - Wishlist management
+ * 1. StoreProvider - Redux store for global state management
+ * 2. QueryProvider - React Query for server state management
+ * 3. ThemeProvider - Theme and styling management
+ * 4. AuthProvider - Authentication and session management
+ * 5. NotificationProvider - Toast notifications and in-app notifications
+ * 6. ModalProvider - Modal and dialog management
+ * 7. CartProvider - Shopping cart management
+ * 8. WishlistProvider - Wishlist management
  * 
  * This hierarchy ensures that:
+ * - StoreProvider is at the top to provide Redux context
  * - QueryProvider is at the top to provide React Query context to all components
  * - ThemeProvider is early to ensure theming is available throughout the app
  * - AuthProvider comes before providers that depend on user authentication
@@ -45,26 +49,28 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({
   themeProps = {} 
 }) => {
   return (
-    <QueryProvider>
-      <ThemeProvider
-        defaultTheme={themeProps.defaultTheme}
-        enableSystem={themeProps.enableSystem}
-        attribute={themeProps.attribute}
-        value={themeProps.value}
-      >
-        <AuthProvider>
-          <NotificationProvider>
-            <ModalProvider>
-              <CartProvider>
-                <WishlistProvider>
-                  {children}
-                </WishlistProvider>
-              </CartProvider>
-            </ModalProvider>
-          </NotificationProvider>
-        </AuthProvider>
-      </ThemeProvider>
-    </QueryProvider>
+    <StoreProvider>
+      <QueryProvider>
+        <ThemeProvider
+          defaultTheme={themeProps.defaultTheme}
+          enableSystem={themeProps.enableSystem}
+          attribute={themeProps.attribute}
+          value={themeProps.value}
+        >
+          <AuthProvider>
+            <NotificationProvider>
+              <ModalProvider>
+                <CartProvider>
+                  <WishlistProvider>
+                    {children}
+                  </WishlistProvider>
+                </CartProvider>
+              </ModalProvider>
+            </NotificationProvider>
+          </AuthProvider>
+        </ThemeProvider>
+      </QueryProvider>
+    </StoreProvider>
   );
 };
 

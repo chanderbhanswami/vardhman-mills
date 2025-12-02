@@ -7,35 +7,12 @@ import {
 } from './types';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { buildPaginationParams, buildSearchParams } from './utils';
+import { Category } from '../../types/product.types';
 
 /**
  * Category API Service
  * Handles product category management, hierarchy, and navigation
  */
-
-interface Category {
-  id: string;
-  name: string;
-  slug: string;
-  description?: string;
-  image?: string;
-  icon?: string;
-  parentId?: string;
-  level: number;
-  path: string;
-  isActive: boolean;
-  isFeatured: boolean;
-  sortOrder: number;
-  seoTitle?: string;
-  seoDescription?: string;
-  seoKeywords?: string;
-  metadata: Record<string, unknown>;
-  productCount: number;
-  children?: Category[];
-  parent?: Category;
-  createdAt: string;
-  updatedAt: string;
-}
 
 interface CategoryTree {
   id: string;
@@ -76,7 +53,7 @@ class CategoryApiService {
     level?: number;
     isActive?: boolean;
     isFeatured?: boolean;
-  }): Promise<ApiResponse<Category[]>> {
+  }): Promise<ApiResponse<{ categories: Category[] }>> {
     const queryParams = {
       ...buildSearchParams(params || {}),
       ...buildPaginationParams(params || {}),
@@ -86,7 +63,7 @@ class CategoryApiService {
       ...(params?.isFeatured !== undefined && { isFeatured: params.isFeatured }),
     };
     
-    return this.client.get<Category[]>(endpoints.categories.list, { params: queryParams });
+    return this.client.get<{ categories: Category[] }>(endpoints.categories.list, { params: queryParams });
   }
 
   // Get category tree (hierarchical structure)
@@ -105,19 +82,30 @@ class CategoryApiService {
   }
 
   // Get category by ID
-  async getCategoryById(categoryId: string): Promise<ApiResponse<Category>> {
-    return this.client.get<Category>(endpoints.categories.byId(categoryId));
+  async getCategoryById(categoryId: string): Promise<ApiResponse<{ category: Category }>> {
+    return this.client.get<{ category: Category }>(endpoints.categories.byId(categoryId));
   }
 
   // Get category by slug
-  async getCategoryBySlug(slug: string): Promise<ApiResponse<Category>> {
-    return this.client.get<Category>(endpoints.categories.bySlug(slug));
+  async getCategoryBySlug(slug: string): Promise<ApiResponse<{ category: Category }>> {
+    return this.client.get<{ category: Category }>(endpoints.categories.bySlug(slug));
   }
 
   // Get featured categories
-  async getFeaturedCategories(limit?: number): Promise<ApiResponse<Category[]>> {
-    const params = limit ? { limit } : {};
-    return this.client.get<Category[]>(endpoints.categories.featured, { params });
+  // NOTE: Backend endpoint /featured does not exist. We fetch all and filter.
+  async getFeaturedCategories(limit?: number): Promise<ApiResponse<{ categories: Category[] }>> {
+    const response = await this.getCategories({ isFeatured: true });
+    // If backend doesn't support filtering by isFeatured, we filter here
+    if (response.data?.categories) {
+      const featured = response.data.categories.filter(c => c.isFeatured);
+      return {
+        ...response,
+        data: {
+          categories: limit ? featured.slice(0, limit) : featured
+        }
+      };
+    }
+    return response;
   }
 
   // Get category products
@@ -185,13 +173,13 @@ class CategoryApiService {
     seoDescription?: string;
     seoKeywords?: string;
     metadata?: Record<string, unknown>;
-  }): Promise<ApiResponse<Category>> {
-    return this.client.post<Category>(endpoints.categories.create, categoryData);
+  }): Promise<ApiResponse<{ category: Category }>> {
+    return this.client.post<{ category: Category }>(endpoints.categories.create, categoryData);
   }
 
   // Update category
-  async updateCategory(categoryId: string, updates: Partial<Category>): Promise<ApiResponse<Category>> {
-    return this.client.put<Category>(endpoints.categories.update(categoryId), updates);
+  async updateCategory(categoryId: string, updates: Partial<Category>): Promise<ApiResponse<{ category: Category }>> {
+    return this.client.put<{ category: Category }>(endpoints.categories.update(categoryId), updates);
   }
 
   // Delete category
@@ -385,8 +373,8 @@ class CategoryApiService {
     canonicalUrl?: string;
     ogImage?: string;
     structuredData?: Record<string, unknown>;
-  }): Promise<ApiResponse<Category>> {
-    return this.client.put<Category>(endpoints.categories.updateSEO(categoryId), seoData);
+  }): Promise<ApiResponse<{ category: Category }>> {
+    return this.client.put<{ category: Category }>(endpoints.categories.updateSEO(categoryId), seoData);
   }
 
   // Admin Operations

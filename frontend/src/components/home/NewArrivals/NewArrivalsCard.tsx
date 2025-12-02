@@ -331,7 +331,7 @@ export const NewArrivalsCard: React.FC<NewArrivalsCardProps> = ({
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={handleQuickView}
-              className="p-2 bg-white/90 hover:bg-white text-gray-900 rounded-full backdrop-blur-md transition-colors"
+              className="p-2 bg-background/90 hover:bg-background text-foreground rounded-full backdrop-blur-md transition-colors"
               aria-label="Quick view"
             >
               <EyeIcon className="h-5 w-5" />
@@ -432,8 +432,8 @@ export const NewArrivalsCard: React.FC<NewArrivalsCardProps> = ({
                 selectedSize === size.id
                   ? 'bg-gray-900 text-white border-gray-900'
                   : size.available
-                  ? 'bg-white text-gray-900 border-gray-300 hover:border-gray-900'
-                  : 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+                    ? 'bg-white text-gray-900 border-gray-300 hover:border-gray-900'
+                    : 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
               )}
               aria-label={`Select size ${size.name}`}
             >
@@ -507,7 +507,7 @@ export const NewArrivalsCard: React.FC<NewArrivalsCardProps> = ({
         <CardContent className="p-0">
           {/* Image Section */}
           <Link href={`/products/${slug}`}>
-            <div className="relative aspect-[3/4] overflow-hidden bg-gray-100">
+            <div className="relative aspect-[3/4] overflow-hidden bg-muted">
               <motion.div
                 animate={{ scale: isHovered ? 1.1 : 1 }}
                 transition={{ duration: 0.6 }}

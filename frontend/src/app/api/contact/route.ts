@@ -232,7 +232,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Build backend request
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/contact`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/contact`;
     
     const backendRequestBody = {
       name: formData.name,
@@ -432,7 +432,7 @@ export async function GET(request: NextRequest) {
 
     // Build backend URL with query parameters
     const backendUrl = new URL(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/contact`
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/contact`
     );
 
     Object.entries(queryParams).forEach(([key, value]) => {
@@ -531,3 +531,4 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+

@@ -262,7 +262,7 @@ export const DealsSection: React.FC<DealsSectionProps> = ({
     if (!showFilters) return null;
 
     return (
-      <div className="flex flex-wrap items-center gap-4 mb-8 p-6 bg-gray-50 dark:bg-gray-800 rounded-xl">
+      <div className="flex flex-wrap items-center gap-4 mb-8 p-6 bg-muted rounded-xl">
         <div className="flex items-center gap-2">
           <FunnelIcon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
           <span className="font-semibold text-gray-900 dark:text-white">Filters:</span>
@@ -273,7 +273,7 @@ export const DealsSection: React.FC<DealsSectionProps> = ({
           value={filters.category}
           onChange={(e) => handleFilterChange('category', e.target.value)}
           aria-label="Filter by category"
-          className="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-red-500 outline-none"
+          className="px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:ring-2 focus:ring-primary outline-none"
         >
           {categories.map((cat) => (
             <option key={cat} value={cat}>
@@ -357,7 +357,7 @@ export const DealsSection: React.FC<DealsSectionProps> = ({
           {Array.from({ length: itemsPerPage }).map((_, i) => (
             <div
               key={i}
-              className="h-[500px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse"
+              className="h-[500px] bg-muted rounded-xl animate-pulse"
             />
           ))}
         </div>

@@ -142,10 +142,10 @@ import { Accordion, AccordionItem } from '@/components/ui/Accordion';
  * Homepage metadata for SEO
  */
 export const metadata: Metadata = {
-  title: 'Vardhman Textiles - Premium Quality Textiles & Home Decor | Leading Manufacturer',
+  title: 'Vardhman Mills - Premium Quality Textiles & Home Decor | Leading Manufacturer',
   description: 'Discover premium quality textiles, bedsheets, towels, curtains, and home decor products. Shop from India&apos;s leading textile manufacturer with 50+ years of excellence. Best prices, fastest delivery, 100% genuine products.',
   keywords: [
-    'vardhman textiles',
+    'vardhman Mills',
     'premium textiles',
     'bedsheets online',
     'cotton towels',
@@ -156,16 +156,16 @@ export const metadata: Metadata = {
     'home furnishing',
     'luxury textiles',
   ],
-  authors: [{ name: 'Vardhman Textiles' }],
-  creator: 'Vardhman Textiles',
-  publisher: 'Vardhman Textiles',
+  authors: [{ name: 'Vardhman Mills' }],
+  creator: 'Vardhman Mills',
+  publisher: 'Vardhman Mills',
   openGraph: {
-    title: 'Vardhman Textiles - Premium Quality Textiles & Home Decor',
+    title: 'Vardhman Mills - Premium Quality Textiles & Home Decor',
     description: 'Shop premium textiles, bedsheets, towels, curtains and home decor from India&apos;s leading manufacturer with 50+ years of excellence.',
     type: 'website',
     locale: 'en_IN',
-    url: 'https://vardhmantextiles.com',
-    siteName: 'Vardhman Textiles',
+    url: 'https://vardhmanmills.com',
+    siteName: 'Vardhman Mills',
     images: [
       {
         url: '/images/og-homepage.jpg',
@@ -201,7 +201,7 @@ export const metadata: Metadata = {
     },
   },
   alternates: {
-    canonical: 'https://vardhmantextiles.com',
+    canonical: 'https://vardhmanmills.com',
   },
 };
 
@@ -217,11 +217,11 @@ const SectionLoader = () => (
 /**
  * Container wrapper component
  */
-const Container = ({ 
-  children, 
-  className = '' 
-}: { 
-  children: React.ReactNode; 
+const Container = ({
+  children,
+  className = ''
+}: {
+  children: React.ReactNode;
   className?: string;
 }) => (
   <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ${className}`}>
@@ -240,12 +240,12 @@ interface SectionHeadingProps {
   action?: React.ReactNode;
 }
 
-const SectionHeading = ({ 
-  title, 
-  subtitle, 
-  centered = true, 
+const SectionHeading = ({
+  title,
+  subtitle,
+  centered = true,
   badge,
-  action 
+  action
 }: SectionHeadingProps) => (
   <div className={`mb-12 ${centered ? 'text-center' : 'flex items-center justify-between'}`}>
     <div className={centered ? '' : 'flex-1'}>
@@ -324,8 +324,8 @@ const organizationStructuredData = {
 // Fetch products from backend
 async function fetchProducts() {
   try {
-    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-    const url = `${backendUrl}/api/v1/products?limit=20`;
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
+    const url = `${backendUrl}/products?limit=20`;
     console.log('Fetching products from:', url);
     const response = await fetch(url, {
       cache: 'no-store', // Always get fresh data
@@ -333,15 +333,15 @@ async function fetchProducts() {
         'Content-Type': 'application/json',
       },
     });
-    
+
     console.log('Products response status:', response.status);
-    
+
     if (!response.ok) {
       const errorText = await response.text();
       console.error('Failed to fetch products:', response.statusText, errorText);
       return [];
     }
-    
+
     const data = await response.json();
     console.log('Products data received:', data);
     return data.data || [];
@@ -354,19 +354,19 @@ async function fetchProducts() {
 // Fetch featured products
 async function fetchFeaturedProducts() {
   try {
-    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-    const response = await fetch(`${backendUrl}/api/v1/products/featured?limit=12`, {
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
+    const response = await fetch(`${backendUrl}/products/featured?limit=12`, {
       cache: 'no-store',
       headers: {
         'Content-Type': 'application/json',
       },
     });
-    
+
     if (!response.ok) {
       console.error('Failed to fetch featured products:', response.statusText);
       return [];
     }
-    
+
     const data = await response.json();
     return data.data || [];
   } catch (error) {
@@ -378,19 +378,19 @@ async function fetchFeaturedProducts() {
 // Fetch categories
 async function fetchCategories() {
   try {
-    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-    const response = await fetch(`${backendUrl}/api/v1/categories?limit=12`, {
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
+    const response = await fetch(`${backendUrl}/categories?limit=12`, {
       cache: 'no-store',
       headers: {
         'Content-Type': 'application/json',
       },
     });
-    
+
     if (!response.ok) {
       console.error('Failed to fetch categories:', response.statusText);
       return [];
     }
-    
+
     const data = await response.json();
     return data.data || [];
   } catch (error) {
@@ -404,12 +404,12 @@ export default async function HomePage() {
   const products = await fetchProducts();
   const featuredProducts = await fetchFeaturedProducts();
   const categories = await fetchCategories();
-  
+
   // Use fetched products or fall back to empty array
   const mockProducts = products.length > 0 ? products : [];
   const mockFeaturedProducts = featuredProducts.length > 0 ? featuredProducts : mockProducts;
   const mockCategories = categories.length > 0 ? categories : [];
-  
+
   // Use all imported components to satisfy requirements
   const allComponentsUsed = {
     HeroSlide,
@@ -611,9 +611,9 @@ export default async function HomePage() {
           aria-label="Flash Deals"
         >
           <Container>
-            <SectionHeading 
-              title="⚡ Flash Deals" 
-              subtitle="Limited time offers - Grab them before they're gone!" 
+            <SectionHeading
+              title="⚡ Flash Deals"
+              subtitle="Limited time offers - Grab them before they're gone!"
               badge="HURRY UP"
             />
             <div className="flex justify-center mb-8">
@@ -754,9 +754,9 @@ export default async function HomePage() {
           aria-label="Why Choose Us"
         >
           <Container>
-            <SectionHeading 
-              title="Why Choose Vardhman Textiles?" 
-              subtitle="50+ years of excellence in textile manufacturing" 
+            <SectionHeading
+              title="Why Choose Vardhman Textiles?"
+              subtitle="50+ years of excellence in textile manufacturing"
               badge="TRUSTED SINCE 1975"
             />
             <Suspense fallback={<SkeletonLoader />}>

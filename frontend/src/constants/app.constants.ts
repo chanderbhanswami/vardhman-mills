@@ -28,7 +28,7 @@ export const IS_DEVELOPMENT = CURRENT_ENV === ENVIRONMENT.DEVELOPMENT;
 // URLs
 export const URLS = {
   BASE: process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000',
-  API: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api',
+  API: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1',
   CDN: process.env.NEXT_PUBLIC_CDN_URL || '',
   UPLOADS: process.env.NEXT_PUBLIC_UPLOADS_URL || '/uploads',
 } as const;

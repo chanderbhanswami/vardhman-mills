@@ -52,7 +52,7 @@ const defaultNavigationItems: NavigationItem[] = [
   {
     label: 'About',
     children: [
-      { label: 'Our Story', href: '/about/our-story' },
+      { label: 'Our Story', href: '/about' },
       { label: 'Our Team', href: '/about/our-team' },
       { label: 'Careers', href: '/about/careers' },
     ],
@@ -128,8 +128,8 @@ const Navigation: React.FC<NavigationProps> = ({
             className={`
               flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200
               ${itemIsActive
-                ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20'
-                : 'text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800'
+                ? 'text-primary bg-primary/10'
+                : 'text-foreground hover:text-primary hover:bg-accent'
               }
             `}
             {...(activeDropdown === item.label ? { 'aria-expanded': true } : { 'aria-expanded': false })}
@@ -141,9 +141,9 @@ const Navigation: React.FC<NavigationProps> = ({
                 <span
                   className={`
                     absolute -top-2 -right-6 px-1.5 py-0.5 text-xs font-bold rounded-full
-                    ${item.isHot 
-                      ? 'bg-red-500 text-white animate-pulse' 
-                      : 'bg-blue-500 text-white'
+                    ${item.isHot
+                      ? 'bg-red-500 text-white animate-pulse'
+                      : 'bg-primary text-primary-foreground'
                     }
                   `}
                 >
@@ -152,9 +152,8 @@ const Navigation: React.FC<NavigationProps> = ({
               )}
             </span>
             <ChevronDownIcon
-              className={`w-4 h-4 transition-transform duration-200 ${
-                activeDropdown === item.label ? 'rotate-180' : ''
-              }`}
+              className={`w-4 h-4 transition-transform duration-200 ${activeDropdown === item.label ? 'rotate-180' : ''
+                }`}
             />
           </button>
         ) : (
@@ -163,8 +162,8 @@ const Navigation: React.FC<NavigationProps> = ({
             className={`
               flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200
               ${itemIsActive
-                ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20'
-                : 'text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800'
+                ? 'text-primary bg-primary/10'
+                : 'text-foreground hover:text-primary hover:bg-accent'
               }
             `}
           >
@@ -174,9 +173,9 @@ const Navigation: React.FC<NavigationProps> = ({
                 <span
                   className={`
                     absolute -top-2 -right-6 px-1.5 py-0.5 text-xs font-bold rounded-full
-                    ${item.isHot 
-                      ? 'bg-red-500 text-white animate-pulse' 
-                      : 'bg-blue-500 text-white'
+                    ${item.isHot
+                      ? 'bg-red-500 text-white animate-pulse'
+                      : 'bg-primary text-primary-foreground'
                     }
                   `}
                 >
@@ -198,7 +197,7 @@ const Navigation: React.FC<NavigationProps> = ({
               initial="hidden"
               animate="visible"
               exit="exit"
-              className="absolute top-full left-0 mt-1 w-56 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50"
+              className="absolute top-full left-0 mt-1 w-56 bg-background rounded-lg shadow-lg border border-border z-50"
             >
               <div className="py-2">
                 {item.children!.map((child) => (
@@ -208,8 +207,8 @@ const Navigation: React.FC<NavigationProps> = ({
                     className={`
                       block px-4 py-2 text-sm transition-colors duration-200
                       ${isActive(child.href || '')
-                        ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20'
-                        : 'text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800'
+                        ? 'text-primary bg-primary/10'
+                        : 'text-foreground hover:text-primary hover:bg-accent'
                       }
                     `}
                   >

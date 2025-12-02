@@ -356,7 +356,7 @@ export const HeroSlide: React.FC<HeroSlideProps> = ({
               variant="outline"
               size="sm"
               onClick={toggleVideoPlay}
-              className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm"
+              className="bg-background/90 backdrop-blur-sm"
               aria-label={isVideoPlaying ? 'Pause video' : 'Play video'}
             >
               {isVideoPlaying ? (
@@ -371,7 +371,7 @@ export const HeroSlide: React.FC<HeroSlideProps> = ({
               variant="outline"
               size="sm"
               onClick={toggleVideoMute}
-              className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm"
+              className="bg-background/90 backdrop-blur-sm"
               aria-label={isVideoMuted ? 'Unmute video' : 'Mute video'}
             >
               {isVideoMuted ? (
@@ -519,7 +519,7 @@ export const HeroSlide: React.FC<HeroSlideProps> = ({
                   size="lg"
                   variant={primaryCTA.variant || 'default'}
                   onClick={() => handleCTAClick('primary')}
-                  className="bg-white text-gray-900 hover:bg-gray-100"
+                  className="bg-background text-foreground hover:bg-accent"
                   asChild
                 >
                   <Link href={primaryCTA.href}>
@@ -562,7 +562,7 @@ export const HeroSlide: React.FC<HeroSlideProps> = ({
 
       {/* Loading Indicator */}
       {!isLoaded && (
-        <div className="absolute inset-0 z-30 bg-gray-900 flex items-center justify-center">
+        <div className="absolute inset-0 z-30 bg-background/95 flex items-center justify-center">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white" />
         </div>
       )}

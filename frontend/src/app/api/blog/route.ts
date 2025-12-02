@@ -16,7 +16,7 @@ import type { BlogPost } from '@/types/blog.types';
 // CONSTANTS
 // ============================================================================
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_API_URL || 'http://localhost:5000/api';
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_API_URL || 'http://localhost:5000/api/v1';
 const CACHE_TIME = 600; // 10 minutes
 
 // ============================================================================
@@ -280,3 +280,4 @@ export async function OPTIONS(): Promise<NextResponse> {
     },
   });
 }
+

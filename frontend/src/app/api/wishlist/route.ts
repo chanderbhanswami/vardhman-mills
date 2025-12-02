@@ -193,7 +193,7 @@ export async function GET(request: NextRequest) {
     queryParams.append('limit', limit.toString());
 
     // Make request to backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/wishlist?${queryParams.toString()}`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/wishlist?${queryParams.toString()}`;
     
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
@@ -344,7 +344,7 @@ export async function POST(request: NextRequest) {
         throw error;
       }
 
-      const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/wishlist/share`;
+      const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/wishlist/share`;
       
       const response = await fetch(backendUrl, {
         method: 'POST',
@@ -411,7 +411,7 @@ export async function POST(request: NextRequest) {
       throw error;
     }
 
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/wishlist`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/wishlist`;
     
     const response = await fetch(backendUrl, {
       method: 'POST',
@@ -548,7 +548,7 @@ export async function PATCH(request: NextRequest) {
         throw error;
       }
 
-      const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/wishlist/move`;
+      const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/wishlist/move`;
       
       const response = await fetch(backendUrl, {
         method: 'PATCH',
@@ -611,7 +611,7 @@ export async function PATCH(request: NextRequest) {
       throw error;
     }
 
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/wishlist`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/wishlist`;
     
     const response = await fetch(backendUrl, {
       method: 'PATCH',
@@ -733,7 +733,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Make request to backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/wishlist`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/wishlist`;
     
     const response = await fetch(backendUrl, {
       method: 'DELETE',
@@ -821,3 +821,4 @@ export async function DELETE(request: NextRequest) {
     );
   }
 }
+

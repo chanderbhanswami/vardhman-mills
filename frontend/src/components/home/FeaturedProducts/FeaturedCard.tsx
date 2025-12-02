@@ -148,10 +148,10 @@ export const FeaturedCard: React.FC<FeaturedCardProps> = ({
     }
 
     if (product.isOnSale && product.pricing?.salePrice) {
-      const discount = product.pricing.basePrice && product.pricing.salePrice 
+      const discount = product.pricing.basePrice && product.pricing.salePrice
         ? Math.round(((product.pricing.basePrice.amount - product.pricing.salePrice.amount) / product.pricing.basePrice.amount) * 100)
         : 0;
-      
+
       if (discount > 0) {
         badgeList.push({
           text: `-${discount}%`,
@@ -306,7 +306,7 @@ export const FeaturedCard: React.FC<FeaturedCardProps> = ({
       >
         <Card className="overflow-hidden border-2 hover:border-blue-500 transition-all duration-300 hover:shadow-xl">
           {/* Image Container */}
-          <div className="relative aspect-square overflow-hidden bg-gray-100 dark:bg-gray-800">
+          <div className="relative aspect-square overflow-hidden bg-muted">
             {/* Product Image */}
             <motion.div
               className="relative w-full h-full"
@@ -364,7 +364,7 @@ export const FeaturedCard: React.FC<FeaturedCardProps> = ({
                         size="sm"
                         variant="outline"
                         onClick={handleToggleWishlist}
-                        className="bg-white/90 backdrop-blur-sm hover:bg-white shadow-lg p-2"
+                        className="bg-background/90 backdrop-blur-sm hover:bg-background shadow-lg p-2"
                         aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
                       >
                         {isWishlisted ? (
@@ -379,7 +379,7 @@ export const FeaturedCard: React.FC<FeaturedCardProps> = ({
                         size="sm"
                         variant="outline"
                         onClick={handleQuickView}
-                        className="bg-white/90 backdrop-blur-sm hover:bg-white shadow-lg p-2"
+                        className="bg-background/90 backdrop-blur-sm hover:bg-background shadow-lg p-2"
                         aria-label="Quick view product"
                       >
                         <EyeIcon className="h-5 w-5" />
@@ -390,7 +390,7 @@ export const FeaturedCard: React.FC<FeaturedCardProps> = ({
                         size="sm"
                         variant="outline"
                         onClick={handleShare}
-                        className="bg-white/90 backdrop-blur-sm hover:bg-white shadow-lg p-2"
+                        className="bg-background/90 backdrop-blur-sm hover:bg-background shadow-lg p-2"
                         aria-label="Share product"
                       >
                         <ShareIcon className="h-5 w-5" />
@@ -456,7 +456,7 @@ export const FeaturedCard: React.FC<FeaturedCardProps> = ({
                   {colorSwatches.map((color, index) => {
                     const colorStyle = { backgroundColor: color.hexCode || '#cccccc' } as React.CSSProperties;
                     console.log('Color swatch rendered:', color.name, colorStyle);
-                    
+
                     return (
                       <Tooltip key={index} content={color.name}>
                         <button
@@ -472,7 +472,7 @@ export const FeaturedCard: React.FC<FeaturedCardProps> = ({
                           )}
                           aria-label={`Select ${color.name} color`}
                         >
-                          <span 
+                          <span
                             className="block w-full h-full"
                             {...(colorStyle ? { style: colorStyle } : {})}
                           />

@@ -257,7 +257,7 @@ export async function POST(request: NextRequest) {
     };
 
     // Make request to backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/orders/create`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/orders/create`;
     
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
@@ -398,3 +398,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+

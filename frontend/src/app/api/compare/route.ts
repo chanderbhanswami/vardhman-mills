@@ -171,7 +171,7 @@ export async function GET(request: NextRequest) {
 
     // Build backend URL
     const backendUrl = new URL(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/compare`
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/compare`
     );
 
     if (validationResult.data.productIds) {
@@ -293,7 +293,7 @@ export async function POST(request: NextRequest) {
     const accessToken = authHeader?.replace('Bearer ', '') || cookieStore.get('access_token')?.value;
 
     // Build backend request
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/compare`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/compare`;
     
     const response = await fetch(backendUrl, {
       method: 'POST',
@@ -484,7 +484,7 @@ export async function DELETE(request: NextRequest) {
     const accessToken = authHeader?.replace('Bearer ', '') || cookieStore.get('access_token')?.value;
 
     // Build backend request
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/compare`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/compare`;
     
     const response = await fetch(backendUrl, {
       method: 'DELETE',
@@ -575,3 +575,4 @@ export async function DELETE(request: NextRequest) {
     );
   }
 }
+

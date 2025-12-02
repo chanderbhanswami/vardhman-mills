@@ -244,7 +244,7 @@ export async function GET(request: NextRequest) {
 
     // Build backend URL with query parameters
     const backendUrl = new URL(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/hero`
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/hero`
     );
 
     Object.entries(queryParams).forEach(([key, value]) => {
@@ -427,7 +427,7 @@ export async function POST(request: NextRequest) {
     const heroData = validationResult.data;
 
     // Make request to backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/hero`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/hero`;
     
     const response = await fetch(backendUrl, {
       method: 'POST',
@@ -574,7 +574,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Make request to backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/hero/bulk`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/hero/bulk`;
     
     const response = await fetch(backendUrl, {
       method: 'PATCH',
@@ -706,7 +706,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Make request to backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/hero/bulk`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/hero/bulk`;
     
     const response = await fetch(backendUrl, {
       method: 'DELETE',
@@ -794,3 +794,4 @@ export async function DELETE(request: NextRequest) {
     );
   }
 }
+

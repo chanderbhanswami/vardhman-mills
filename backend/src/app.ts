@@ -94,7 +94,9 @@ if (process.env.NODE_ENV === 'development') {
 app.use(cors({
   origin: [
     process.env.FRONTEND_URL || 'http://localhost:3000',
-    process.env.ADMIN_URL || 'http://localhost:3001'
+    process.env.ADMIN_URL || 'http://localhost:3001',
+    'http://192.168.1.7:3000',
+    'http://192.168.1.7:3001'
   ],
   credentials: true
 }));

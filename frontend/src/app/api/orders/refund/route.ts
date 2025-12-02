@@ -201,7 +201,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Make request to backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/orders/refund`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/orders/refund`;
     
     const response = await fetch(backendUrl, {
       method: 'POST',
@@ -395,7 +395,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Make request to backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/orders/refund/process`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/orders/refund/process`;
     
     const response = await fetch(backendUrl, {
       method: 'PATCH',
@@ -533,7 +533,7 @@ export async function GET(request: NextRequest) {
 
     // Build backend URL with query parameters
     const backendUrl = new URL(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/orders/refund`
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/orders/refund`
     );
 
     searchParams.forEach((value, key) => {
@@ -600,3 +600,4 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+

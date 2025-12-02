@@ -152,7 +152,7 @@ export async function GET(request: NextRequest) {
 
     // Build backend URL with query parameters
     const backendUrl = new URL(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/faq`
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/faq`
     );
 
     Object.entries(queryParams).forEach(([key, value]) => {
@@ -312,7 +312,7 @@ async function handleVote(request: NextRequest, body: unknown) {
   const { faqId, helpful } = validationResult.data;
 
   // Build backend request
-  const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/faq/vote`;
+  const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/faq/vote`;
   
   const response = await fetch(backendUrl, {
     method: 'POST',
@@ -391,7 +391,7 @@ async function createFAQ(request: NextRequest, body: unknown) {
   }
 
   // Make request to backend
-  const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/faq`;
+  const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/faq`;
   
   const response = await fetch(backendUrl, {
     method: 'POST',
@@ -449,3 +449,4 @@ async function createFAQ(request: NextRequest, body: unknown) {
     { status: 201 }
   );
 }
+

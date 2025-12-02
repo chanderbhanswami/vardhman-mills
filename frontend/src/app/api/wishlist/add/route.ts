@@ -172,7 +172,7 @@ export async function POST(request: NextRequest) {
     };
 
     // Make request to backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/wishlist/add`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/wishlist/add`;
     
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
@@ -366,7 +366,7 @@ export async function GET(request: NextRequest) {
     if (wishlistId) queryParams.append('wishlistId', wishlistId);
 
     // Make request to backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/wishlist/check?${queryParams.toString()}`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/wishlist/check?${queryParams.toString()}`;
     
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
@@ -438,3 +438,4 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+

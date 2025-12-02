@@ -196,7 +196,7 @@ export async function GET(request: NextRequest) {
 
     // Build backend URL
     const backendUrl = new URL(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/favorites`
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/favorites`
     );
 
     Object.entries(queryParams).forEach(([key, value]) => {
@@ -373,7 +373,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Build backend request
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/favorites`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/favorites`;
     
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
@@ -535,7 +535,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Build backend request
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/favorites`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/favorites`;
     
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
@@ -659,7 +659,7 @@ async function handleBulkOperation(request: NextRequest, body: unknown) {
   const authToken = cookieStore.get('auth_token')?.value;
 
   // Build backend request
-  const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/favorites/bulk`;
+  const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/favorites/bulk`;
   
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
@@ -712,3 +712,4 @@ async function handleBulkOperation(request: NextRequest, body: unknown) {
 
   return NextResponse.json(responseData, { status: 200 });
 }
+

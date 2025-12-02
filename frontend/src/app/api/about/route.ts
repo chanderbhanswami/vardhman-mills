@@ -37,7 +37,7 @@ import type {
 // CONSTANTS AND CONFIGURATION
 // ============================================================================
 
-const BACKEND_API_URL = process.env.NEXT_PUBLIC_BACKEND_API_URL || 'http://localhost:5000/api';
+const BACKEND_API_URL = process.env.NEXT_PUBLIC_BACKEND_API_URL || 'http://localhost:5000/api/v1';
 const API_TIMEOUT = 30000; // 30 seconds
 const CACHE_DURATION = 3600; // 1 hour in seconds
 
@@ -572,3 +572,4 @@ export async function OPTIONS(): Promise<NextResponse> {
     },
   });
 }
+

@@ -158,10 +158,10 @@ export const TestimonialCard: React.FC<TestimonialCardProps> = ({
     if (diffDays < 7) return `${diffDays} days ago`;
     if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
     if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`;
-    return reviewDate.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
+    return reviewDate.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
     });
   }, [date]);
 
@@ -270,7 +270,7 @@ export const TestimonialCard: React.FC<TestimonialCardProps> = ({
         )}
         {customer.verified && (
           <Tooltip content="Verified Buyer">
-            <div className="absolute -bottom-1 -right-1 bg-white rounded-full">
+            <div className="absolute -bottom-1 -right-1 bg-background rounded-full">
               <CheckBadgeIcon className="h-5 w-5 text-blue-600" />
             </div>
           </Tooltip>
@@ -302,7 +302,7 @@ export const TestimonialCard: React.FC<TestimonialCardProps> = ({
     if (!product) return null;
 
     return (
-      <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg">
+      <div className="flex items-center gap-2 px-3 py-2 bg-muted rounded-lg">
         <ShoppingBagIcon className="h-4 w-4 text-gray-500" />
         <span className="text-sm text-gray-700">
           Purchased: <span className="font-medium">{product.name}</span>
@@ -345,7 +345,7 @@ export const TestimonialCard: React.FC<TestimonialCardProps> = ({
               key={index}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="relative aspect-square rounded-lg overflow-hidden bg-gray-100 cursor-pointer group"
+              className="relative aspect-square rounded-lg overflow-hidden bg-muted cursor-pointer group"
               onClick={() => handleImageClick(image, index)}
             >
               <Image

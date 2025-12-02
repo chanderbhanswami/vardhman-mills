@@ -2,15 +2,19 @@ import { HttpClient } from './client';
 import { endpoints } from './endpoints';
 import { 
   Product, 
-  Review,
   ProductVariant,
-  ApiResponse, 
-  SearchParams,
-  PaginationParams 
-} from './types';
+  Category,
+  Brand
+} from '../../types/product.types';
+import { ProductReview as Review } from '../../types/review.types';
+import { 
+  APIResponse as ApiResponse,
+  PaginationMeta
+} from '../../types/common.types';
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { CACHE_KEYS } from './config';
 import { buildSearchParams, buildPaginationParams } from './utils';
+import { SearchParams, PaginationParams } from './types';
 
 /**
  * Product API Service
@@ -24,6 +28,158 @@ class ProductApiService {
     this.client = new HttpClient();
   }
 
+  // Helper to map backend product to frontend product
+  private mapProduct(backendProduct: any): Product {
+    const images = backendProduct.images || [];
+    const imageAssets = images.map((url: string, index: number) => ({
+      id: `img-${index}`,
+      url,
+      alt: backendProduct.name,
+      priority: index === 0
+    }));
+
+    const price = backendProduct.variants?.[0]?.price || 0;
+    const comparePrice = backendProduct.variants?.[0]?.comparePrice;
+
+    return {
+      id: backendProduct._id || backendProduct.id,
+      name: backendProduct.name,
+      slug: backendProduct.slug,
+      sku: backendProduct.variants?.[0]?.sku || '',
+      description: backendProduct.description,
+      shortDescription: backendProduct.shortDescription,
+      
+      categoryId: backendProduct.category?._id || backendProduct.category?.id || '',
+      category: backendProduct.category ? {
+        id: backendProduct.category._id || backendProduct.category.id,
+        name: backendProduct.category.name,
+        slug: backendProduct.category.slug,
+        level: 0,
+        children: [],
+        path: '',
+        seo: {},
+        status: 'active',
+        isVisible: true,
+        isFeatured: false,
+        productCount: 0,
+        activeProductCount: 0,
+        sortOrder: 0,
+        attributeGroups: [],
+        createdBy: '',
+        updatedBy: '',
+        createdAt: '',
+        updatedAt: ''
+      } : { 
+        id: '', name: '', slug: '', level: 0, children: [], path: '', seo: {}, 
+        status: 'active', isVisible: true, isFeatured: false, 
+        productCount: 0, activeProductCount: 0, sortOrder: 0, attributeGroups: [],
+        createdBy: '', updatedBy: '', createdAt: '', updatedAt: '' 
+      },
+      
+      collectionIds: [],
+      collections: [],
+      
+      price: price,
+      pricing: {
+        basePrice: { amount: price, currency: 'INR', formatted: `₹${price}` },
+        salePrice: comparePrice ? { amount: price, currency: 'INR', formatted: `₹${price}` } : undefined,
+        compareAtPrice: comparePrice ? { amount: comparePrice, currency: 'INR', formatted: `₹${comparePrice}` } : undefined,
+        isDynamicPricing: false,
+        taxable: true
+      },
+
+      // Inventory
+      stock: backendProduct.stock || 0,
+      inventory: {
+        quantity: backendProduct.stock || 0,
+        isInStock: (backendProduct.stock || 0) > 0,
+        isLowStock: (backendProduct.stock || 0) < 10,
+        lowStockThreshold: 10,
+        availableQuantity: backendProduct.stock || 0,
+        backorderAllowed: false
+      },
+      
+      variants: (backendProduct.variants || []).map((v: any) => ({
+        id: v._id || v.id,
+        productId: backendProduct._id || backendProduct.id,
+        name: `${v.size || ''} ${v.color || ''}`.trim(),
+        sku: v.sku,
+        options: [
+            { id: 'opt-size', optionId: 'size', value: v.size, displayValue: v.size, sortOrder: 0, isAvailable: true },
+            { id: 'opt-color', optionId: 'color', value: v.color, displayValue: v.color, sortOrder: 1, isAvailable: true }
+        ].filter((o: any) => o.value),
+        pricing: {
+            basePrice: { amount: v.price, currency: 'INR', formatted: `₹${v.price}` },
+            salePrice: v.comparePrice ? { amount: v.price, currency: 'INR', formatted: `₹${v.price}` } : undefined,
+            compareAtPrice: v.comparePrice ? { amount: v.comparePrice, currency: 'INR', formatted: `₹${v.comparePrice}` } : undefined,
+            isDynamicPricing: false,
+            taxable: true
+        },
+        inventory: {
+            quantity: v.stock || 0,
+            isInStock: (v.stock || 0) > 0,
+            isLowStock: (v.stock || 0) < 10,
+            lowStockThreshold: 10,
+            availableQuantity: v.stock || 0,
+            backorderAllowed: false
+        },
+        status: 'active',
+        isDefault: false,
+        createdAt: '',
+        updatedAt: ''
+      })),
+      
+      images: images,
+      media: {
+        images: imageAssets
+      },
+      
+      rating: {
+        average: backendProduct.averageRating || 0,
+        count: backendProduct.totalReviews || 0,
+        distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
+      },
+      reviewCount: backendProduct.totalReviews || 0,
+
+      status: backendProduct.isActive ? 'active' : 'inactive',
+      isPublished: backendProduct.isActive,
+      isFeatured: backendProduct.isFeatured || false,
+      
+      createdAt: backendProduct.createdAt,
+      updatedAt: backendProduct.updatedAt
+    } as Product;
+  }
+
+  // Helper to transform backend list response to frontend ApiResponse
+  private transformListResponse(response: any): ApiResponse<Product[]> {
+    if (response && response.data && Array.isArray(response.data.products)) {
+      return {
+        success: response.status === 'success',
+        data: response.data.products.map((p: any) => this.mapProduct(p)),
+        meta: {
+          total: response.pagination?.total || response.results || 0,
+          page: response.pagination?.page || 1,
+          limit: response.pagination?.limit || 12,
+          totalPages: response.pagination?.pages || 1,
+          hasNextPage: (response.pagination?.page || 1) < (response.pagination?.pages || 1),
+          hasPreviousPage: (response.pagination?.page || 1) > 1
+        } as PaginationMeta
+      };
+    }
+    return response as ApiResponse<Product[]>;
+  }
+
+  // Helper to transform backend single item response
+  private transformSingleResponse(response: any): ApiResponse<Product> {
+    if (response && response.data && response.data.product) {
+      return {
+        success: response.status === 'success',
+        data: this.mapProduct(response.data.product)
+      };
+    }
+    return response as ApiResponse<Product>;
+  }
+
   // Get all products with filters and pagination
   async getProducts(params?: SearchParams & PaginationParams): Promise<ApiResponse<Product[]>> {
     const queryParams = {
@@ -31,53 +187,62 @@ class ProductApiService {
       ...buildPaginationParams(params || {}),
     };
     
-    return this.client.get<Product[]>(endpoints.products.list, { params: queryParams });
+    const response = await this.client.get<any>(endpoints.products.list, { params: queryParams });
+    return this.transformListResponse(response);
   }
 
   // Get product by ID
   async getProductById(id: string): Promise<ApiResponse<Product>> {
-    return this.client.get<Product>(endpoints.products.byId(id));
+    const response = await this.client.get<any>(endpoints.products.byId(id));
+    return this.transformSingleResponse(response);
   }
 
   // Get product by slug
   async getProductBySlug(slug: string): Promise<ApiResponse<Product>> {
-    return this.client.get<Product>(endpoints.products.bySlug(slug));
+    const response = await this.client.get<any>(endpoints.products.bySlug(slug));
+    return this.transformSingleResponse(response);
   }
 
   // Get featured products
   async getFeaturedProducts(limit?: number): Promise<ApiResponse<Product[]>> {
     const params = limit ? { limit } : {};
-    return this.client.get<Product[]>(endpoints.products.featured, { params });
+    const response = await this.client.get<any>(endpoints.products.featured, { params });
+    return this.transformListResponse(response);
   }
 
   // Get bestselling products
   async getBestsellerProducts(limit?: number): Promise<ApiResponse<Product[]>> {
     const params = limit ? { limit } : {};
-    return this.client.get<Product[]>(endpoints.products.bestsellers, { params });
+    const response = await this.client.get<any>(endpoints.products.bestsellers, { params });
+    return this.transformListResponse(response);
   }
 
   // Get new arrival products
   async getNewArrivals(limit?: number): Promise<ApiResponse<Product[]>> {
     const params = limit ? { limit } : {};
-    return this.client.get<Product[]>(endpoints.products.newArrivals, { params });
+    const response = await this.client.get<any>(endpoints.products.newArrivals, { params });
+    return this.transformListResponse(response);
   }
 
   // Get products on sale
   async getOnSaleProducts(limit?: number): Promise<ApiResponse<Product[]>> {
     const params = limit ? { limit } : {};
-    return this.client.get<Product[]>(endpoints.products.onSale, { params });
+    const response = await this.client.get<any>(endpoints.products.onSale, { params });
+    return this.transformListResponse(response);
   }
 
   // Get related products
   async getRelatedProducts(id: string, limit?: number): Promise<ApiResponse<Product[]>> {
     const params = limit ? { limit } : {};
-    return this.client.get<Product[]>(endpoints.products.related(id), { params });
+    const response = await this.client.get<any>(endpoints.products.related(id), { params });
+    return this.transformListResponse(response);
   }
 
   // Get similar products
   async getSimilarProducts(id: string, limit?: number): Promise<ApiResponse<Product[]>> {
     const params = limit ? { limit } : {};
-    return this.client.get<Product[]>(endpoints.products.similar(id), { params });
+    const response = await this.client.get<any>(endpoints.products.similar(id), { params });
+    return this.transformListResponse(response);
   }
 
   // Search products
@@ -88,7 +253,8 @@ class ProductApiService {
       ...buildPaginationParams(params || {}),
     };
     
-    return this.client.get<Product[]>(endpoints.products.search, { params: searchParams });
+    const response = await this.client.get<any>(endpoints.products.search, { params: searchParams });
+    return this.transformListResponse(response);
   }
 
   // Get products by category
@@ -99,7 +265,8 @@ class ProductApiService {
       ...buildPaginationParams(params || {}),
     };
     
-    return this.client.get<Product[]>(endpoints.products.byCategory(categoryId), { params: queryParams });
+    const response = await this.client.get<any>(endpoints.products.byCategory(categoryId), { params: queryParams });
+    return this.transformListResponse(response);
   }
 
   // Get products by brand
@@ -110,17 +277,20 @@ class ProductApiService {
       ...buildPaginationParams(params || {}),
     };
     
-    return this.client.get<Product[]>(endpoints.products.byBrand(brandId), { params: queryParams });
+    const response = await this.client.get<any>(endpoints.products.byBrand(brandId), { params: queryParams });
+    return this.transformListResponse(response);
   }
 
   // Create product (Admin only)
   async createProduct(data: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>): Promise<ApiResponse<Product>> {
-    return this.client.post<Product>(endpoints.products.create, data);
+    const response = await this.client.post<any>(endpoints.products.create, data);
+    return this.transformSingleResponse(response);
   }
 
   // Update product (Admin only)
   async updateProduct(id: string, data: Partial<Product>): Promise<ApiResponse<Product>> {
-    return this.client.put<Product>(endpoints.products.update(id), data);
+    const response = await this.client.put<any>(endpoints.products.update(id), data);
+    return this.transformSingleResponse(response);
   }
 
   // Delete product (Admin only)
@@ -145,28 +315,49 @@ class ProductApiService {
 
   // Update product stock (Admin only)
   async updateProductStock(id: string, stock: number): Promise<ApiResponse<Product>> {
-    return this.client.patch<Product>(endpoints.products.updateStock(id), { stock });
+    const response = await this.client.patch<any>(endpoints.products.updateStock(id), { stock });
+    return this.transformSingleResponse(response);
   }
 
   // Update product price (Admin only)
   async updateProductPrice(id: string, price: number, salePrice?: number): Promise<ApiResponse<Product>> {
-    return this.client.patch<Product>(endpoints.products.updatePrice(id), { price, salePrice });
+    const response = await this.client.patch<any>(endpoints.products.updatePrice(id), { price, salePrice });
+    return this.transformSingleResponse(response);
   }
 
   // Toggle product status (Admin only)
   async toggleProductStatus(id: string, isActive: boolean): Promise<ApiResponse<Product>> {
-    return this.client.patch<Product>(endpoints.products.toggleStatus(id), { isActive });
+    const response = await this.client.patch<any>(endpoints.products.toggleStatus(id), { isActive });
+    return this.transformSingleResponse(response);
   }
 
   // Get product reviews
   async getProductReviews(id: string, params?: PaginationParams): Promise<ApiResponse<Review[]>> {
     const queryParams = buildPaginationParams(params || {});
-    return this.client.get<Review[]>(endpoints.products.reviews(id), { params: queryParams });
+    const response = await this.client.get<any>(endpoints.products.reviews(id), { params: queryParams });
+    // Reviews might also need transformation if they follow the same pattern
+    if (response && response.data && Array.isArray(response.data.reviews)) {
+        return {
+            success: response.status === 'success',
+            data: response.data.reviews,
+            meta: {
+                total: response.results || 0
+            }
+        };
+    }
+    return response;
   }
 
   // Add product review
   async addProductReview(id: string, review: { rating: number; comment: string; title?: string }): Promise<ApiResponse<Review>> {
-    return this.client.post<Review>(endpoints.products.addReview(id), review);
+    const response = await this.client.post<any>(endpoints.products.addReview(id), review);
+    if (response && response.data && response.data.review) {
+        return {
+            success: response.status === 'success',
+            data: response.data.review
+        };
+    }
+    return response;
   }
 
   // Get product variants

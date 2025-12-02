@@ -200,27 +200,6 @@ const UserMenu: React.FC<UserMenuProps> = ({
     hidden: { opacity: 0, y: 10 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.3 } }
   };
-
-  // If not authenticated, show login button
-  if (!isAuthenticated) {
-    return (
-      <div className={`flex items-center space-x-2 ${className}`}>
-        <Link
-          href="/login"
-          className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
-        >
-          Sign In
-        </Link>
-        <Link
-          href="/register"
-          className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors"
-        >
-          Sign Up
-        </Link>
-      </div>
-    );
-  }
-
   return (
     <div className={`relative ${className}`} data-user-menu>
       {/* User Menu Button */}
@@ -247,7 +226,7 @@ const UserMenu: React.FC<UserMenuProps> = ({
               <UserIcon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
             </div>
           )}
-          
+
           {/* Verification Badge */}
           {user?.isVerified && (
             <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-900 flex items-center justify-center">
@@ -263,8 +242,8 @@ const UserMenu: React.FC<UserMenuProps> = ({
           </div>
         </div>
 
-        <ChevronDownIcon 
-          className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} 
+        <ChevronDownIcon
+          className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
         />
       </motion.button>
 
@@ -279,7 +258,7 @@ const UserMenu: React.FC<UserMenuProps> = ({
             className="absolute right-0 top-full mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 z-50 overflow-hidden"
           >
             {/* User Profile Header */}
-            <motion.div 
+            <motion.div
               variants={sectionVariants}
               className="p-4 bg-gradient-to-r from-primary-50 to-primary-100 dark:from-primary-900/20 dark:to-primary-900/30 border-b border-gray-200 dark:border-gray-700"
             >
@@ -307,7 +286,7 @@ const UserMenu: React.FC<UserMenuProps> = ({
                 </div>
 
                 {/* User Details */}
-                  <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-0">
                   <div className="flex items-center space-x-2 mb-1">
                     <h3 className="text-sm font-semibold text-gray-900 dark:text-white truncate">
                       {user?.name || 'Guest User'}
@@ -401,7 +380,7 @@ const UserMenu: React.FC<UserMenuProps> = ({
             </div>
 
             {/* Logout Section */}
-            <motion.div 
+            <motion.div
               variants={sectionVariants}
               className="p-2 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50"
             >
@@ -417,9 +396,9 @@ const UserMenu: React.FC<UserMenuProps> = ({
             {/* Member Since */}
             <div className="px-4 py-2 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
               <div className="text-center text-xs text-gray-500 dark:text-gray-400">
-                Member since {new Date(user?.memberSince || '').toLocaleDateString('en-US', { 
-                  year: 'numeric', 
-                  month: 'long' 
+                Member since {new Date(user?.memberSince || '').toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'long'
                 })}
               </div>
             </div>

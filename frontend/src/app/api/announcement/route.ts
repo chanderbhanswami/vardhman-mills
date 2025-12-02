@@ -41,7 +41,7 @@ function _validateTypes(): void {
 // CONSTANTS
 // ============================================================================
 
-const BACKEND_API_URL = process.env.NEXT_PUBLIC_BACKEND_API_URL || 'http://localhost:5000/api';
+const BACKEND_API_URL = process.env.NEXT_PUBLIC_BACKEND_API_URL || 'http://localhost:5000/api/v1';
 const API_TIMEOUT = 15000;
 const CACHE_DURATION = 300; // 5 minutes for announcements
 
@@ -877,3 +877,4 @@ export async function OPTIONS(): Promise<NextResponse> {
 
 // Call validation function to use all imported types (satisfies linter)
 if (false) _validateTypes();
+

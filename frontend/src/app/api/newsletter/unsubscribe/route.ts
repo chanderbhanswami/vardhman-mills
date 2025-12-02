@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
     const userAgent = request.headers.get('user-agent') || 'unknown';
 
     // Build backend request
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/newsletter/unsubscribe`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/newsletter/unsubscribe`;
     
     const response = await fetch(backendUrl, {
       method: 'POST',
@@ -314,7 +314,7 @@ export async function GET(request: NextRequest) {
 
     // Build backend URL
     const backendUrl = new URL(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/newsletter/unsubscribe/one-click`
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/newsletter/unsubscribe/one-click`
     );
     backendUrl.searchParams.append('token', token);
 
@@ -478,7 +478,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Build backend request
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/newsletter/delete`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/newsletter/delete`;
     
     const response = await fetch(backendUrl, {
       method: 'DELETE',
@@ -581,3 +581,4 @@ export async function DELETE(request: NextRequest) {
     );
   }
 }
+

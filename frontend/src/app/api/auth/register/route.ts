@@ -157,7 +157,7 @@ export async function POST(request: NextRequest) {
     };
 
     // Build backend URL
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/auth/register`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/auth/register`;
 
     // Prepare headers
     const headers: HeadersInit = {
@@ -273,7 +273,7 @@ export async function POST(request: NextRequest) {
 
     // Track registration event (fire and forget)
     fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/analytics/auth/register`,
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/analytics/auth/register`,
       {
         method: 'POST',
         headers: {
@@ -295,7 +295,7 @@ export async function POST(request: NextRequest) {
     // Send welcome email if not already sent by backend
     if (!responseData.welcomeEmailSent) {
       fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/email/welcome`,
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/email/welcome`,
         {
           method: 'POST',
           headers: {
@@ -397,7 +397,7 @@ export async function GET(request: NextRequest) {
 
     // Build backend URL
     const backendUrl = new URL(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/auth/check-email`
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/auth/check-email`
     );
     backendUrl.searchParams.append('email', email);
 
@@ -465,3 +465,4 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+

@@ -123,7 +123,7 @@ export const HeroControls: React.FC<HeroControlsProps> = ({
 
   const canGoPrevious = useMemo(() => currentSlide > 0, [currentSlide]);
   const canGoNext = useMemo(() => currentSlide < totalSlides - 1, [currentSlide, totalSlides]);
-  
+
   const progressPercentage = useMemo(() => {
     if (progress > 0) return progress;
     return ((currentSlide + 1) / totalSlides) * 100;
@@ -196,7 +196,7 @@ export const HeroControls: React.FC<HeroControlsProps> = ({
           size="sm"
           onClick={handlePrevious}
           disabled={!canGoPrevious}
-          className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm hover:bg-white dark:hover:bg-gray-800"
+          className="bg-background/90 backdrop-blur-sm hover:bg-background"
           aria-label="Previous slide"
         >
           <ChevronLeftIcon className="h-5 w-5" />
@@ -208,7 +208,7 @@ export const HeroControls: React.FC<HeroControlsProps> = ({
           size="sm"
           onClick={handleNext}
           disabled={!canGoNext}
-          className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm hover:bg-white dark:hover:bg-gray-800"
+          className="bg-background/90 backdrop-blur-sm hover:bg-background"
           aria-label="Next slide"
         >
           <ChevronRightIcon className="h-5 w-5" />
@@ -290,7 +290,7 @@ export const HeroControls: React.FC<HeroControlsProps> = ({
           variant="outline"
           size="sm"
           onClick={handleToggleAutoplay}
-          className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm hover:bg-white dark:hover:bg-gray-800"
+          className="bg-background/90 backdrop-blur-sm hover:bg-background"
           aria-label={isPlaying ? 'Pause autoplay' : 'Play autoplay'}
         >
           {isPlaying ? (
@@ -307,7 +307,7 @@ export const HeroControls: React.FC<HeroControlsProps> = ({
           variant="outline"
           size="sm"
           onClick={handleToggleFullscreen}
-          className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm hover:bg-white dark:hover:bg-gray-800"
+          className="bg-background/90 backdrop-blur-sm hover:bg-background"
           aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
         >
           {isFullscreen ? (
@@ -324,7 +324,7 @@ export const HeroControls: React.FC<HeroControlsProps> = ({
           variant="outline"
           size="sm"
           onClick={handleToggleShortcuts}
-          className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm hover:bg-white dark:hover:bg-gray-800"
+          className="bg-background/90 backdrop-blur-sm hover:bg-background"
           aria-label="Show keyboard shortcuts"
         >
           <InformationCircleIcon className="h-4 w-4" />
@@ -436,7 +436,7 @@ export const HeroControls: React.FC<HeroControlsProps> = ({
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl"
+              className="bg-background rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl"
             >
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white">

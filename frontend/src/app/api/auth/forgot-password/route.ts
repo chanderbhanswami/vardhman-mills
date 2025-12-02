@@ -134,7 +134,7 @@ export async function POST(request: NextRequest) {
     };
 
     // Build backend URL
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/auth/forgot-password`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/auth/forgot-password`;
 
     // Prepare headers
     const headers: HeadersInit = {
@@ -234,7 +234,7 @@ export async function POST(request: NextRequest) {
 
     // Track password reset request (fire and forget)
     fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/analytics/auth/password-reset-request`,
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/analytics/auth/password-reset-request`,
       {
         method: 'POST',
         headers: {
@@ -319,7 +319,7 @@ export async function GET(request: NextRequest) {
 
     // Build backend URL
     const backendUrl = new URL(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/auth/verify-reset-token`
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/auth/verify-reset-token`
     );
     backendUrl.searchParams.append('token', token);
 
@@ -383,3 +383,4 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+

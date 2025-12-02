@@ -438,7 +438,7 @@ export const TestimonialSlider: React.FC<TestimonialSliderProps> = ({
             size="sm"
             onClick={goToPrevious}
             disabled={!canGoPrevious}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white shadow-lg"
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-background/90 hover:bg-background shadow-lg"
             aria-label="Previous testimonials"
           >
             <ChevronLeftIcon className="h-5 w-5" />
@@ -451,7 +451,7 @@ export const TestimonialSlider: React.FC<TestimonialSliderProps> = ({
             size="sm"
             onClick={goToNext}
             disabled={!canGoNext}
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white shadow-lg"
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-background/90 hover:bg-background shadow-lg"
             aria-label="Next testimonials"
           >
             <ChevronRightIcon className="h-5 w-5" />

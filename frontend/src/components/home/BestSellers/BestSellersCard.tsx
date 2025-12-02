@@ -172,7 +172,7 @@ export const BestSellersCard: React.FC<BestSellersCardProps> = ({
   const [isWishlisted, setIsWishlisted] = useState(isInWishlist);
   const [addedToCart, setAddedToCart] = useState(isInCart);
   const [showNotification, setShowNotification] = useState<'cart' | 'wishlist' | null>(null);
-  
+
   const cardRef = useRef<HTMLDivElement>(null);
 
   // ============================================================================
@@ -188,8 +188,8 @@ export const BestSellersCard: React.FC<BestSellersCardProps> = ({
   }, [images, currentImageIndex, product.media]);
 
   const hasDiscount = useMemo(() => {
-    return product.pricing?.salePrice && 
-           product.pricing.salePrice.amount < product.pricing.basePrice.amount;
+    return product.pricing?.salePrice &&
+      product.pricing.salePrice.amount < product.pricing.basePrice.amount;
   }, [product.pricing]);
 
   const discountedPrice = useMemo(() => {
@@ -206,7 +206,7 @@ export const BestSellersCard: React.FC<BestSellersCardProps> = ({
 
   const badges = useMemo(() => {
     const badgeList: { text: string; variant: 'default' | 'destructive' | 'secondary'; icon: React.ReactNode }[] = [];
-    
+
     if (product.isBestseller) {
       badgeList.push({ text: 'Best Seller', variant: 'secondary', icon: <FireIcon className="w-3 h-3" /> });
     }
@@ -214,10 +214,10 @@ export const BestSellersCard: React.FC<BestSellersCardProps> = ({
       badgeList.push({ text: 'New', variant: 'default', icon: <SparklesIcon className="w-3 h-3" /> });
     }
     if (hasDiscount && discountPercentage > 0) {
-      badgeList.push({ 
-        text: `-${discountPercentage}%`, 
-        variant: 'destructive', 
-        icon: <TagIcon className="w-3 h-3" /> 
+      badgeList.push({
+        text: `-${discountPercentage}%`,
+        variant: 'destructive',
+        icon: <TagIcon className="w-3 h-3" />
       });
     }
     if (product.inventory?.quantity === 0) {
@@ -225,7 +225,7 @@ export const BestSellersCard: React.FC<BestSellersCardProps> = ({
     } else if (product.inventory?.quantity && product.inventory.quantity < 5) {
       badgeList.push({ text: 'Low Stock', variant: 'destructive', icon: null });
     }
-    
+
     return badgeList;
   }, [product, hasDiscount, discountPercentage]);
 
@@ -262,16 +262,16 @@ export const BestSellersCard: React.FC<BestSellersCardProps> = ({
       e.preventDefault();
       e.stopPropagation();
     }
-    
+
     if (isOutOfStock) return;
-    
+
     setAddedToCart(true);
     setShowNotification('cart');
-    
+
     if (onAddToCart) {
       onAddToCart(product);
     }
-    
+
     setTimeout(() => {
       setShowNotification(null);
     }, 2000);
@@ -280,14 +280,14 @@ export const BestSellersCard: React.FC<BestSellersCardProps> = ({
   const handleWishlistToggle = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     setIsWishlisted((prev) => !prev);
     setShowNotification('wishlist');
-    
+
     if (onWishlistToggle) {
       onWishlistToggle(product);
     }
-    
+
     setTimeout(() => {
       setShowNotification(null);
     }, 2000);
@@ -296,7 +296,7 @@ export const BestSellersCard: React.FC<BestSellersCardProps> = ({
   const handleQuickView = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (onQuickView) {
       onQuickView(product);
     }
@@ -305,7 +305,7 @@ export const BestSellersCard: React.FC<BestSellersCardProps> = ({
   const handleShare = useCallback(async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (onShare) {
       onShare(product);
     } else if (navigator.share) {
@@ -378,13 +378,13 @@ export const BestSellersCard: React.FC<BestSellersCardProps> = ({
               variant="ghost"
               size="sm"
               onClick={handleQuickView}
-              className="bg-white hover:bg-gray-100"
+              className="bg-background hover:bg-accent"
             >
               <EyeIcon className="w-5 h-5" />
             </Button>
           </Tooltip>
         )}
-        
+
         {showWishlist && (
           <Tooltip content={isWishlisted ? 'Remove from Wishlist' : 'Add to Wishlist'}>
             <Button
@@ -401,7 +401,7 @@ export const BestSellersCard: React.FC<BestSellersCardProps> = ({
             </Button>
           </Tooltip>
         )}
-        
+
         {showShare && (
           <Tooltip content="Share">
             <Button
@@ -435,7 +435,7 @@ export const BestSellersCard: React.FC<BestSellersCardProps> = ({
       <>
         <button
           onClick={handlePrevImage}
-          className="absolute left-2 top-1/2 -translate-y-1/2 z-20 bg-white/90 rounded-full p-1 hover:bg-white shadow-lg"
+          className="absolute left-2 top-1/2 -translate-y-1/2 z-20 bg-background/90 rounded-full p-1 hover:bg-background shadow-lg"
           aria-label="Previous image"
         >
           <ChevronLeftIcon className="w-4 h-4" />
@@ -447,7 +447,7 @@ export const BestSellersCard: React.FC<BestSellersCardProps> = ({
         >
           <ChevronRightIcon className="w-4 h-4" />
         </button>
-        
+
         {/* Image indicators */}
         <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-20 flex gap-1">
           {images.map((_, index) => (
@@ -499,7 +499,7 @@ export const BestSellersCard: React.FC<BestSellersCardProps> = ({
 
   const renderPrice = useCallback(() => {
     const basePrice = product.pricing?.basePrice.amount || 0;
-    
+
     return (
       <div className="flex items-center gap-2 flex-wrap">
         <span className="text-xl font-bold text-gray-900 dark:text-white">
@@ -558,10 +558,10 @@ export const BestSellersCard: React.FC<BestSellersCardProps> = ({
               gray: 'bg-gray-500',
               orange: 'bg-orange-500',
             };
-            
+
             const colorName = color.name.toLowerCase();
             const colorClass = colorClasses[colorName as keyof typeof colorClasses] || 'bg-gray-400';
-            
+
             return (
               <Tooltip key={color.id} content={color.name}>
                 <button
@@ -586,10 +586,10 @@ export const BestSellersCard: React.FC<BestSellersCardProps> = ({
   const renderNotification = useCallback(() => {
     if (!showNotification) return null;
 
-    const message = showNotification === 'cart' 
-      ? 'Added to cart!' 
-      : isWishlisted 
-        ? 'Added to wishlist!' 
+    const message = showNotification === 'cart'
+      ? 'Added to cart!'
+      : isWishlisted
+        ? 'Added to wishlist!'
         : 'Removed from wishlist!';
 
     return (
@@ -623,7 +623,7 @@ export const BestSellersCard: React.FC<BestSellersCardProps> = ({
         {/* Image Container */}
         <Link href={`/products/${product.slug}`} className="relative">
           <motion.div
-            className="relative aspect-square overflow-hidden bg-gray-100 dark:bg-gray-800"
+            className="relative aspect-square overflow-hidden bg-muted"
             variants={enableZoom ? imageVariants : undefined}
             initial="initial"
             whileHover={enableZoom ? 'hover' : undefined}
@@ -635,15 +635,15 @@ export const BestSellersCard: React.FC<BestSellersCardProps> = ({
               className="object-cover"
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
             />
-            
+
             {/* Badges */}
             {renderBadges()}
-            
+
             {/* Quick Actions Overlay */}
             <AnimatePresence>
               {renderQuickActions()}
             </AnimatePresence>
-            
+
             {/* Carousel Controls */}
             {renderCarouselControls()}
           </motion.div>
@@ -657,28 +657,28 @@ export const BestSellersCard: React.FC<BestSellersCardProps> = ({
               {product.category.name}
             </span>
           )}
-          
+
           {/* Title */}
           <Link href={`/products/${product.slug}`}>
             <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
               {product.name}
             </h3>
           </Link>
-          
+
           {/* Rating */}
           {renderRating()}
-          
+
           {/* Price */}
           <div className="mt-auto pt-3">
             {renderPrice()}
           </div>
-          
+
           {/* Size Selector (Compact variants only) */}
           {variant === 'detailed' && renderSizeSelector()}
-          
+
           {/* Color Selector (Compact variants only) */}
           {variant === 'detailed' && renderColorSelector()}
-          
+
           {/* Add to Cart Button */}
           {showAddToCart && (
             <Button
@@ -700,7 +700,7 @@ export const BestSellersCard: React.FC<BestSellersCardProps> = ({
             </Button>
           )}
         </CardContent>
-        
+
         {/* Notification */}
         <AnimatePresence>
           {renderNotification()}

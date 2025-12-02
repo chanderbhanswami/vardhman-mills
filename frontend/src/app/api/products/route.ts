@@ -309,7 +309,7 @@ export async function GET(request: NextRequest) {
 
     // Build backend URL
     const backendUrl = new URL(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/products`
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/products`
     );
 
     Object.entries(queryParams).forEach(([key, value]) => {
@@ -486,8 +486,8 @@ export async function POST(request: NextRequest) {
 
     // Collect metadata
     const clientIp = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-                     request.headers.get('x-real-ip') ||
-                     'unknown';
+      request.headers.get('x-real-ip') ||
+      'unknown';
 
     const enrichedProductData = {
       ...productData,
@@ -498,8 +498,8 @@ export async function POST(request: NextRequest) {
     };
 
     // Make request to backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/products`;
-    
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/products`;
+
     const response = await fetch(backendUrl, {
       method: 'POST',
       headers: {
@@ -512,7 +512,7 @@ export async function POST(request: NextRequest) {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      
+
       if (response.status === 403) {
         return NextResponse.json<ErrorResponse>(
           {
@@ -657,8 +657,8 @@ export async function PATCH(request: NextRequest) {
     const operationData = validationResult.data;
 
     // Make request to backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/products/bulk`;
-    
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/products/bulk`;
+
     const response = await fetch(backendUrl, {
       method: 'PATCH',
       headers: {
@@ -671,7 +671,7 @@ export async function PATCH(request: NextRequest) {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      
+
       if (response.status === 403) {
         return NextResponse.json<ErrorResponse>(
           {
@@ -811,10 +811,10 @@ export async function DELETE(request: NextRequest) {
 
     // Make request to backend
     const backendUrl = new URL(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/products/bulk`
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/products/bulk`
     );
     backendUrl.searchParams.append('ids', ids);
-    
+
     const response = await fetch(backendUrl.toString(), {
       method: 'DELETE',
       headers: {
@@ -826,7 +826,7 @@ export async function DELETE(request: NextRequest) {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      
+
       if (response.status === 403) {
         return NextResponse.json<ErrorResponse>(
           {
@@ -886,3 +886,4 @@ export async function DELETE(request: NextRequest) {
     );
   }
 }
+

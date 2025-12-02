@@ -166,7 +166,7 @@ export async function POST(request: NextRequest) {
     };
 
     // Build backend URL
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/auth/verify-otp`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/auth/verify-otp`;
 
     // Prepare headers
     const headers: HeadersInit = {
@@ -315,7 +315,7 @@ export async function POST(request: NextRequest) {
 
     // Track OTP verification event (fire and forget)
     fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/analytics/auth/otp-verified`,
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/analytics/auth/otp-verified`,
       {
         method: 'POST',
         headers: {
@@ -438,7 +438,7 @@ async function handleResendOTP(request: NextRequest, body: unknown): Promise<Nex
     };
 
     // Build backend URL
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/auth/resend-otp`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/auth/resend-otp`;
 
     // Send request to backend
     const response = await fetch(backendUrl, {
@@ -535,7 +535,7 @@ async function handleResendOTP(request: NextRequest, body: unknown): Promise<Nex
 
     // Track OTP resend event (fire and forget)
     fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/analytics/auth/otp-resent`,
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/analytics/auth/otp-resent`,
       {
         method: 'POST',
         headers: {
@@ -667,3 +667,4 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+

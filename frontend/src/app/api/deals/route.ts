@@ -160,7 +160,7 @@ export async function GET(request: NextRequest) {
 
     // Build backend URL with query parameters
     const backendUrl = new URL(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/deals`
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/deals`
     );
 
     Object.entries(queryParams).forEach(([key, value]) => {
@@ -300,7 +300,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
 
     // Make request to backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/deals`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/deals`;
     
     const response = await fetch(backendUrl, {
       method: 'POST',
@@ -403,3 +403,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+

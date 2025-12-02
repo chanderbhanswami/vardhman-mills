@@ -153,7 +153,7 @@ export async function PATCH(request: NextRequest) {
     const accessToken = authHeader?.replace('Bearer ', '') || cookieStore.get('access_token')?.value;
 
     // Build backend request
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/cart/update`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/cart/update`;
     
     const backendRequestBody = {
       itemId,
@@ -350,7 +350,7 @@ export async function POST(request: NextRequest) {
     const accessToken = authHeader?.replace('Bearer ', '') || cookieStore.get('access_token')?.value;
 
     // Make backend request
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/cart/update`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/cart/update`;
     
     const response = await fetch(backendUrl, {
       method: 'POST',
@@ -440,3 +440,4 @@ export async function GET() {
     }
   );
 }
+

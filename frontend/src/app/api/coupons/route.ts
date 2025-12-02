@@ -206,7 +206,7 @@ export async function GET(request: NextRequest) {
 
     // Build backend URL with query parameters
     const backendUrl = new URL(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/coupons`
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/coupons`
     );
 
     Object.entries(queryParams).forEach(([key, value]) => {
@@ -371,7 +371,7 @@ async function validateCoupon(request: NextRequest, body: unknown) {
   const accessToken = authHeader?.replace('Bearer ', '') || cookieStore.get('access_token')?.value;
 
   // Build backend request
-  const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/coupons/validate`;
+  const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/coupons/validate`;
   
   const response = await fetch(backendUrl, {
     method: 'POST',
@@ -501,7 +501,7 @@ async function createCoupon(request: NextRequest, body: unknown) {
   }
 
   // Make request to backend
-  const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/coupons`;
+  const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/coupons`;
   
   const response = await fetch(backendUrl, {
     method: 'POST',
@@ -573,3 +573,4 @@ async function createCoupon(request: NextRequest, body: unknown) {
 
   return NextResponse.json(responseData, { status: 201 });
 }
+

@@ -20,7 +20,7 @@ import type { Product } from '@/types/product.types';
 // CONSTANTS
 // ============================================================================
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_API_URL || 'http://localhost:5000/api';
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_API_URL || 'http://localhost:5000/api/v1';
 const CART_COOKIE_NAME = 'vardhman_cart_id';
 const CART_COOKIE_MAX_AGE = 30 * 24 * 60 * 60; // 30 days
 const CACHE_TIME = 0; // No cache for cart data
@@ -377,3 +377,4 @@ export async function OPTIONS(): Promise<NextResponse> {
     },
   });
 }
+

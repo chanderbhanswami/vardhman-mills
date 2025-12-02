@@ -253,7 +253,7 @@ export async function POST(request: NextRequest) {
     backendFormData.append('metadata', JSON.stringify(metadata));
 
     // Make request to backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/upload/avatar`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/upload/avatar`;
     
     const response = await fetch(backendUrl, {
       method: 'POST',
@@ -375,7 +375,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Make request to backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/upload/avatar`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/upload/avatar`;
     
     const response = await fetch(backendUrl, {
       method: 'DELETE',
@@ -467,7 +467,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Make request to backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/upload/avatar`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/upload/avatar`;
     
     const response = await fetch(backendUrl, {
       method: 'GET',
@@ -528,3 +528,4 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+

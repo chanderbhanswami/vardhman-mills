@@ -193,7 +193,7 @@ export async function GET(request: NextRequest) {
 
     // Build backend URL with query parameters
     const backendUrl = new URL(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/gift-cards`
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/gift-cards`
     );
 
     Object.entries(queryParams).forEach(([key, value]) => {
@@ -371,7 +371,7 @@ async function handlePurchase(request: NextRequest, body: unknown) {
   const authToken = cookieStore.get('auth_token')?.value;
 
   // Build backend request
-  const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/gift-cards/purchase`;
+  const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/gift-cards/purchase`;
   
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
@@ -475,7 +475,7 @@ async function handleCheckBalance(request: NextRequest, body: unknown) {
   const { cardNumber, pin } = validationResult.data;
 
   // Build backend request
-  const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/gift-cards/balance`;
+  const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/gift-cards/balance`;
   
   const response = await fetch(backendUrl, {
     method: 'POST',
@@ -575,7 +575,7 @@ async function handleCreateTemplate(request: NextRequest, body: unknown) {
   }
 
   // Build backend request
-  const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/gift-cards/templates`;
+  const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/gift-cards/templates`;
   
   const response = await fetch(backendUrl, {
     method: 'POST',
@@ -633,3 +633,4 @@ async function handleCreateTemplate(request: NextRequest, body: unknown) {
     { status: 201 }
   );
 }
+

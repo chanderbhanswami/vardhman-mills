@@ -193,7 +193,7 @@ export async function GET(request: NextRequest) {
     queryParams.append('limit', limit.toString());
 
     // Make request to backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/user/notifications?${queryParams.toString()}`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/user/notifications?${queryParams.toString()}`;
     
     const response = await fetch(backendUrl, {
       method: 'GET',
@@ -320,7 +320,7 @@ export async function PATCH(request: NextRequest) {
       }
 
       // Make request to backend
-      const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/user/notifications/preferences`;
+      const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/user/notifications/preferences`;
       
       const response = await fetch(backendUrl, {
         method: 'PATCH',
@@ -386,7 +386,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Make request to backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/user/notifications/read`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/user/notifications/read`;
     
     const response = await fetch(backendUrl, {
       method: 'PATCH',
@@ -502,7 +502,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Make request to backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/user/notifications/device`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/user/notifications/device`;
     
     const response = await fetch(backendUrl, {
       method: 'POST',
@@ -599,7 +599,7 @@ export async function DELETE(request: NextRequest) {
 
     // Check if unregistering device
     if (deviceToken) {
-      const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/user/notifications/device`;
+      const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/user/notifications/device`;
       
       const response = await fetch(backendUrl, {
         method: 'DELETE',
@@ -656,7 +656,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Make request to backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/user/notifications`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/user/notifications`;
     
     const response = await fetch(backendUrl, {
       method: 'DELETE',
@@ -717,3 +717,4 @@ export async function DELETE(request: NextRequest) {
     );
   }
 }
+

@@ -39,7 +39,7 @@ import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Card, CardContent } from '@/components/ui/Card';
 import { cn } from '@/lib/utils/utils';
-import type { ImageAsset } from '@/types/product.types';
+import type { ImageAsset, Category } from '@/types/product.types';
 
 // ============================================================================
 // HELPER FUNCTIONS
@@ -58,7 +58,7 @@ const getImageUrl = (image: string | ImageAsset | undefined): string => {
 // TYPES & INTERFACES
 // ============================================================================
 
-export interface FeaturedCategory {
+export interface FeaturedCategory extends Partial<Category> {
   id: string;
   name: string;
   slug: string;
@@ -174,17 +174,27 @@ export const CategoryShowcase: React.FC<CategoryShowcaseProps> = ({
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+        <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
           {title}
         </h2>
-        <p className="text-lg text-gray-600 max-w-2xl mx-auto">{subtitle}</p>
+        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">{subtitle}</p>
       </motion.div>
     </div>
   );
 
   const renderCategoryCard = (category: FeaturedCategory, index: number) => {
-    const CategoryIcon = category.icon || TagIcon;
-    const badge = category.badge ? badgeConfig[category.badge] : null;
+    const CategoryIcon = (typeof category.icon === 'function' || typeof category.icon === 'object') && category.icon !== null
+      ? category.icon as React.ComponentType<{ className?: string }>
+      : TagIcon;
+
+    let badgeType = category.badge;
+    if (!badgeType) {
+      if (category.isHot) badgeType = 'hot';
+      else if (category.isNew) badgeType = 'new';
+      else if (category.isFeatured) badgeType = 'featured';
+    }
+
+    const badge = badgeType ? badgeConfig[badgeType] : null;
     const BadgeIcon = badge?.icon;
     const isHovered = hoveredCard === category.id;
 
@@ -252,12 +262,12 @@ export const CategoryShowcase: React.FC<CategoryShowcaseProps> = ({
                   'absolute bottom-4 left-4 z-10',
                   'w-12 h-12 rounded-full',
                   'flex items-center justify-center',
-                  'bg-white/90 backdrop-blur-sm shadow-lg',
+                  'bg-background/90 backdrop-blur-sm shadow-lg',
                   'group-hover:scale-110 transition-transform'
                 )}
               >
                 <CategoryIcon
-                  className={cn('w-6 h-6', !category.color && 'text-blue-600')}
+                  className={cn('w-6 h-6', !category.color && 'text-primary')}
                   {...(category.color && {
                     style: { color: category.color },
                   })}
@@ -275,10 +285,10 @@ export const CategoryShowcase: React.FC<CategoryShowcaseProps> = ({
 
             {/* Content Section */}
             <CardContent className="p-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-primary-600 transition-colors">
+              <h3 className="text-xl font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
                 {category.name}
               </h3>
-              <p className="text-gray-600 mb-4 line-clamp-2">
+              <p className="text-muted-foreground mb-4 line-clamp-2">
                 {category.description}
               </p>
 
@@ -288,12 +298,12 @@ export const CategoryShowcase: React.FC<CategoryShowcaseProps> = ({
                   {category.stats.map((stat, i) => (
                     <div
                       key={i}
-                      className="bg-gray-50 rounded-lg p-3 text-center"
+                      className="bg-muted rounded-lg p-3 text-center"
                     >
-                      <div className="text-lg font-bold text-gray-900">
+                      <div className="text-lg font-bold text-foreground">
                         {stat.value}
                       </div>
-                      <div className="text-xs text-gray-600">{stat.label}</div>
+                      <div className="text-xs text-muted-foreground">{stat.label}</div>
                     </div>
                   ))}
                 </div>
@@ -301,7 +311,7 @@ export const CategoryShowcase: React.FC<CategoryShowcaseProps> = ({
 
               {/* CTA Button */}
               <Button
-                className="w-full group-hover:bg-primary-700 transition-colors"
+                className="w-full group-hover:bg-primary/90 transition-colors"
                 onClick={(e) => {
                   e.preventDefault();
                   handleCategoryClick(category);
@@ -415,7 +425,7 @@ export const CategoryShowcase: React.FC<CategoryShowcaseProps> = ({
                 <div className="text-3xl font-bold text-primary-600 mb-2">
                   {featuredCategories.length}+
                 </div>
-                <div className="text-sm text-gray-600">
+                <div className="text-sm text-muted-foreground">
                   Featured Categories
                 </div>
               </CardContent>
@@ -428,7 +438,7 @@ export const CategoryShowcase: React.FC<CategoryShowcaseProps> = ({
                     .toLocaleString()}
                   +
                 </div>
-                <div className="text-sm text-gray-600">Total Products</div>
+                <div className="text-sm text-muted-foreground">Total Products</div>
               </CardContent>
             </Card>
             <Card className="text-center">
@@ -436,7 +446,7 @@ export const CategoryShowcase: React.FC<CategoryShowcaseProps> = ({
                 <div className="text-3xl font-bold text-orange-600 mb-2">
                   100%
                 </div>
-                <div className="text-sm text-gray-600">Quality Assured</div>
+                <div className="text-sm text-muted-foreground">Quality Assured</div>
               </CardContent>
             </Card>
             <Card className="text-center">
@@ -446,7 +456,7 @@ export const CategoryShowcase: React.FC<CategoryShowcaseProps> = ({
                     <StarSolidIcon key={i} className="w-5 h-5 text-yellow-500" />
                   ))}
                 </div>
-                <div className="text-sm text-gray-600">Top Rated</div>
+                <div className="text-sm text-muted-foreground">Top Rated</div>
               </CardContent>
             </Card>
           </motion.div>

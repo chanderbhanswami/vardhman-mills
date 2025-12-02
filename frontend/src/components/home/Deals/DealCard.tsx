@@ -238,7 +238,7 @@ export const DealCard: React.FC<DealCardProps> = ({
               variant="ghost"
               size="sm"
               onClick={handleClick}
-              className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm"
+              className="w-10 h-10 rounded-full bg-background/90 backdrop-blur-sm"
             >
               <EyeIcon className="w-5 h-5" />
             </Button>
@@ -254,7 +254,7 @@ export const DealCard: React.FC<DealCardProps> = ({
       if (!showCountdown) return null;
 
       return (
-        <div className="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
+        <div className="bg-muted p-3 rounded-lg">
           <p className="text-xs text-gray-600 dark:text-gray-400 mb-2 uppercase tracking-wide">
             Deal ends in:
           </p>
@@ -304,7 +304,7 @@ export const DealCard: React.FC<DealCardProps> = ({
         )}
       >
         {/* Image */}
-        <div className="relative h-72 bg-gray-100 dark:bg-gray-700 overflow-hidden">
+        <div className="relative h-72 bg-muted overflow-hidden">
           <Image
             src={product.media?.images?.[0]?.url || '/images/placeholder.jpg'}
             alt={product.name}

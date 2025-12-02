@@ -138,7 +138,7 @@ export async function POST(request: NextRequest) {
     };
 
     // Make request to backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/payment/razorpay/verify`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/payment/razorpay/verify`;
     
     const response = await fetch(backendUrl, {
       method: 'POST',
@@ -312,7 +312,7 @@ export async function GET(request: NextRequest) {
 
     // Build backend URL
     const backendUrl = new URL(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/payment/razorpay/payment-status`
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/payment/razorpay/payment-status`
     );
     backendUrl.searchParams.append('razorpayPaymentId', razorpayPaymentId);
 
@@ -387,3 +387,4 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+

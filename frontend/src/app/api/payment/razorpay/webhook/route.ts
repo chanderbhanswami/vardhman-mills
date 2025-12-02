@@ -215,7 +215,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Forward to backend for processing
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/payment/razorpay/webhook`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/payment/razorpay/webhook`;
     
     const response = await fetch(backendUrl, {
       method: 'POST',
@@ -321,3 +321,4 @@ export async function GET() {
     { status: 200 }
   );
 }
+

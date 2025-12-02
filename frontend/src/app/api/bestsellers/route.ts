@@ -119,7 +119,7 @@ interface ErrorResponse {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    
+
     // Parse and validate query parameters
     const queryParams = BestSellersQuerySchema.safeParse({
       page: searchParams.get('page'),
@@ -175,8 +175,8 @@ export async function GET(request: NextRequest) {
     if (inStock !== undefined) backendParams.append('inStock', inStock.toString());
 
     // Fetch from backend API
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/products/bestsellers?${backendParams}`;
-    
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/bestsellers?${backendParams}`;
+
     const response = await fetch(backendUrl, {
       method: 'GET',
       headers: {
@@ -194,7 +194,7 @@ export async function GET(request: NextRequest) {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      
+
       return NextResponse.json<ErrorResponse>(
         {
           success: false,
@@ -228,11 +228,11 @@ export async function GET(request: NextRequest) {
           ...(category && { category }),
           ...(minPrice !== undefined || maxPrice !== undefined
             ? {
-                priceRange: {
-                  ...(minPrice !== undefined && { min: minPrice }),
-                  ...(maxPrice !== undefined && { max: maxPrice }),
-                },
-              }
+              priceRange: {
+                ...(minPrice !== undefined && { min: minPrice }),
+                ...(maxPrice !== undefined && { max: maxPrice }),
+              },
+            }
             : {}),
           ...(inStock !== undefined && { inStock }),
         },
@@ -247,7 +247,7 @@ export async function GET(request: NextRequest) {
 
     // Set cache headers
     const cacheMaxAge = period === 'daily' ? 3600 : period === 'weekly' ? 7200 : 14400;
-    
+
     return NextResponse.json(transformedResponse, {
       status: 200,
       headers: {
@@ -322,8 +322,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Fetch from backend API with POST
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/products/bestsellers/filter`;
-    
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/bestsellers/filter`;
+
     const response = await fetch(backendUrl, {
       method: 'POST',
       headers: {
@@ -338,7 +338,7 @@ export async function POST(request: NextRequest) {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      
+
       return NextResponse.json<ErrorResponse>(
         {
           success: false,

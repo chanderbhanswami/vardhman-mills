@@ -244,7 +244,7 @@ export async function GET(request: NextRequest) {
 
       // Build backend URL
       const backendUrl = new URL(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/products/search/autocomplete`
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/products/search/autocomplete`
       );
 
       Object.entries(autocompleteParams).forEach(([key, value]) => {
@@ -342,7 +342,7 @@ export async function GET(request: NextRequest) {
 
       // Build backend URL
       const backendUrl = new URL(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/products/search/suggestions`
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/products/search/suggestions`
       );
 
       Object.entries(suggestionsParams).forEach(([key, value]) => {
@@ -439,7 +439,7 @@ export async function GET(request: NextRequest) {
 
     // Build backend URL
     const backendUrl = new URL(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/products/search`
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/products/search`
     );
 
     Object.entries(validatedParams).forEach(([key, value]) => {
@@ -530,7 +530,7 @@ export async function GET(request: NextRequest) {
 
     // Track search (fire and forget)
     fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/analytics/search`,
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/analytics/search`,
       {
         method: 'POST',
         headers: {
@@ -621,7 +621,7 @@ export async function POST(request: NextRequest) {
     const guestId = cookieStore.get('guest_id')?.value;
 
     // Build backend URL
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/products/search`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/products/search`;
 
     // Prepare request body
     const requestBody = {
@@ -740,3 +740,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+

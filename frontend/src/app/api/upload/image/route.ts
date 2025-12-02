@@ -324,7 +324,7 @@ export async function POST(request: NextRequest) {
     backendFormData.append('metadata', JSON.stringify(metadata));
 
     // Make request to backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/upload/image`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/upload/image`;
     
     const headers: HeadersInit = {
       // Don't set Content-Type - browser will set it with boundary for multipart/form-data
@@ -484,7 +484,7 @@ export async function GET(request: NextRequest) {
     queryParams.append('limit', limit.toString());
 
     // Make request to backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/upload/image?${queryParams.toString()}`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/upload/image?${queryParams.toString()}`;
     
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
@@ -599,7 +599,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Make request to backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/upload/image`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/upload/image`;
     
     const response = await fetch(backendUrl, {
       method: 'DELETE',
@@ -658,3 +658,4 @@ export async function DELETE(request: NextRequest) {
     );
   }
 }
+

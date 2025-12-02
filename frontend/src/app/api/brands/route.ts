@@ -186,7 +186,7 @@ export async function GET(request: NextRequest) {
     if (featured !== undefined) backendParams.append('featured', featured.toString());
 
     // Fetch from backend API
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/brands?${backendParams}`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/brands?${backendParams}`;
     
     const response = await fetch(backendUrl, {
       method: 'GET',
@@ -364,7 +364,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Fetch from backend API with POST
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/brands`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/brands`;
     
     const response = await fetch(backendUrl, {
       method: 'POST',
@@ -421,3 +421,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+

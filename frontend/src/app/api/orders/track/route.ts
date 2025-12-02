@@ -166,7 +166,7 @@ export async function GET(request: NextRequest) {
 
     // Build backend URL
     const backendUrl = new URL(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/orders/track`
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/orders/track`
     );
     backendUrl.searchParams.append('orderNumber', orderNumber);
     backendUrl.searchParams.append('email', email);
@@ -283,7 +283,7 @@ export async function POST(request: NextRequest) {
     const trackingData = validationResult.data;
 
     // Make request to backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/orders/track`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/orders/track`;
     
     const response = await fetch(backendUrl, {
       method: 'POST',
@@ -386,3 +386,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+

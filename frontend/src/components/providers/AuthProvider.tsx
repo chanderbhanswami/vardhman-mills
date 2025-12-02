@@ -72,11 +72,11 @@ export interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   isInitialized: boolean;
-  
+
   // Session Management
   session: unknown;
   sessionStatus: 'loading' | 'authenticated' | 'unauthenticated';
-  
+
   // Authentication Methods
   login: (email: string, password: string, rememberMe?: boolean) => Promise<{
     success: boolean;
@@ -92,7 +92,7 @@ export interface AuthContextType {
     requiresVerification?: boolean;
   }>;
   logout: (clearAll?: boolean) => Promise<void>;
-  
+
   // Password & Security
   forgotPassword: (email: string) => Promise<{ success: boolean; error?: string }>;
   resetPassword: (token: string, newPassword: string) => Promise<{ success: boolean; error?: string }>;
@@ -100,38 +100,38 @@ export interface AuthContextType {
   enable2FA: () => Promise<{ success: boolean; qrCode?: string; secret?: string; error?: string }>;
   disable2FA: (code: string) => Promise<{ success: boolean; error?: string }>;
   verify2FA: (code: string) => Promise<{ success: boolean; error?: string }>;
-  
+
   // Account Management
   updateProfile: (updates: Partial<User>) => Promise<{ success: boolean; user?: User; error?: string }>;
   uploadAvatar: (file: File) => Promise<{ success: boolean; avatarUrl?: string; error?: string }>;
   deleteAccount: (password: string) => Promise<{ success: boolean; error?: string }>;
-  
+
   // Address Management
   addAddress: (address: Omit<Address, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => Promise<{ success: boolean; address?: Address; error?: string }>;
   updateAddress: (addressId: string, updates: Partial<Address>) => Promise<{ success: boolean; address?: Address; error?: string }>;
   deleteAddress: (addressId: string) => Promise<{ success: boolean; error?: string }>;
   setDefaultAddress: (addressId: string) => Promise<{ success: boolean; error?: string }>;
-  
+
   // Email & Phone Verification
   sendEmailVerification: () => Promise<{ success: boolean; error?: string }>;
   verifyEmail: (token: string) => Promise<{ success: boolean; error?: string }>;
   sendPhoneVerification: (phone: string) => Promise<{ success: boolean; error?: string }>;
   verifyPhone: (code: string) => Promise<{ success: boolean; error?: string }>;
-  
+
   // Social Auth
   googleSignIn: () => Promise<void>;
   facebookSignIn: () => Promise<void>;
   appleSignIn: () => Promise<void>;
-  
+
   // Account Status
   refreshUser: () => Promise<void>;
   checkAuthStatus: () => Promise<boolean>;
   extendSession: () => Promise<boolean>;
-  
+
   // Guest/Anonymous
   convertGuestToUser: (userData: RegisterData) => Promise<{ success: boolean; user?: User; error?: string }>;
   mergeGuestData: () => Promise<void>;
-  
+
   // Admin Functions (for admin panel)
   impersonateUser: (userId: string) => Promise<{ success: boolean; error?: string }>;
   stopImpersonation: () => Promise<void>;
@@ -173,7 +173,7 @@ export const useAuth = () => {
 // Custom cookie utilities
 const setCookie = (name: string, value: string, days = 7) => {
   if (typeof window === 'undefined') return;
-  
+
   const expires = new Date();
   expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
   document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;SameSite=Strict${process.env.NODE_ENV === 'production' ? ';Secure' : ''}`;
@@ -181,7 +181,7 @@ const setCookie = (name: string, value: string, days = 7) => {
 
 const getCookie = (name: string): string | null => {
   if (typeof window === 'undefined') return null;
-  
+
   const nameEQ = name + "=";
   const ca = document.cookie.split(';');
   for (let i = 0; i < ca.length; i++) {
@@ -231,7 +231,7 @@ const addNotification = (notification: {
     warning: toast,
     info: toast
   }[notification.type];
-  
+
   toastFn(`${notification.title}: ${notification.message}`, {
     duration: notification.duration || 4000
   });
@@ -246,27 +246,26 @@ const AuthProviderInner: React.FC<AuthProviderProps> = ({ children }) => {
   const { data: session, status } = useSession();
   const router = useRouter();
   const pathname = usePathname();
-  
+
   // State
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
-  
+
   // Persistent storage using the proper hook
   const rememberUserStorage = useLocalStorage<boolean>('rememberUser', { defaultValue: false });
   const guestIdStorage = useLocalStorage<string | null>('guestId', { defaultValue: null });
-  
+
   // Refs
   const sessionCheckInterval = useRef<NodeJS.Timeout | null>(null);
   const heartbeatInterval = useRef<NodeJS.Timeout | null>(null);
 
   // Configuration
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
   const SESSION_CHECK_INTERVAL = 5 * 60 * 1000; // 5 minutes
   const HEARTBEAT_INTERVAL = 2 * 60 * 1000; // 2 minutes
   const ENCRYPTION_KEY = process.env.NEXT_PUBLIC_ENCRYPTION_KEY || 'vardhman-mills-2024';
 
-  // Utility Functions
   const encryptData = useCallback((data: unknown): string => {
     return CryptoJS.AES.encrypt(JSON.stringify(data), ENCRYPTION_KEY).toString();
   }, [ENCRYPTION_KEY]);
@@ -298,7 +297,7 @@ const AuthProviderInner: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (error) {
       const axiosError = error as AxiosError<{ message?: string }>;
       logger.error('API Request failed:', axiosError);
-      
+
       return {
         success: false,
         error: axiosError.response?.data?.message || axiosError.message || 'An error occurred'
@@ -310,7 +309,7 @@ const AuthProviderInner: React.FC<AuthProviderProps> = ({ children }) => {
   const refreshUser = useCallback(async () => {
     try {
       const result = await apiRequest('/auth/me');
-      
+
       if (result.success) {
         setUser(result.data as User);
       }
@@ -331,13 +330,13 @@ const AuthProviderInner: React.FC<AuthProviderProps> = ({ children }) => {
   const extendSession = useCallback(async (): Promise<boolean> => {
     try {
       const result = await apiRequest('/auth/extend-session', { method: 'POST' });
-      
+
       if (result.success) {
         const { token } = result.data as { token: string };
         setCookie('auth_token', token, rememberUserStorage.value ? 30 : 1);
         return true;
       }
-      
+
       return false;
     } catch {
       return false;
@@ -361,7 +360,7 @@ const AuthProviderInner: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (email: string, password: string, rememberMe = false) => {
     try {
       setIsLoading(true);
-      
+
       const result = await apiRequest('/auth/login', {
         method: 'POST',
         data: { email, password, rememberMe }
@@ -374,11 +373,11 @@ const AuthProviderInner: React.FC<AuthProviderProps> = ({ children }) => {
           requires2FA?: boolean;
           requiresVerification?: boolean;
         };
-        
+
         if (requires2FA) {
           return { success: true, requires2FA: true };
         }
-        
+
         if (requiresVerification) {
           return { success: true, requiresVerification: true };
         }
@@ -391,7 +390,7 @@ const AuthProviderInner: React.FC<AuthProviderProps> = ({ children }) => {
         }
 
         setUser(userData);
-        
+
         // Merge guest data if exists
         if (guestIdStorage.value) {
           await mergeGuestData();
@@ -399,7 +398,7 @@ const AuthProviderInner: React.FC<AuthProviderProps> = ({ children }) => {
 
         toast.success(`Welcome back, ${userData.firstName}!`);
         logger.info('User logged in successfully:', userData.email);
-        
+
         return { success: true, user: userData };
       }
 
@@ -415,7 +414,7 @@ const AuthProviderInner: React.FC<AuthProviderProps> = ({ children }) => {
   const register = async (userData: RegisterData) => {
     try {
       setIsLoading(true);
-      
+
       const result = await apiRequest('/auth/register', {
         method: 'POST',
         data: userData
@@ -427,7 +426,7 @@ const AuthProviderInner: React.FC<AuthProviderProps> = ({ children }) => {
           token: string;
           requiresVerification?: boolean;
         };
-        
+
         if (requiresVerification) {
           toast.success('Registration successful! Please check your email to verify your account.');
           return { success: true, requiresVerification: true };
@@ -436,7 +435,7 @@ const AuthProviderInner: React.FC<AuthProviderProps> = ({ children }) => {
         // Auto-login after registration
         setCookie('auth_token', token, 7);
         setUser(newUser);
-        
+
         // Merge guest data if exists
         if (guestIdStorage.value) {
           await mergeGuestData();
@@ -444,7 +443,7 @@ const AuthProviderInner: React.FC<AuthProviderProps> = ({ children }) => {
 
         toast.success(`Welcome to Vardhman Mills, ${newUser.firstName}!`);
         logger.info('User registered successfully:', newUser.email);
-        
+
         return { success: true, user: newUser };
       }
 
@@ -460,7 +459,7 @@ const AuthProviderInner: React.FC<AuthProviderProps> = ({ children }) => {
   const logout = useCallback(async (clearAll = false) => {
     try {
       setIsLoading(true);
-      
+
       // Call backend logout
       if (user) {
         await apiRequest('/auth/logout', { method: 'POST' });
@@ -468,14 +467,14 @@ const AuthProviderInner: React.FC<AuthProviderProps> = ({ children }) => {
 
       // Clear NextAuth session
       await signOut({ redirect: false });
-      
+
       // Clear local state
       setUser(null);
-      
+
       // Clear cookies and storage
       deleteCookie('auth_token');
       deleteCookie('user_data');
-      
+
       if (clearAll) {
         rememberUserStorage.setValue(false);
         localStorage.clear();
@@ -492,7 +491,7 @@ const AuthProviderInner: React.FC<AuthProviderProps> = ({ children }) => {
 
       toast.success('Logged out successfully');
       logger.info('User logged out');
-      
+
       // Redirect to login page if on protected route
       const protectedPaths = ['/account', '/orders', '/wishlist', '/checkout'];
       if (pathname && protectedPaths.some(path => pathname.startsWith(path))) {
@@ -904,10 +903,10 @@ const AuthProviderInner: React.FC<AuthProviderProps> = ({ children }) => {
         const { user: newUser, token } = result.data as { user: User; token: string };
         setCookie('auth_token', token, 7);
         setUser(newUser);
-        
+
         // Clear guest data
         guestIdStorage.remove();
-        
+
         toast.success(`Welcome to Vardhman Mills, ${newUser.firstName}!`);
         return { success: true, user: newUser };
       }
@@ -948,7 +947,7 @@ const AuthProviderInner: React.FC<AuthProviderProps> = ({ children }) => {
         setCookie('auth_token', token);
         setCookie('impersonation_data', encryptData({ originalUserId: user?.id }));
         setUser(impersonatedUser);
-        
+
         addNotification({
           type: 'info',
           title: 'Impersonation Active',
@@ -961,7 +960,7 @@ const AuthProviderInner: React.FC<AuthProviderProps> = ({ children }) => {
             }
           ]
         });
-        
+
         return { success: true };
       }
 
@@ -985,7 +984,7 @@ const AuthProviderInner: React.FC<AuthProviderProps> = ({ children }) => {
       if (result.success) {
         deleteCookie('impersonation_data');
         await refreshUser();
-        
+
         addNotification({
           type: 'success',
           title: 'Impersonation Stopped',
@@ -1077,16 +1076,16 @@ const AuthProviderInner: React.FC<AuthProviderProps> = ({ children }) => {
     isAuthenticated: !!user,
     isLoading,
     isInitialized,
-    
+
     // Session Management
     session,
     sessionStatus: status,
-    
+
     // Authentication Methods
     login,
     register,
     logout,
-    
+
     // Password & Security
     forgotPassword,
     resetPassword,
@@ -1094,38 +1093,38 @@ const AuthProviderInner: React.FC<AuthProviderProps> = ({ children }) => {
     enable2FA,
     disable2FA,
     verify2FA,
-    
+
     // Account Management
     updateProfile,
     uploadAvatar,
     deleteAccount,
-    
+
     // Address Management
     addAddress,
     updateAddress,
     deleteAddress,
     setDefaultAddress,
-    
+
     // Email & Phone Verification
     sendEmailVerification,
     verifyEmail,
     sendPhoneVerification,
     verifyPhone,
-    
+
     // Social Auth
     googleSignIn,
     facebookSignIn,
     appleSignIn,
-    
+
     // Account Status
     refreshUser,
     checkAuthStatus,
     extendSession,
-    
+
     // Guest/Anonymous
     convertGuestToUser,
     mergeGuestData,
-    
+
     // Admin Functions
     impersonateUser,
     stopImpersonation,

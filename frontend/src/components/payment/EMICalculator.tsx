@@ -413,9 +413,9 @@ const EMIOptionCard: React.FC<EMIOptionCardProps> = ({
         {/* Terms Link */}
         {option.terms && (
           <p className="text-xs text-gray-500">
-            <a href="#" className="text-primary-600 hover:underline">
+            <button type="button" className="text-primary hover:underline">
               View terms and conditions
-            </a>
+            </button>
           </p>
         )}
       </CardContent>

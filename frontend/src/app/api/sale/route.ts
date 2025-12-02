@@ -256,7 +256,7 @@ export async function GET(request: NextRequest) {
 
     // Build backend URL with query parameters
     const backendUrl = new URL(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/products/sale`
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/products/sale`
     );
 
     Object.entries(queryParams).forEach(([key, value]) => {
@@ -439,7 +439,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Make request to backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/products/sale`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/products/sale`;
     
     const response = await fetch(backendUrl, {
       method: 'POST',
@@ -574,7 +574,7 @@ export async function DELETE(request: NextRequest) {
 
     // Make request to backend
     const backendUrl = new URL(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/products/sale`
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/products/sale`
     );
     backendUrl.searchParams.append('productIds', productIdsParam);
     
@@ -649,3 +649,4 @@ export async function DELETE(request: NextRequest) {
     );
   }
 }
+

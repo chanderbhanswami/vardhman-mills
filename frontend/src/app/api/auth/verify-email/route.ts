@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
     };
 
     // Build backend URL
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/auth/verify-email`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/auth/verify-email`;
 
     // Prepare headers
     const headers: HeadersInit = {
@@ -251,7 +251,7 @@ export async function POST(request: NextRequest) {
 
     // Track email verification event (fire and forget)
     fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/analytics/auth/email-verified`,
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/analytics/auth/email-verified`,
       {
         method: 'POST',
         headers: {
@@ -269,7 +269,7 @@ export async function POST(request: NextRequest) {
 
     // Send welcome/confirmation email
     fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/email/email-verified`,
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/email/email-verified`,
       {
         method: 'POST',
         headers: {
@@ -388,7 +388,7 @@ async function handleResendVerification(request: NextRequest, body: unknown): Pr
     };
 
     // Build backend URL
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/auth/resend-verification`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/auth/resend-verification`;
 
     // Send request to backend
     const response = await fetch(backendUrl, {
@@ -528,7 +528,7 @@ export async function GET(request: NextRequest) {
 
     // Build backend URL
     const backendUrl = new URL(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/auth/validate-verification-token`
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/auth/validate-verification-token`
     );
     backendUrl.searchParams.append('token', token);
 
@@ -598,3 +598,4 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+

@@ -21,7 +21,7 @@ declare module 'axios' {
 }
 
 // API configuration
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
 
 // Create axios instance
 const apiClient = axios.create({
@@ -138,3 +138,4 @@ const apiMiddleware: Middleware<object, RootState> = (store) => (next) => (actio
 // Export API client for use in services
 export { apiClient };
 export default apiMiddleware;
+

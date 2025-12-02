@@ -294,7 +294,7 @@ export async function GET(request: NextRequest) {
 
     // Build backend URL
     const backendUrl = new URL(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/products/reviews`
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/products/reviews`
     );
 
     Object.entries(queryParams).forEach(([key, value]) => {
@@ -448,7 +448,7 @@ export async function POST(request: NextRequest) {
 
       const voteData = validationResult.data;
 
-      const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/products/reviews/${voteData.reviewId}/vote`;
+      const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/products/reviews/${voteData.reviewId}/vote`;
       
       const response = await fetch(backendUrl, {
         method: 'POST',
@@ -511,7 +511,7 @@ export async function POST(request: NextRequest) {
 
       const reportData = validationResult.data;
 
-      const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/products/reviews/${reportData.reviewId}/report`;
+      const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/products/reviews/${reportData.reviewId}/report`;
       
       const response = await fetch(backendUrl, {
         method: 'POST',
@@ -571,7 +571,7 @@ export async function POST(request: NextRequest) {
 
       const replyData = validationResult.data;
 
-      const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/products/reviews/${replyData.reviewId}/reply`;
+      const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/products/reviews/${replyData.reviewId}/reply`;
       
       const response = await fetch(backendUrl, {
         method: 'POST',
@@ -644,7 +644,7 @@ export async function POST(request: NextRequest) {
         },
       };
 
-      const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/products/reviews`;
+      const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/products/reviews`;
       
       const response = await fetch(backendUrl, {
         method: 'POST',
@@ -800,7 +800,7 @@ export async function PATCH(request: NextRequest) {
 
       const moderationData = validationResult.data;
 
-      const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/products/reviews/${moderationData.reviewId}/moderate`;
+      const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/products/reviews/${moderationData.reviewId}/moderate`;
       
       const response = await fetch(backendUrl, {
         method: 'PATCH',
@@ -876,7 +876,7 @@ export async function PATCH(request: NextRequest) {
 
       const updateData = validationResult.data;
 
-      const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/products/reviews/${updateData.reviewId}`;
+      const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/products/reviews/${updateData.reviewId}`;
       
       const response = await fetch(backendUrl, {
         method: 'PATCH',
@@ -1010,7 +1010,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/products/reviews/${reviewId}`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/products/reviews/${reviewId}`;
     
     const response = await fetch(backendUrl, {
       method: 'DELETE',
@@ -1093,3 +1093,4 @@ export async function DELETE(request: NextRequest) {
     );
   }
 }
+
