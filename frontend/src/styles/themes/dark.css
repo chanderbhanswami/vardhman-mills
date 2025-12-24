@@ -828,7 +828,7 @@
 }
 
 /* Dark theme media queries */
-@media (prefers-color-scheme: dark) {
+@media (max-width: 0px) /* (prefers-color-scheme: dark) disabled */ {
   :root {
     color-scheme: dark;
   }

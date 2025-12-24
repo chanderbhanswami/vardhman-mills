@@ -3,7 +3,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { 
+import {
   CreditCardIcon,
   BanknotesIcon,
   DevicePhoneMobileIcon,
@@ -100,8 +100,8 @@ const PaymentMethods: React.FC<PaymentMethodsProps> = ({
 
   const itemVariants = {
     hidden: { opacity: 0, scale: 0.8 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       scale: 1,
       transition: { duration: 0.3 }
     },
@@ -116,7 +116,7 @@ const PaymentMethods: React.FC<PaymentMethodsProps> = ({
     return (
       <div className={`${className}`}>
         {showTitle && (
-          <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
+          <h4 className="text-sm font-semibold text-white mb-3">
             Payment Methods
           </h4>
         )}
@@ -124,7 +124,7 @@ const PaymentMethods: React.FC<PaymentMethodsProps> = ({
           {paymentMethods.slice(0, 4).map((method) => (
             <div
               key={method.name}
-              className="flex items-center justify-center w-12 h-8 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md"
+              className="flex items-center justify-center w-12 h-8 bg-gray-800 border border-gray-700 rounded-md"
               title={method.name}
             >
               {method.icon ? (
@@ -136,7 +136,7 @@ const PaymentMethods: React.FC<PaymentMethodsProps> = ({
                   className="object-contain"
                 />
               ) : method.iconComponent ? (
-                <method.iconComponent className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                <method.iconComponent className="w-4 h-4 text-gray-400" />
               ) : null}
             </div>
           ))}
@@ -160,9 +160,9 @@ const PaymentMethods: React.FC<PaymentMethodsProps> = ({
             whileHover="hover"
             className={`
               relative flex items-center justify-center w-14 h-10 
-              bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 
+              bg-gray-800 border border-gray-700 
               rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200
-              ${method.popular ? 'ring-1 ring-blue-200 dark:ring-blue-800' : ''}
+              ${method.popular ? 'ring-1 ring-blue-800' : ''}
             `}
             title={method.name}
           >
@@ -175,13 +175,13 @@ const PaymentMethods: React.FC<PaymentMethodsProps> = ({
                 className="object-contain"
               />
             ) : method.iconComponent ? (
-              <method.iconComponent className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+              <method.iconComponent className="w-5 h-5 text-gray-400" />
             ) : null}
-            
+
             {method.popular && (
               <div className="absolute -top-1 -right-1 w-2 h-2 bg-blue-500 rounded-full" />
             )}
-            
+
             {method.secure && (
               <div className="absolute -bottom-1 -right-1">
                 <ShieldCheckIcon className="w-3 h-3 text-green-500" />
@@ -196,11 +196,11 @@ const PaymentMethods: React.FC<PaymentMethodsProps> = ({
   return (
     <div className={`${className}`}>
       {showTitle && (
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">
+        <h3 className="text-lg font-semibold text-white mb-6">
           Accepted Payment Methods
         </h3>
       )}
-      
+
       <motion.div
         className="space-y-6"
         variants={containerVariants}
@@ -216,9 +216,9 @@ const PaymentMethods: React.FC<PaymentMethodsProps> = ({
               whileHover="hover"
               className={`
                 relative flex items-center justify-center h-12 
-                bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 
+                bg-gray-800 border border-gray-700 
                 rounded-lg shadow-sm hover:shadow-md transition-all duration-200
-                ${method.popular ? 'ring-2 ring-blue-200 dark:ring-blue-800' : ''}
+                ${method.popular ? 'ring-2 ring-blue-800' : ''}
               `}
               title={method.name}
             >
@@ -231,9 +231,9 @@ const PaymentMethods: React.FC<PaymentMethodsProps> = ({
                   className="object-contain"
                 />
               ) : method.iconComponent ? (
-                <method.iconComponent className="w-6 h-6 text-gray-600 dark:text-gray-400" />
+                <method.iconComponent className="w-6 h-6 text-gray-400" />
               ) : null}
-              
+
               {method.popular && (
                 <div className="absolute -top-1 -right-1 px-1 py-0.5 text-xs font-bold text-white bg-blue-500 rounded-full">
                   ★
@@ -245,42 +245,42 @@ const PaymentMethods: React.FC<PaymentMethodsProps> = ({
 
         {/* Payment Categories */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-            <CreditCardIcon className="w-8 h-8 text-blue-600 dark:text-blue-400 mx-auto mb-2" />
-            <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-100 mb-1">
+          <div className="text-center p-4 bg-blue-900/20 rounded-lg">
+            <CreditCardIcon className="w-8 h-8 text-blue-400 mx-auto mb-2" />
+            <h4 className="text-sm font-semibold text-blue-100 mb-1">
               Credit & Debit Cards
             </h4>
-            <p className="text-xs text-blue-700 dark:text-blue-300">
+            <p className="text-xs text-blue-300 font-medium">
               All major cards accepted
             </p>
           </div>
-          
-          <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-            <DevicePhoneMobileIcon className="w-8 h-8 text-green-600 dark:text-green-400 mx-auto mb-2" />
-            <h4 className="text-sm font-semibold text-green-900 dark:text-green-100 mb-1">
+
+          <div className="text-center p-4 bg-green-900/20 rounded-lg">
+            <DevicePhoneMobileIcon className="w-8 h-8 text-green-400 mx-auto mb-2" />
+            <h4 className="text-sm font-semibold text-green-100 mb-1">
               Digital Wallets
             </h4>
-            <p className="text-xs text-green-700 dark:text-green-300">
+            <p className="text-xs text-green-300 font-medium">
               UPI, PayPal, Razorpay
             </p>
           </div>
-          
-          <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-            <BanknotesIcon className="w-8 h-8 text-purple-600 dark:text-purple-400 mx-auto mb-2" />
-            <h4 className="text-sm font-semibold text-purple-900 dark:text-purple-100 mb-1">
+
+          <div className="text-center p-4 bg-purple-900/20 rounded-lg">
+            <BanknotesIcon className="w-8 h-8 text-purple-400 mx-auto mb-2" />
+            <h4 className="text-sm font-semibold text-purple-100 mb-1">
               Bank Transfer
             </h4>
-            <p className="text-xs text-purple-700 dark:text-purple-300">
+            <p className="text-xs text-purple-300 font-medium">
               Net banking & RTGS
             </p>
           </div>
-          
-          <div className="text-center p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
-            <ShieldCheckIcon className="w-8 h-8 text-orange-600 dark:text-orange-400 mx-auto mb-2" />
-            <h4 className="text-sm font-semibold text-orange-900 dark:text-orange-100 mb-1">
+
+          <div className="text-center p-4 bg-orange-900/20 rounded-lg">
+            <ShieldCheckIcon className="w-8 h-8 text-orange-400 mx-auto mb-2" />
+            <h4 className="text-sm font-semibold text-orange-100 mb-1">
               Secure Payments
             </h4>
-            <p className="text-xs text-orange-700 dark:text-orange-300">
+            <p className="text-xs text-orange-300 font-medium">
               256-bit SSL encryption
             </p>
           </div>
@@ -288,13 +288,13 @@ const PaymentMethods: React.FC<PaymentMethodsProps> = ({
 
         {/* Security Badge */}
         {showSecurityBadge && (
-          <div className="flex items-center justify-center p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
+          <div className="flex items-center justify-center p-4 bg-gray-800 border border-gray-700 rounded-lg shadow-sm">
             <ShieldCheckIcon className="w-6 h-6 text-green-500 mr-3" />
             <div>
-              <h4 className="text-sm font-semibold text-gray-900 dark:text-white">
+              <h4 className="text-sm font-semibold text-white">
                 100% Secure Payments
               </h4>
-              <p className="text-xs text-gray-600 dark:text-gray-400">
+              <p className="text-xs text-gray-400 font-medium">
                 Your payment information is encrypted and secure
               </p>
             </div>

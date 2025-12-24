@@ -6,7 +6,7 @@
 
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useToast } from './useToast';
 import type { Product } from '@/types';
 
@@ -33,24 +33,57 @@ export interface UseWishlistReturn {
 export function useWishlist(): UseWishlistReturn {
   const [items, setItems] = useState<WishlistItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const ignoreNextUpdate = useRef(false);
   const { toast } = useToast();
 
-  // Load wishlist from localStorage on mount
+  // Load wishlist from localStorage on mount and listen for updates
   useEffect(() => {
-    const savedWishlist = localStorage.getItem('wishlist');
-    if (savedWishlist) {
-      try {
-        setItems(JSON.parse(savedWishlist));
-      } catch (error) {
-        console.error('Failed to load wishlist:', error);
+    const loadWishlist = () => {
+      const savedWishlist = localStorage.getItem('vardhman_wishlist');
+      if (savedWishlist) {
+        try {
+          // Prevent loop: do not trigger save/dispatch when loading from storage
+          ignoreNextUpdate.current = true;
+          setItems(JSON.parse(savedWishlist));
+        } catch (error) {
+          console.error('Failed to load wishlist:', error);
+        }
       }
-    }
+      setIsInitialized(true);
+    };
+
+    loadWishlist();
+
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === 'vardhman_wishlist') {
+        loadWishlist();
+      }
+    };
+
+    window.addEventListener('storage', handleStorage);
+    // Custom event for same-tab sync
+    window.addEventListener('vardhman_wishlist_updated', loadWishlist);
+
+    return () => {
+      window.removeEventListener('storage', handleStorage);
+      window.removeEventListener('vardhman_wishlist_updated', loadWishlist);
+    };
   }, []);
 
   // Save wishlist to localStorage whenever it changes
   useEffect(() => {
-    localStorage.setItem('wishlist', JSON.stringify(items));
-  }, [items]);
+    if (!isInitialized) return;
+
+    // If update came from storage/event, don't save back or dispatch
+    if (ignoreNextUpdate.current) {
+      ignoreNextUpdate.current = false;
+      return;
+    }
+
+    localStorage.setItem('vardhman_wishlist', JSON.stringify(items));
+    window.dispatchEvent(new Event('vardhman_wishlist_updated'));
+  }, [items, isInitialized]);
 
   const addItem = useCallback(async (product: Product) => {
     setIsLoading(true);
@@ -96,7 +129,7 @@ export function useWishlist(): UseWishlistReturn {
     try {
       await new Promise(resolve => setTimeout(resolve, 300));
       setItems(prev => prev.filter(item => item.id !== itemId));
-      
+
       toast({
         title: 'Removed from wishlist',
         description: 'Item has been removed from your wishlist',
@@ -119,7 +152,7 @@ export function useWishlist(): UseWishlistReturn {
     try {
       await new Promise(resolve => setTimeout(resolve, 300));
       setItems([]);
-      
+
       toast({
         title: 'Wishlist cleared',
         description: 'All items have been removed from your wishlist',
@@ -143,7 +176,7 @@ export function useWishlist(): UseWishlistReturn {
 
   const toggleWishlist = useCallback(async (product: Product) => {
     const existingItem = items.find(item => item.productId === product.id);
-    
+
     if (existingItem) {
       await removeItem(existingItem.id);
     } else {

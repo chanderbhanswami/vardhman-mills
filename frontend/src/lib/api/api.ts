@@ -43,7 +43,7 @@ interface CheckoutFormData {
 }
 import { toast } from 'react-hot-toast';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5000/api/v1';
 
 class ApiClient {
   private client: AxiosInstance;
@@ -106,7 +106,7 @@ class ApiClient {
       },
       (error) => {
         const message = error.response?.data?.message || error.message || 'Something went wrong';
-        
+
         // Handle authentication errors
         if (error.response?.status === 401) {
           if (typeof window !== 'undefined') {
@@ -178,7 +178,7 @@ class ApiClient {
 
   // Auth methods
   async login(email: string, password: string) {
-    const response = await this.post<{ token: string }>('/api/v1/auth/login', { email, password });
+    const response = await this.post<{ token: string }>('/auth/login', { email, password });
     if (response.data?.token) {
       this.setToken(response.data.token);
     }
@@ -186,52 +186,58 @@ class ApiClient {
   }
 
   async register(userData: RegisterFormData) {
-    return this.post('/api/v1/auth/register', userData);
+    return this.post('/auth/register', userData);
   }
 
   // Product methods
   async getProducts(params?: Record<string, string>) {
     const queryString = params ? `?${new URLSearchParams(params)}` : '';
-    return this.get(`/api/v1/products${queryString}`);
+    return this.get(`/products${queryString}`);
   }
 
   async getProduct(id: string) {
-    return this.get(`/api/v1/products/${id}`);
+    return this.get(`/products/${id}`);
   }
 
   async getFeaturedProducts() {
-    return this.get('/api/v1/products/featured');
+    return this.get('/products/featured');
   }
 
   // Category methods
   async getCategories() {
-    return this.get('/api/v1/categories');
+    return this.get('/categories');
   }
 
   async getCategory(slug: string) {
-    return this.get(`/api/v1/categories/${slug}`);
+    return this.get(`/categories/${slug}`);
+  }
+
+  // Brand methods
+  async getBrands(params?: Record<string, string>) {
+    const queryString = params ? `?${new URLSearchParams(params)}` : '';
+    return this.get(`/brands${queryString}`);
   }
 
   // User methods
   async getUserProfile() {
-    return this.get('/api/v1/users/me');
+    return this.get('/users/me');
   }
 
   async updateProfile(userData: Partial<User>) {
-    return this.patch('/api/v1/users/me', userData);
+    return this.patch('/users/me', userData);
   }
 
   // Order methods
   async getUserOrders() {
-    return this.get('/api/v1/orders/my/orders');
+    return this.get('/orders/my/orders');
   }
 
   async createOrder(orderData: CheckoutFormData) {
-    return this.post('/api/v1/orders', orderData);
+    return this.post('/orders', orderData);
   }
 
   async getOrder(id: string) {
-    return this.get(`/api/v1/orders/${id}`);
+    return this.get(`/orders/${id}`);
   }
 }
 
@@ -251,7 +257,7 @@ export const endpoints = {
     google: '/auth/google',
     facebook: '/auth/facebook',
   },
-  
+
   // Users
   users: {
     me: '/users/me',
@@ -292,21 +298,21 @@ export const endpoints = {
     getStatus: (orderId: string) => `/payments/${orderId}/status`,
   },
   reviews: {
-    getByProduct: (productId: string) => `/api/v1/products/${productId}/reviews`,
-    create: '/api/v1/reviews',
-    update: (id: string) => `/api/v1/reviews/${id}`,
-    delete: (id: string) => `/api/v1/reviews/${id}`,
+    getByProduct: (productId: string) => `/products/${productId}/reviews`,
+    create: '/reviews',
+    update: (id: string) => `/reviews/${id}`,
+    delete: (id: string) => `/reviews/${id}`,
   },
   wishlist: {
-    list: '/api/v1/wishlist',
-    add: '/api/v1/wishlist',
-    remove: (id: string) => `/api/v1/wishlist/${id}`,
+    list: '/wishlist',
+    add: '/wishlist',
+    remove: (id: string) => `/wishlist/${id}`,
   },
   cart: {
-    list: '/api/v1/cart',
-    add: '/api/v1/cart',
-    update: (id: string) => `/api/v1/cart/${id}`,
-    remove: (id: string) => `/api/v1/cart/${id}`,
-    clear: '/api/v1/cart/clear',
+    list: '/cart',
+    add: '/cart',
+    update: (id: string) => `/cart/${id}`,
+    remove: (id: string) => `/cart/${id}`,
+    clear: '/cart/clear',
   },
 };

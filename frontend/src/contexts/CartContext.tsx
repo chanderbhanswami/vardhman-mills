@@ -81,23 +81,26 @@ interface CartContextType {
   removeItem: (id: string) => Promise<void>;
   updateQuantity: (id: string, quantity: number) => Promise<void>;
   clearCart: () => Promise<void>;
-  
+
   // Cart operations
   getItem: (productId: string, variantId?: string) => CartItem | undefined;
+  getItemByProductId: (productId: string) => CartItem | undefined;
+  hasItem: (productId: string) => boolean;
+  getItemQuantity: (productId: string) => number;
   getItemCount: () => number;
   getTotalQuantity: () => number;
   getSubtotal: () => number;
   getTotal: () => number;
   isEmpty: () => boolean;
-  
+
   // Coupon operations
   applyCoupon: (code: string) => Promise<void>;
   removeCoupon: () => void;
-  
+
   // Shipping operations
   setShippingMethod: (method: string) => void;
   setGiftWrap: (enabled: boolean, price?: number) => void;
-  
+
   // Utility operations
   validateStock: () => Promise<boolean>;
   calculateEstimatedDelivery: () => string;
@@ -132,12 +135,12 @@ const calculateSummary = (items: CartItem[], couponDiscount = 0, giftWrapPrice =
     const itemSavings = item.originalPrice ? (item.originalPrice - item.price) * item.quantity : 0;
     return sum + itemSavings;
   }, 0);
-  
+
   const totalDiscount = itemDiscount + couponDiscount;
   const tax = subtotal * 0.18; // 18% GST
   const shipping = subtotal > 500 ? 0 : 99; // Free shipping above ₹500
   const total = subtotal - couponDiscount + tax + shipping + giftWrapPrice;
-  
+
   return {
     itemCount,
     totalQuantity,
@@ -159,29 +162,29 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
   switch (action.type) {
     case 'SET_LOADING':
       return { ...state, loading: action.payload };
-    
+
     case 'SET_SYNCING':
       return { ...state, syncing: action.payload };
-    
+
     case 'ADD_ITEM': {
       const itemId = generateItemId(action.payload.productId, action.payload.variantId);
-      const existingItemIndex = state.items.findIndex(item => 
+      const existingItemIndex = state.items.findIndex(item =>
         generateItemId(item.productId, item.variantId) === itemId
       );
-      
+
       let newItems: CartItem[];
-      
+
       if (existingItemIndex >= 0) {
         // Update existing item quantity
         newItems = [...state.items];
         const existingItem = newItems[existingItemIndex];
         const newQuantity = existingItem.quantity + action.payload.quantity;
-        
+
         if (newQuantity > ORDER_LIMITS.MAX_QUANTITY_PER_ITEM) {
           toast.error(`Cannot add more than ${ORDER_LIMITS.MAX_QUANTITY_PER_ITEM} items`);
           return state;
         }
-        
+
         newItems[existingItemIndex] = {
           ...existingItem,
           quantity: newQuantity,
@@ -192,16 +195,16 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
           toast.error(`Cannot add more than ${ORDER_LIMITS.MAX_ITEMS} items to cart`);
           return state;
         }
-        
+
         newItems = [...state.items, {
           ...action.payload,
           id: itemId,
           addedAt: new Date(),
         }];
       }
-      
+
       const newSummary = calculateSummary(newItems, state.couponDiscount, state.giftWrapPrice);
-      
+
       return {
         ...state,
         items: newItems,
@@ -209,16 +212,16 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
         lastUpdated: new Date(),
       };
     }
-    
+
     case 'UPDATE_ITEM': {
       const newItems = state.items.map(item =>
         item.id === action.payload.id
           ? { ...item, ...action.payload.updates }
           : item
       );
-      
+
       const newSummary = calculateSummary(newItems, state.couponDiscount, state.giftWrapPrice);
-      
+
       return {
         ...state,
         items: newItems,
@@ -226,11 +229,11 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
         lastUpdated: new Date(),
       };
     }
-    
+
     case 'REMOVE_ITEM': {
       const newItems = state.items.filter(item => item.id !== action.payload);
       const newSummary = calculateSummary(newItems, state.couponDiscount, state.giftWrapPrice);
-      
+
       return {
         ...state,
         items: newItems,
@@ -238,25 +241,25 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
         lastUpdated: new Date(),
       };
     }
-    
+
     case 'UPDATE_QUANTITY': {
       const { id, quantity } = action.payload;
-      
+
       if (quantity <= 0) {
         return cartReducer(state, { type: 'REMOVE_ITEM', payload: id });
       }
-      
+
       if (quantity > ORDER_LIMITS.MAX_QUANTITY_PER_ITEM) {
         toast.error(`Maximum ${ORDER_LIMITS.MAX_QUANTITY_PER_ITEM} items allowed`);
         return state;
       }
-      
+
       const newItems = state.items.map(item =>
         item.id === id ? { ...item, quantity } : item
       );
-      
+
       const newSummary = calculateSummary(newItems, state.couponDiscount, state.giftWrapPrice);
-      
+
       return {
         ...state,
         items: newItems,
@@ -264,16 +267,16 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
         lastUpdated: new Date(),
       };
     }
-    
+
     case 'CLEAR_CART':
       return {
         ...initialState,
         lastUpdated: new Date(),
       };
-    
+
     case 'APPLY_COUPON': {
       const newSummary = calculateSummary(state.items, action.payload.discount, state.giftWrapPrice);
-      
+
       return {
         ...state,
         couponCode: action.payload.code,
@@ -282,10 +285,10 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
         lastUpdated: new Date(),
       };
     }
-    
+
     case 'REMOVE_COUPON': {
       const newSummary = calculateSummary(state.items, 0, state.giftWrapPrice);
-      
+
       return {
         ...state,
         couponCode: undefined,
@@ -294,17 +297,17 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
         lastUpdated: new Date(),
       };
     }
-    
+
     case 'SET_SHIPPING_METHOD':
       return {
         ...state,
         shippingMethod: action.payload,
         lastUpdated: new Date(),
       };
-    
+
     case 'SET_GIFT_WRAP':
       const newSummary = calculateSummary(state.items, state.couponDiscount, action.payload.price || 0);
-      
+
       return {
         ...state,
         giftWrap: action.payload.enabled,
@@ -312,12 +315,12 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
         summary: newSummary,
         lastUpdated: new Date(),
       };
-    
+
     case 'CALCULATE_SUMMARY': {
       const summary = calculateSummary(state.items, state.couponDiscount, state.giftWrapPrice);
       return { ...state, summary };
     }
-    
+
     case 'RESTORE_CART': {
       const summary = calculateSummary(action.payload, 0, 0);
       return {
@@ -327,7 +330,7 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
         lastUpdated: new Date(),
       };
     }
-    
+
     default:
       return state;
   }
@@ -343,42 +346,61 @@ interface CartProviderProps {
 
 export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const [state, dispatch] = useReducer(cartReducer, initialState);
-  
+
   // Load cart from localStorage on mount
   useEffect(() => {
-    try {
-      const savedCart = localStorage.getItem('vardhman_cart');
-      if (savedCart) {
-        const parsedCart = JSON.parse(savedCart);
-        if (Array.isArray(parsedCart) && parsedCart.length > 0) {
-          dispatch({ type: 'RESTORE_CART', payload: parsedCart });
+    const loadCart = () => {
+      try {
+        const savedCart = localStorage.getItem('vardhman_cart');
+        if (savedCart) {
+          const parsedCart = JSON.parse(savedCart);
+          // Handle both array format (old) and object format (new)
+          const items = Array.isArray(parsedCart) ? parsedCart : (parsedCart.items || []);
+          if (items.length > 0) {
+            dispatch({ type: 'RESTORE_CART', payload: items });
+          }
         }
+      } catch (error) {
+        console.error('Failed to load cart from localStorage:', error);
       }
-    } catch (error) {
-      console.error('Failed to load cart from localStorage:', error);
-    }
+    };
+
+    loadCart();
+
+    // Listen for storage events from other components/tabs
+    const handleStorageChange = () => loadCart();
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
-  
+
   // Save cart to localStorage whenever it changes
   useEffect(() => {
     try {
-      localStorage.setItem('vardhman_cart', JSON.stringify(state.items));
+      // Save in object format for consistency with ProductCarousel
+      const cartData = {
+        items: state.items,
+        summary: state.summary,
+      };
+      localStorage.setItem('vardhman_cart', JSON.stringify(cartData));
+      // Dispatch storage event to notify other components
+      window.dispatchEvent(new Event('storage'));
     } catch (error) {
       console.error('Failed to save cart to localStorage:', error);
     }
-  }, [state.items]);
-  
+  }, [state.items, state.summary]);
+
   // Context methods
   const addItem = async (item: Omit<CartItem, 'addedAt'>): Promise<void> => {
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
-      
+
       // Validate stock
       if (item.quantity > item.inStock) {
         toast.error(CART_ERRORS.INSUFFICIENT_STOCK);
         return;
       }
-      
+
       dispatch({ type: 'ADD_ITEM', payload: item });
       toast.success(`${item.name} added to cart`);
     } catch (error) {
@@ -388,7 +410,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       dispatch({ type: 'SET_LOADING', payload: false });
     }
   };
-  
+
   const updateItem = async (id: string, updates: Partial<CartItem>): Promise<void> => {
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
@@ -400,7 +422,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       dispatch({ type: 'SET_LOADING', payload: false });
     }
   };
-  
+
   const removeItem = async (id: string): Promise<void> => {
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
@@ -413,7 +435,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       dispatch({ type: 'SET_LOADING', payload: false });
     }
   };
-  
+
   const updateQuantity = async (id: string, quantity: number): Promise<void> => {
     try {
       dispatch({ type: 'UPDATE_QUANTITY', payload: { id, quantity } });
@@ -422,7 +444,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       toast.error('Failed to update quantity');
     }
   };
-  
+
   const clearCart = async (): Promise<void> => {
     try {
       dispatch({ type: 'CLEAR_CART' });
@@ -432,33 +454,46 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       toast.error('Failed to clear cart');
     }
   };
-  
+
   const getItem = (productId: string, variantId?: string): CartItem | undefined => {
     const itemId = generateItemId(productId, variantId);
     return state.items.find(item => generateItemId(item.productId, item.variantId) === itemId);
   };
-  
+
+  const getItemByProductId = (productId: string): CartItem | undefined => {
+    return state.items.find(item => item.productId === productId);
+  };
+
+  const hasItem = (productId: string): boolean => {
+    return state.items.some(item => item.productId === productId);
+  };
+
+  const getItemQuantity = (productId: string): number => {
+    const item = state.items.find(i => i.productId === productId);
+    return item?.quantity || 0;
+  };
+
   const getItemCount = (): number => state.summary.itemCount;
   const getTotalQuantity = (): number => state.summary.totalQuantity;
   const getSubtotal = (): number => state.summary.subtotal;
   const getTotal = (): number => state.summary.total;
   const isEmpty = (): boolean => state.items.length === 0;
-  
+
   const applyCoupon = async (code: string): Promise<void> => {
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
-      
+
       // Simulate API call to validate coupon
       const response = await fetch('/api/coupons/validate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code, subtotal: state.summary.subtotal }),
       });
-      
+
       if (!response.ok) {
         throw new Error('Invalid coupon code');
       }
-      
+
       const { discount } = await response.json();
       dispatch({ type: 'APPLY_COUPON', payload: { code, discount } });
       toast.success(`Coupon applied! You saved ₹${discount}`);
@@ -469,20 +504,20 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       dispatch({ type: 'SET_LOADING', payload: false });
     }
   };
-  
+
   const removeCoupon = (): void => {
     dispatch({ type: 'REMOVE_COUPON' });
     toast.success('Coupon removed');
   };
-  
+
   const setShippingMethod = (method: string): void => {
     dispatch({ type: 'SET_SHIPPING_METHOD', payload: method });
   };
-  
+
   const setGiftWrap = (enabled: boolean, price = 99): void => {
     dispatch({ type: 'SET_GIFT_WRAP', payload: { enabled, price: enabled ? price : 0 } });
   };
-  
+
   const validateStock = async (): Promise<boolean> => {
     try {
       const response = await fetch('/api/cart/validate-stock', {
@@ -490,34 +525,34 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ items: state.items }),
       });
-      
+
       const { valid, outOfStock } = await response.json();
-      
+
       if (!valid && outOfStock.length > 0) {
         outOfStock.forEach((item: { name: string; id: string }) => {
           toast.error(`${item.name} is out of stock`);
         });
       }
-      
+
       return valid;
     } catch (error) {
       console.error('Failed to validate stock:', error);
       return false;
     }
   };
-  
+
   const calculateEstimatedDelivery = (): string => {
     const deliveryDate = new Date();
     deliveryDate.setDate(deliveryDate.getDate() + 5); // 5 days from now
     return deliveryDate.toLocaleDateString();
   };
-  
+
   const exportCart = (): CartItem[] => state.items;
-  
+
   const importCart = (items: CartItem[]): void => {
     dispatch({ type: 'RESTORE_CART', payload: items });
   };
-  
+
   const contextValue: CartContextType = {
     state,
     addItem,
@@ -526,6 +561,9 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     updateQuantity,
     clearCart,
     getItem,
+    getItemByProductId,
+    hasItem,
+    getItemQuantity,
     getItemCount,
     getTotalQuantity,
     getSubtotal,
@@ -540,7 +578,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     exportCart,
     importCart,
   };
-  
+
   return (
     <CartContext.Provider value={contextValue}>
       {children}

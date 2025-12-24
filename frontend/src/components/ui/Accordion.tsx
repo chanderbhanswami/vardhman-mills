@@ -8,7 +8,7 @@ import { cn } from '../../lib/utils';
 // Types
 export interface AccordionItem {
   id: string;
-  title: string;
+  title: React.ReactNode;
   content: React.ReactNode;
   disabled?: boolean;
   className?: string;
@@ -104,21 +104,21 @@ const AccordionItemComponent: React.FC<AccordionItemComponentProps> = ({
   };
 
   const contentVariants = {
-    closed: { 
-      height: 0, 
+    closed: {
+      height: 0,
       opacity: 0
     },
-    open: { 
-      height: 'auto', 
+    open: {
+      height: 'auto',
       opacity: 1
     },
   };
 
   const iconVariants = {
-    closed: { 
+    closed: {
       rotate: iconPosition === 'right' ? 0 : -90
     },
-    open: { 
+    open: {
       rotate: iconPosition === 'right' ? 180 : 0
     },
   };
@@ -159,13 +159,13 @@ const AccordionItemComponent: React.FC<AccordionItemComponentProps> = ({
             <Icon className={cn(iconSizeStyles[size], 'text-gray-500')} />
           </motion.div>
         ) : (
-          <Icon 
+          <Icon
             className={cn(
-              iconSizeStyles[size], 
+              iconSizeStyles[size],
               'text-gray-500 transition-transform duration-200',
               isOpen && iconPosition === 'right' && 'rotate-180',
               isOpen && iconPosition === 'left' && 'rotate-90'
-            )} 
+            )}
           />
         )}
       </button>

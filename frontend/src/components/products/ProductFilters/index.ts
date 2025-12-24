@@ -31,6 +31,15 @@ export type { MaterialFilterProps, MaterialOption } from './MaterialFilter';
 export { default as ArrivalFilter } from './ArrivalFilter';
 export type { ArrivalFilterProps, ArrivalPeriod } from './ArrivalFilter';
 
+export { default as PatternFilter } from './PatternFilter';
+export type { PatternFilterProps, Pattern } from './PatternFilter';
+
+export { default as OccasionFilter } from './OccasionFilter';
+export type { OccasionFilterProps, Occasion } from './OccasionFilter';
+
+export { default as DiscountFilter } from './DiscountFilter';
+export type { DiscountFilterProps, DiscountOption } from './DiscountFilter';
+
 // Utility types for filter management
 export interface FilterGroup {
   id: string;
@@ -51,6 +60,9 @@ export interface FilterState {
   priceRange: { min: number; max: number };
   materials: string[];
   arrivalPeriod: 'today' | 'week' | 'month' | 'quarter' | 'all';
+  patterns: string[];
+  occasions: string[];
+  discount: number | null;
 }
 
 export interface FilterConfig {
@@ -64,6 +76,9 @@ export interface FilterConfig {
   showPrice?: boolean;
   showMaterials?: boolean;
   showArrivals?: boolean;
+  showPatterns?: boolean;
+  showOccasions?: boolean;
+  showDiscount?: boolean;
 }
 
 export const defaultFilterState: FilterState = {
@@ -77,6 +92,9 @@ export const defaultFilterState: FilterState = {
   priceRange: { min: 0, max: 100000 },
   materials: [],
   arrivalPeriod: 'all',
+  patterns: [],
+  occasions: [],
+  discount: null,
 };
 
 export const defaultFilterConfig: FilterConfig = {
@@ -90,4 +108,7 @@ export const defaultFilterConfig: FilterConfig = {
   showPrice: true,
   showMaterials: true,
   showArrivals: true,
+  showPatterns: true,
+  showOccasions: true,
+  showDiscount: true,
 };

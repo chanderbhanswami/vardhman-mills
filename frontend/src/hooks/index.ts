@@ -19,6 +19,8 @@ export type { ToastOptions } from './useToast';
 export { useImagePreloader } from './useImagePreloader';
 export { usePushNotifications } from './usePushNotifications';
 export { useUserProfile } from './useUserProfile';
+export { useRecentlyViewed } from './useRecentlyViewed';
+export type { RecentProduct } from './useRecentlyViewed';
 
 // Common Hooks
 export { useDebounce } from './common/useDebounce';

@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  EnvelopeIcon, 
+import {
+  EnvelopeIcon,
   UserIcon,
   CheckCircleIcon,
   ExclamationTriangleIcon,
@@ -92,7 +92,18 @@ const NewsletterForm: React.FC<NewsletterFormProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
+    // Validate first name if name fields are shown
+    if (showName && !formState.firstName.trim()) {
+      setFormState(prev => ({ ...prev, error: 'Please enter your first name' }));
+      return;
+    }
+
+    if (!formState.email.trim()) {
+      setFormState(prev => ({ ...prev, error: 'Please enter your email address' }));
+      return;
+    }
+
     if (!validateEmail(formState.email)) {
       setFormState(prev => ({ ...prev, error: 'Please enter a valid email address' }));
       return;
@@ -111,31 +122,31 @@ const NewsletterForm: React.FC<NewsletterFormProps> = ({
 
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1500));
-      
+
       if (onSubscribe) {
         onSubscribe(subscriptionData);
       }
-      
-      setFormState(prev => ({ 
-        ...prev, 
-        isLoading: false, 
+
+      setFormState(prev => ({
+        ...prev,
+        isLoading: false,
         isSuccess: true,
         email: '',
         firstName: '',
         lastName: '',
         preferences: []
       }));
-      
+
       // Reset success state after 3 seconds
       setTimeout(() => {
         setFormState(prev => ({ ...prev, isSuccess: false }));
       }, 3000);
-      
+
     } catch {
-      setFormState(prev => ({ 
-        ...prev, 
-        isLoading: false, 
-        error: 'Something went wrong. Please try again.' 
+      setFormState(prev => ({
+        ...prev,
+        isLoading: false,
+        error: 'Something went wrong. Please try again.'
       }));
     }
   };
@@ -154,8 +165,8 @@ const NewsletterForm: React.FC<NewsletterFormProps> = ({
 
   const itemVariants = {
     hidden: { opacity: 0, y: 10 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
       transition: { duration: 0.4 }
     }
@@ -203,14 +214,14 @@ const NewsletterForm: React.FC<NewsletterFormProps> = ({
             {formState.isLoading ? 'Subscribing...' : formState.isSuccess ? 'Subscribed!' : 'Subscribe'}
           </motion.button>
         </form>
-        
+
         {formState.error && (
           <div className="mt-2 flex items-center text-red-600 dark:text-red-400 text-sm">
             <ExclamationTriangleIcon className="w-4 h-4 mr-1" />
             {formState.error}
           </div>
         )}
-        
+
         {formState.isSuccess && (
           <div className="mt-2 flex items-center text-green-600 dark:text-green-400 text-sm">
             <CheckCircleIcon className="w-4 h-4 mr-1" />
@@ -230,14 +241,14 @@ const NewsletterForm: React.FC<NewsletterFormProps> = ({
         animate="visible"
       >
         <div className="mb-4">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+          <h3 className="text-lg font-semibold text-black dark:text-white mb-2">
             {title || 'Stay Updated'}
           </h3>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-black dark:text-gray-300">
             {description || 'Get the latest news and exclusive offers delivered to your inbox.'}
           </p>
         </div>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <motion.div variants={itemVariants}>
             <input
@@ -250,7 +261,7 @@ const NewsletterForm: React.FC<NewsletterFormProps> = ({
               required
             />
           </motion.div>
-          
+
           <motion.button
             type="submit"
             variants={buttonVariants}
@@ -264,9 +275,9 @@ const NewsletterForm: React.FC<NewsletterFormProps> = ({
             {formState.isLoading ? 'Subscribing...' : formState.isSuccess ? 'Subscribed!' : 'Subscribe Now'}
           </motion.button>
         </form>
-        
+
         {formState.error && (
-          <motion.div 
+          <motion.div
             className="mt-3 flex items-center text-red-600 dark:text-red-400 text-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -275,9 +286,9 @@ const NewsletterForm: React.FC<NewsletterFormProps> = ({
             {formState.error}
           </motion.div>
         )}
-        
+
         {formState.isSuccess && (
-          <motion.div 
+          <motion.div
             className="mt-3 flex items-center text-green-600 dark:text-green-400 text-sm"
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -298,31 +309,32 @@ const NewsletterForm: React.FC<NewsletterFormProps> = ({
       animate="visible"
     >
       {/* Header */}
-      <motion.div className="mb-6" variants={itemVariants}>
+      <motion.div className="mb-8" variants={itemVariants}>
         <div className="flex items-center mb-3">
           <SparklesIcon className="w-6 h-6 text-blue-600 dark:text-blue-400 mr-2" />
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+          <h3 className="text-xl font-bold text-black dark:text-white">
             {title || 'Join Our Newsletter'}
           </h3>
         </div>
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-black dark:text-gray-300 font-medium">
           {description || 'Be the first to know about new collections, exclusive deals, and industry insights. Join 50,000+ textile professionals.'}
         </p>
       </motion.div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-8">
         {/* Name Fields */}
         {showName && (
-          <motion.div className="grid grid-cols-1 sm:grid-cols-2 gap-4" variants={itemVariants}>
+          <motion.div className="grid grid-cols-1 sm:grid-cols-2 gap-8 mb-6" variants={itemVariants}>
             <div className="relative">
-              <UserIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <UserIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" />
               <input
                 type="text"
                 value={formState.firstName}
                 onChange={(e) => handleInputChange('firstName', e.target.value)}
-                placeholder="First Name"
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                placeholder="First Name *"
+                className="w-full pl-10 pr-4 py-4 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200"
                 disabled={formState.isLoading}
+                required
               />
             </div>
             <div>
@@ -331,7 +343,7 @@ const NewsletterForm: React.FC<NewsletterFormProps> = ({
                 value={formState.lastName}
                 onChange={(e) => handleInputChange('lastName', e.target.value)}
                 placeholder="Last Name"
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                className="w-full px-4 py-4 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200"
                 disabled={formState.isLoading}
               />
             </div>
@@ -339,14 +351,14 @@ const NewsletterForm: React.FC<NewsletterFormProps> = ({
         )}
 
         {/* Email Field */}
-        <motion.div className="relative" variants={itemVariants}>
-          <EnvelopeIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+        <motion.div className="relative mb-6" variants={itemVariants}>
+          <EnvelopeIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" />
           <input
             type="email"
             value={formState.email}
             onChange={(e) => handleInputChange('email', e.target.value)}
-            placeholder="Your email address"
-            className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+            placeholder="Your email address *"
+            className="w-full pl-10 pr-4 py-4 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200"
             disabled={formState.isLoading}
             required
           />
@@ -354,11 +366,11 @@ const NewsletterForm: React.FC<NewsletterFormProps> = ({
 
         {/* Preferences */}
         {showPreferences && (
-          <motion.div variants={itemVariants}>
-            <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
+          <motion.div variants={itemVariants} className="mb-6">
+            <h4 className="text-sm font-semibold text-black dark:text-white mb-3">
               What interests you? (Optional)
             </h4>
-            <div className="space-y-2">
+            <div className="space-y-3">
               {preferenceOptions.map((option) => (
                 <label
                   key={option.id}
@@ -372,10 +384,10 @@ const NewsletterForm: React.FC<NewsletterFormProps> = ({
                     disabled={formState.isLoading}
                   />
                   <div>
-                    <div className="text-sm font-medium text-gray-900 dark:text-white">
+                    <div className="text-sm font-medium text-black dark:text-white">
                       {option.label}
                     </div>
-                    <div className="text-xs text-gray-600 dark:text-gray-400">
+                    <div className="text-xs text-black dark:text-gray-300">
                       {option.description}
                     </div>
                   </div>
@@ -386,7 +398,7 @@ const NewsletterForm: React.FC<NewsletterFormProps> = ({
         )}
 
         {/* Submit Button */}
-        <motion.div variants={itemVariants}>
+        <motion.div variants={itemVariants} className="mt-10">
           <motion.button
             type="submit"
             variants={buttonVariants}
@@ -419,12 +431,12 @@ const NewsletterForm: React.FC<NewsletterFormProps> = ({
         </motion.div>
 
         {/* Privacy Notice */}
-        <motion.div 
-          className="text-xs text-gray-500 dark:text-gray-400 text-center"
+        <motion.div
+          className="text-sm text-gray-600 text-center mt-6 font-medium"
           variants={itemVariants}
         >
           By subscribing, you agree to our{' '}
-          <a href="/privacy-policy" className="text-blue-600 dark:text-blue-400 hover:underline">
+          <a href="/privacy-policy" className="text-blue-600 hover:underline font-bold">
             Privacy Policy
           </a>
           {' '}and consent to receive marketing emails. You can unsubscribe at any time.
@@ -433,7 +445,7 @@ const NewsletterForm: React.FC<NewsletterFormProps> = ({
 
       {/* Error Message */}
       {formState.error && (
-        <motion.div 
+        <motion.div
           className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-center text-red-700 dark:text-red-400"
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -445,7 +457,7 @@ const NewsletterForm: React.FC<NewsletterFormProps> = ({
 
       {/* Success Message */}
       {formState.isSuccess && (
-        <motion.div 
+        <motion.div
           className="mt-4 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg"
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -455,7 +467,7 @@ const NewsletterForm: React.FC<NewsletterFormProps> = ({
             <span className="font-semibold">Welcome to our newsletter!</span>
           </div>
           <p className="text-sm text-green-600 dark:text-green-400">
-            Thank you for subscribing. We&apos;ve sent a confirmation email to {formState.email}. 
+            Thank you for subscribing. We&apos;ve sent a confirmation email to {formState.email}.
             Please check your inbox and click the confirmation link to complete your subscription.
           </p>
         </motion.div>
@@ -463,14 +475,14 @@ const NewsletterForm: React.FC<NewsletterFormProps> = ({
 
       {/* Benefits */}
       {!compact && (
-        <motion.div 
-          className="mt-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"
+        <motion.div
+          className="mt-8 p-4 bg-white border border-gray-100 dark:bg-gray-800 rounded-lg"
           variants={itemVariants}
         >
-          <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
+          <h4 className="text-sm font-semibold text-black dark:text-white mb-3">
             Newsletter Benefits:
           </h4>
-          <ul className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
+          <ul className="text-xs text-black dark:text-gray-300 space-y-2 font-medium">
             <li>• Exclusive access to new collections</li>
             <li>• Industry insights and trends</li>
             <li>• Special subscriber-only discounts</li>

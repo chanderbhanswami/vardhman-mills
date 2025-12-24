@@ -465,17 +465,20 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
               itemsShown === 4 && 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
             )}
           >
-            {visibleProducts.map((product) => (
-              <RecentItem
-                key={product.id}
-                product={product}
-                viewedAt={product.viewedAt}
-                onProductClick={onProductClick}
-                onAddToCart={onAddToCart}
-                onAddToWishlist={onAddToWishlist}
-                onRemove={handleRemove}
-              />
-            ))}
+            {visibleProducts.map((product) => {
+              if (!product) return null;
+              return (
+                <RecentItem
+                  key={product.id}
+                  product={product}
+                  viewedAt={product.viewedAt}
+                  onProductClick={onProductClick}
+                  onAddToCart={onAddToCart}
+                  onAddToWishlist={onAddToWishlist}
+                  onRemove={handleRemove}
+                />
+              );
+            })}
           </motion.div>
         </AnimatePresence>
 

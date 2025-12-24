@@ -179,8 +179,8 @@ export const ProductSort: React.FC<ProductSortProps> = ({
           onClick={() => !disabled && setIsOpen(!isOpen)}
           disabled={disabled}
           className={cn(
-            'inline-flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors',
-            isOpen && 'text-gray-900'
+            'inline-flex items-center gap-2 text-sm font-semibold text-gray-900 hover:text-black disabled:opacity-50 disabled:cursor-not-allowed transition-colors',
+            isOpen && 'text-black'
           )}
           aria-label="Sort products"
           aria-haspopup="true"
@@ -236,7 +236,7 @@ export const ProductSort: React.FC<ProductSortProps> = ({
           size="sm"
           onClick={() => !disabled && setIsOpen(!isOpen)}
           disabled={disabled}
-          className="gap-2"
+          className="gap-2 text-gray-900 font-medium"
           aria-label="Sort products"
           aria-haspopup="true"
         >
@@ -244,7 +244,7 @@ export const ProductSort: React.FC<ProductSortProps> = ({
           <span className="hidden sm:inline">{selectedOption.label}</span>
           <span className="sm:hidden">Sort</span>
           <ChevronDown
-            className={cn('w-4 h-4 transition-transform', isOpen && 'rotate-180')}
+            className={cn('w-4 h-4 transition-transform text-gray-500', isOpen && 'rotate-180')}
           />
         </Button>
 
@@ -311,16 +311,16 @@ export const ProductSort: React.FC<ProductSortProps> = ({
           size="md"
           onClick={() => !disabled && setIsOpen(!isOpen)}
           disabled={disabled}
-          className="gap-2 min-w-[200px] justify-between"
+          className="gap-2 min-w-[200px] justify-between text-gray-900"
           aria-label="Sort products"
           aria-haspopup="true"
         >
           <div className="flex items-center gap-2">
-            {React.createElement(selectedOption.icon, { className: 'w-4 h-4' })}
-            <span>{selectedOption.label}</span>
+            {React.createElement(selectedOption.icon, { className: 'w-4 h-4 text-gray-900' })}
+            <span className="text-gray-900 font-medium">{selectedOption.label}</span>
           </div>
           <ChevronDown
-            className={cn('w-4 h-4 transition-transform', isOpen && 'rotate-180')}
+            className={cn('w-4 h-4 transition-transform text-gray-500', isOpen && 'rotate-180')}
           />
         </Button>
       </div>

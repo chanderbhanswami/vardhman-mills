@@ -13,7 +13,11 @@ import {
   ClockIcon,
   UserGroupIcon,
   GlobeAltIcon,
+  EnvelopeIcon,
+  DevicePhoneMobileIcon,
+  ComputerDesktopIcon,
 } from '@heroicons/react/24/outline';
+import { CheckIcon } from '@heroicons/react/24/solid';
 
 export interface NewsletterPreferencesProps {
   className?: string;
@@ -44,6 +48,7 @@ interface PreferenceCategory {
   description: string;
   icon: React.ElementType;
   color: string;
+  bgColor: string;
   popular?: boolean;
 }
 
@@ -54,6 +59,7 @@ const preferenceCategories: PreferenceCategory[] = [
     description: 'Latest fabric collections and textile innovations',
     icon: SparklesIcon,
     color: 'text-blue-600',
+    bgColor: 'bg-blue-100',
     popular: true,
   },
   {
@@ -61,7 +67,8 @@ const preferenceCategories: PreferenceCategory[] = [
     label: 'Special Offers',
     description: 'Exclusive discounts and promotional deals',
     icon: TagIcon,
-    color: 'text-green-600',
+    color: 'text-emerald-600',
+    bgColor: 'bg-emerald-100',
     popular: true,
   },
   {
@@ -70,13 +77,15 @@ const preferenceCategories: PreferenceCategory[] = [
     description: 'Textile industry trends and market updates',
     icon: NewspaperIcon,
     color: 'text-purple-600',
+    bgColor: 'bg-purple-100',
   },
   {
     id: 'sustainability',
     label: 'Sustainability',
     description: 'Eco-friendly practices and sustainable textiles',
     icon: GlobeAltIcon,
-    color: 'text-emerald-600',
+    color: 'text-teal-600',
+    bgColor: 'bg-teal-100',
   },
   {
     id: 'events',
@@ -84,6 +93,7 @@ const preferenceCategories: PreferenceCategory[] = [
     description: 'Upcoming exhibitions and industry events',
     icon: CalendarIcon,
     color: 'text-orange-600',
+    bgColor: 'bg-orange-100',
   },
   {
     id: 'market-insights',
@@ -91,13 +101,15 @@ const preferenceCategories: PreferenceCategory[] = [
     description: 'Price trends and market analysis',
     icon: ChartBarIcon,
     color: 'text-indigo-600',
+    bgColor: 'bg-indigo-100',
   },
   {
     id: 'company-updates',
     label: 'Company Updates',
     description: 'Vardhman Mills news and announcements',
     icon: BellIcon,
-    color: 'text-red-600',
+    color: 'text-rose-600',
+    bgColor: 'bg-rose-100',
   },
   {
     id: 'community',
@@ -105,26 +117,27 @@ const preferenceCategories: PreferenceCategory[] = [
     description: 'Customer stories and community highlights',
     icon: UserGroupIcon,
     color: 'text-pink-600',
+    bgColor: 'bg-pink-100',
   },
 ];
 
 const frequencyOptions = [
-  { id: 'daily', label: 'Daily', description: 'Every day (breaking news only)' },
-  { id: 'weekly', label: 'Weekly', description: 'Every Tuesday (recommended)' },
-  { id: 'monthly', label: 'Monthly', description: 'First Tuesday of each month' },
-  { id: 'never', label: 'Never', description: 'No regular emails (events only)' },
+  { id: 'daily', label: 'Daily', description: 'Breaking news only', icon: '⚡' },
+  { id: 'weekly', label: 'Weekly', description: 'Every Tuesday', icon: '📅', recommended: true },
+  { id: 'monthly', label: 'Monthly', description: 'First of month', icon: '📆' },
+  { id: 'never', label: 'Never', description: 'Events only', icon: '🔕' },
 ] as const;
 
 const languageOptions = [
-  { id: 'en', label: 'English', flag: '🇺🇸' },
-  { id: 'hi', label: 'हिंदी', flag: '🇮🇳' },
-  { id: 'pa', label: 'ਪੰਜਾਬੀ', flag: '🇮🇳' },
-  { id: 'gu', label: 'ગુજરાતી', flag: '🇮🇳' },
+  { id: 'en', label: 'English' },
+  { id: 'hi', label: 'हिंदी (Hindi)' },
+  { id: 'pa', label: 'ਪੰਜਾਬੀ (Punjabi)' },
+  { id: 'gu', label: 'ગુજરાતી (Gujarati)' },
 ];
 
 const formatOptions = [
-  { id: 'html', label: 'Rich HTML', description: 'Beautiful emails with images and formatting' },
-  { id: 'text', label: 'Plain Text', description: 'Simple text-only emails' },
+  { id: 'html', label: 'Rich HTML', description: 'Beautiful emails with images', icon: '✨' },
+  { id: 'text', label: 'Plain Text', description: 'Simple text-only emails', icon: '📝' },
 ] as const;
 
 const NewsletterPreferences: React.FC<NewsletterPreferencesProps> = ({
@@ -160,320 +173,348 @@ const NewsletterPreferences: React.FC<NewsletterPreferencesProps> = ({
     const newCategories = preferences.categories.includes(categoryId)
       ? preferences.categories.filter(id => id !== categoryId)
       : [...preferences.categories, categoryId];
-    
+
     updatePreferences({ categories: newCategories });
   };
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: { duration: 0.4 }
-    }
-  };
-
-  const cardVariants = {
-    idle: { scale: 1 },
-    hover: { scale: 1.02 },
-    tap: { scale: 0.98 }
-  };
-
   return (
-    <motion.div
-      className={`${className}`}
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-    >
-      {/* Content Categories */}
-      <motion.div variants={itemVariants}>
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          What interests you?
-        </h3>
+    <div className={`space-y-8 ${className}`}>
+      {/* Section: Content Categories */}
+      <div>
+        <div className="flex items-center gap-2 mb-4">
+          <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center">
+            <SparklesIcon className="w-4 h-4 text-white" />
+          </div>
+          <div>
+            <h3 className="text-lg font-bold text-gray-900">What interests you?</h3>
+            <p className="text-sm text-gray-500">Select topics you'd like to hear about</p>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {preferenceCategories.map((category) => {
             const isSelected = preferences.categories.includes(category.id);
             const IconComponent = category.icon;
-            
+
             return (
-              <motion.div
+              <motion.button
                 key={category.id}
-                variants={cardVariants}
-                whileHover="hover"
-                whileTap="tap"
+                type="button"
+                onClick={() => toggleCategory(category.id)}
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
                 className={`
-                  relative p-4 border-2 rounded-lg cursor-pointer transition-all duration-200
-                  ${isSelected 
-                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
-                    : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                  relative flex items-start gap-3 p-4 rounded-xl border-2 text-left transition-all duration-200
+                  ${isSelected
+                    ? 'border-blue-500 bg-blue-50 shadow-md shadow-blue-100'
+                    : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
                   }
                 `}
-                onClick={() => toggleCategory(category.id)}
               >
                 {category.popular && (
-                  <div className="absolute -top-2 -right-2 px-2 py-1 bg-orange-500 text-white text-xs font-bold rounded-full">
+                  <span className="absolute -top-2 -right-2 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-full shadow-sm">
                     Popular
-                  </div>
+                  </span>
                 )}
-                
-                <div className="flex items-start space-x-3">
-                  <IconComponent className={`w-6 h-6 ${category.color} flex-shrink-0`} />
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <h4 className="text-sm font-semibold text-gray-900 dark:text-white">
-                        {category.label}
-                      </h4>
-                      {isSelected && (
-                        <CheckCircleIcon className="w-5 h-5 text-blue-500" />
-                      )}
-                    </div>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                      {category.description}
-                    </p>
-                  </div>
+
+                <div className={`flex-shrink-0 w-10 h-10 rounded-lg ${category.bgColor} flex items-center justify-center`}>
+                  <IconComponent className={`w-5 h-5 ${category.color}`} />
                 </div>
-              </motion.div>
+
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <h4 className="font-semibold text-gray-900 text-sm">{category.label}</h4>
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${isSelected ? 'bg-blue-500 border-blue-500' : 'border-gray-300'
+                      }`}>
+                      {isSelected && <CheckIcon className="w-3 h-3 text-white" />}
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">{category.description}</p>
+                </div>
+              </motion.button>
             );
           })}
         </div>
-      </motion.div>
+      </div>
 
-      {/* Frequency Settings */}
+      {/* Section: Email Frequency */}
       {showFrequency && (
-        <motion.div className="mt-8" variants={itemVariants}>
-          <div className="flex items-center mb-4">
-            <ClockIcon className="w-5 h-5 text-gray-600 dark:text-gray-400 mr-2" />
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-              Email Frequency
-            </h3>
+        <div className="pt-6">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center">
+              <ClockIcon className="w-4 h-4 text-white" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-gray-900">Email Frequency</h3>
+              <p className="text-sm text-gray-500">How often would you like to hear from us?</p>
+            </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            {frequencyOptions.map((option) => (
-              <motion.div
-                key={option.id}
-                variants={cardVariants}
-                whileHover="hover"
-                whileTap="tap"
-                className={`
-                  p-4 border-2 rounded-lg cursor-pointer transition-all duration-200
-                  ${preferences.frequency === option.id
-                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                    : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
-                  }
-                `}
-                onClick={() => updatePreferences({ frequency: option.id })}
-              >
-                <div className="text-center">
-                  <div className="flex items-center justify-center mb-2">
-                    <h4 className="text-sm font-semibold text-gray-900 dark:text-white">
-                      {option.label}
-                    </h4>
-                    {preferences.frequency === option.id && (
-                      <CheckCircleIcon className="w-4 h-4 text-blue-500 ml-2" />
-                    )}
-                  </div>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">
-                    {option.description}
-                  </p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-      )}
 
-      {/* Language Settings */}
-      {showLanguage && (
-        <motion.div className="mt-8" variants={itemVariants}>
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            Preferred Language
-          </h3>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {languageOptions.map((option) => (
-              <motion.div
-                key={option.id}
-                variants={cardVariants}
-                whileHover="hover"
-                whileTap="tap"
-                className={`
-                  p-3 border-2 rounded-lg cursor-pointer transition-all duration-200
-                  ${preferences.language === option.id
-                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                    : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
-                  }
-                `}
-                onClick={() => updatePreferences({ language: option.id })}
-              >
-                <div className="text-center">
-                  <div className="text-xl mb-1">{option.flag}</div>
-                  <div className="text-sm font-medium text-gray-900 dark:text-white">
+            {frequencyOptions.map((option) => {
+              const isSelected = preferences.frequency === option.id;
+
+              return (
+                <motion.button
+                  key={option.id}
+                  type="button"
+                  onClick={() => updatePreferences({ frequency: option.id })}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className={`
+                    relative p-4 rounded-xl border-2 text-center transition-all duration-200
+                    ${isSelected
+                      ? 'border-purple-500 bg-purple-50 shadow-md shadow-purple-100'
+                      : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
+                    }
+                  `}
+                >
+                  {option.recommended && (
+                    <span className="absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide bg-green-500 text-white rounded-full">
+                      Best
+                    </span>
+                  )}
+                  <div className="text-2xl mb-1">{option.icon}</div>
+                  <h4 className="font-semibold text-gray-900 text-sm">{option.label}</h4>
+                  <p className="text-[11px] text-gray-500 mt-0.5">{option.description}</p>
+                  {isSelected && (
+                    <div className="absolute top-2 right-2 w-4 h-4 rounded-full bg-purple-500 flex items-center justify-center">
+                      <CheckIcon className="w-2.5 h-2.5 text-white" />
+                    </div>
+                  )}
+                </motion.button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Section: Language */}
+      {showLanguage && (
+        <div className="pt-6">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-8 h-8 rounded-full bg-teal-600 flex items-center justify-center">
+              <GlobeAltIcon className="w-4 h-4 text-white" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-gray-900">Preferred Language</h3>
+              <p className="text-sm text-gray-500">Choose your newsletter language</p>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            {languageOptions.map((option) => {
+              const isSelected = preferences.language === option.id;
+
+              return (
+                <motion.button
+                  key={option.id}
+                  type="button"
+                  onClick={() => updatePreferences({ language: option.id })}
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  className={`
+                    flex items-center gap-2 px-4 py-2.5 rounded-full border-2 transition-all duration-200
+                    ${isSelected
+                      ? 'border-teal-500 bg-teal-50 shadow-md shadow-teal-100'
+                      : 'border-gray-200 bg-white hover:border-gray-300'
+                    }
+                  `}
+                >
+                  <span className={`font-semibold text-sm ${isSelected ? 'text-teal-700' : 'text-gray-900'}`}>
                     {option.label}
-                  </div>
-                  {preferences.language === option.id && (
-                    <CheckCircleIcon className="w-4 h-4 text-blue-500 mx-auto mt-1" />
-                  )}
-                </div>
-              </motion.div>
-            ))}
+                  </span>
+                  {isSelected && <CheckIcon className="w-4 h-4 text-teal-600" />}
+                </motion.button>
+              );
+            })}
           </div>
-        </motion.div>
+        </div>
       )}
 
-      {/* Format Settings */}
+      {/* Section: Email Format */}
       {showFormat && (
-        <motion.div className="mt-8" variants={itemVariants}>
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            Email Format
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {formatOptions.map((option) => (
-              <motion.div
-                key={option.id}
-                variants={cardVariants}
-                whileHover="hover"
-                whileTap="tap"
-                className={`
-                  p-4 border-2 rounded-lg cursor-pointer transition-all duration-200
-                  ${preferences.format === option.id
-                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                    : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
-                  }
-                `}
-                onClick={() => updatePreferences({ format: option.id })}
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
-                      {option.label}
-                    </h4>
-                    <p className="text-xs text-gray-600 dark:text-gray-400">
-                      {option.description}
-                    </p>
-                  </div>
-                  {preferences.format === option.id && (
-                    <CheckCircleIcon className="w-5 h-5 text-blue-500" />
-                  )}
-                </div>
-              </motion.div>
-            ))}
+        <div className="pt-6">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center">
+              <EnvelopeIcon className="w-4 h-4 text-white" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-gray-900">Email Format</h3>
+              <p className="text-sm text-gray-500">How should we format your emails?</p>
+            </div>
           </div>
-        </motion.div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {formatOptions.map((option) => {
+              const isSelected = preferences.format === option.id;
+
+              return (
+                <motion.button
+                  key={option.id}
+                  type="button"
+                  onClick={() => updatePreferences({ format: option.id })}
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.99 }}
+                  className={`
+                    flex items-center gap-3 p-4 rounded-xl border-2 text-left transition-all duration-200
+                    ${isSelected
+                      ? 'border-indigo-500 bg-indigo-50 shadow-md shadow-indigo-100'
+                      : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
+                    }
+                  `}
+                >
+                  <div className="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center flex-shrink-0">
+                    <span className="text-xl">{option.icon}</span>
+                  </div>
+                  <div className="flex-1 flex flex-col justify-center min-h-[40px]">
+                    <h4 className="font-semibold text-gray-900 text-sm">{option.label}</h4>
+                    <p className="text-xs text-gray-500">{option.description}</p>
+                  </div>
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${isSelected ? 'bg-indigo-500 border-indigo-500' : 'border-gray-300'
+                    }`}>
+                    {isSelected && <CheckIcon className="w-3 h-3 text-white" />}
+                  </div>
+                </motion.button>
+              );
+            })}
+          </div>
+        </div>
       )}
 
-      {/* Notification Settings */}
-      <motion.div className="mt-8" variants={itemVariants}>
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          Notification Preferences
-        </h3>
-        <div className="space-y-3">
-          <label className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-            <div>
-              <div className="text-sm font-medium text-gray-900 dark:text-white">
-                Email Notifications
+      {/* Section: Notification Preferences */}
+      <div className="pt-6">
+        <div className="flex items-center gap-2 mb-4">
+          <div className="w-8 h-8 rounded-full bg-rose-600 flex items-center justify-center">
+            <BellIcon className="w-4 h-4 text-white" />
+          </div>
+          <div>
+            <h3 className="text-lg font-bold text-gray-900">Notification Channels</h3>
+            <p className="text-sm text-gray-500">Where should we send notifications?</p>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-4">
+          {/* Email */}
+          <label className="flex items-center justify-between p-4 rounded-xl border-2 border-gray-200 bg-white hover:border-gray-300 transition-all cursor-pointer">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
+                <EnvelopeIcon className="w-5 h-5 text-blue-600" />
               </div>
-              <div className="text-xs text-gray-600 dark:text-gray-400">
-                Receive newsletter and updates via email
+              <div className="flex flex-col justify-center min-h-[40px]">
+                <h4 className="font-semibold text-gray-900 text-sm">Email</h4>
+                <p className="text-xs text-gray-500">Newsletter and updates</p>
               </div>
             </div>
-            <input
-              type="checkbox"
-              checked={preferences.notifications.email}
-              onChange={(e) => updatePreferences({
-                notifications: {
-                  ...preferences.notifications,
-                  email: e.target.checked
-                }
-              })}
-              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-            />
+            <div className="relative">
+              <input
+                type="checkbox"
+                checked={preferences.notifications.email}
+                onChange={(e) => updatePreferences({
+                  notifications: { ...preferences.notifications, email: e.target.checked }
+                })}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-500 transition-colors"></div>
+              <div className="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow peer-checked:translate-x-5 transition-transform"></div>
+            </div>
           </label>
-          
-          <label className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-            <div>
-              <div className="text-sm font-medium text-gray-900 dark:text-white">
-                SMS Notifications
+
+          {/* SMS */}
+          <label className="flex items-center justify-between p-4 rounded-xl border-2 border-gray-200 bg-white hover:border-gray-300 transition-all cursor-pointer">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center flex-shrink-0">
+                <DevicePhoneMobileIcon className="w-5 h-5 text-green-600" />
               </div>
-              <div className="text-xs text-gray-600 dark:text-gray-400">
-                Receive urgent updates via SMS
+              <div className="flex flex-col justify-center min-h-[40px]">
+                <h4 className="font-semibold text-gray-900 text-sm">SMS</h4>
+                <p className="text-xs text-gray-500">Urgent updates only</p>
               </div>
             </div>
-            <input
-              type="checkbox"
-              checked={preferences.notifications.sms}
-              onChange={(e) => updatePreferences({
-                notifications: {
-                  ...preferences.notifications,
-                  sms: e.target.checked
-                }
-              })}
-              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-            />
+            <div className="relative">
+              <input
+                type="checkbox"
+                checked={preferences.notifications.sms}
+                onChange={(e) => updatePreferences({
+                  notifications: { ...preferences.notifications, sms: e.target.checked }
+                })}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-green-500 transition-colors"></div>
+              <div className="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow peer-checked:translate-x-5 transition-transform"></div>
+            </div>
           </label>
-          
-          <label className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-            <div>
-              <div className="text-sm font-medium text-gray-900 dark:text-white">
-                Push Notifications
+
+          {/* Push */}
+          <label className="flex items-center justify-between p-4 rounded-xl border-2 border-gray-200 bg-white hover:border-gray-300 transition-all cursor-pointer">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center flex-shrink-0">
+                <ComputerDesktopIcon className="w-5 h-5 text-purple-600" />
               </div>
-              <div className="text-xs text-gray-600 dark:text-gray-400">
-                Receive browser push notifications
+              <div className="flex flex-col justify-center min-h-[40px]">
+                <h4 className="font-semibold text-gray-900 text-sm">Browser Push</h4>
+                <p className="text-xs text-gray-500">Desktop notifications</p>
               </div>
             </div>
-            <input
-              type="checkbox"
-              checked={preferences.notifications.push}
-              onChange={(e) => updatePreferences({
-                notifications: {
-                  ...preferences.notifications,
-                  push: e.target.checked
-                }
-              })}
-              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-            />
+            <div className="relative">
+              <input
+                type="checkbox"
+                checked={preferences.notifications.push}
+                onChange={(e) => updatePreferences({
+                  notifications: { ...preferences.notifications, push: e.target.checked }
+                })}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-purple-500 transition-colors"></div>
+              <div className="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow peer-checked:translate-x-5 transition-transform"></div>
+            </div>
           </label>
         </div>
-      </motion.div>
+      </div>
 
-      {/* Summary */}
-      <motion.div 
-        className="mt-8 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"
-        variants={itemVariants}
+      {/* Summary Card */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mt-6 p-5 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border-2 border-blue-200"
       >
-        <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
-          Your Preferences Summary:
-        </h4>
-        <ul className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
-          <li>
-            <strong>Categories:</strong> {preferences.categories.length > 0 
-              ? preferences.categories.map(id => 
+        <div className="flex items-center gap-2 mb-3">
+          <CheckCircleIcon className="w-5 h-5 text-green-600" />
+          <h4 className="font-bold text-gray-900">Your Preferences Summary</h4>
+        </div>
+        <div className="grid grid-cols-2 gap-3 text-sm">
+          <div>
+            <span className="text-gray-500 text-xs uppercase tracking-wide">Topics</span>
+            <p className="text-gray-900 font-medium">
+              {preferences.categories.length > 0
+                ? preferences.categories.slice(0, 2).map(id =>
                   preferenceCategories.find(cat => cat.id === id)?.label
-                ).join(', ')
-              : 'None selected'
-            }
-          </li>
-          <li>
-            <strong>Frequency:</strong> {frequencyOptions.find(opt => opt.id === preferences.frequency)?.label}
-          </li>
-          <li>
-            <strong>Language:</strong> {languageOptions.find(opt => opt.id === preferences.language)?.label}
-          </li>
-          <li>
-            <strong>Format:</strong> {formatOptions.find(opt => opt.id === preferences.format)?.label}
-          </li>
-        </ul>
+                ).join(', ') + (preferences.categories.length > 2 ? ` +${preferences.categories.length - 2}` : '')
+                : 'None selected'
+              }
+            </p>
+          </div>
+          <div>
+            <span className="text-gray-500 text-xs uppercase tracking-wide">Frequency</span>
+            <p className="text-gray-900 font-medium">
+              {frequencyOptions.find(opt => opt.id === preferences.frequency)?.label}
+            </p>
+          </div>
+          <div>
+            <span className="text-gray-500 text-xs uppercase tracking-wide">Language</span>
+            <p className="text-gray-900 font-medium">
+              {languageOptions.find(opt => opt.id === preferences.language)?.label}
+            </p>
+          </div>
+          <div>
+            <span className="text-gray-500 text-xs uppercase tracking-wide">Format</span>
+            <p className="text-gray-900 font-medium">
+              {formatOptions.find(opt => opt.id === preferences.format)?.label}
+            </p>
+          </div>
+        </div>
       </motion.div>
-    </motion.div>
+    </div>
   );
 };
 

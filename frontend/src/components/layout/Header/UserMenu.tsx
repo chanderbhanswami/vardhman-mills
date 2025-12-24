@@ -22,6 +22,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { UserIcon as UserSolidIcon } from '@heroicons/react/24/solid';
 import { useAuth } from '@/hooks/auth/useAuth';
+import { Button } from '@/components/ui/Button';
 
 export interface UserMenuProps {
   className?: string;
@@ -176,6 +177,23 @@ const UserMenu: React.FC<UserMenuProps> = ({
     );
   }
 
+  if (!isAuthenticated) {
+    return (
+      <div className={`flex items-center gap-2 ${className}`}>
+        <Link href="/login">
+          <Button variant="ghost" size="sm">
+            Sign In
+          </Button>
+        </Link>
+        <Link href="/register">
+          <Button size="sm">
+            Sign Up
+          </Button>
+        </Link>
+      </div>
+    );
+  }
+
   const dropdownVariants = {
     hidden: {
       opacity: 0,
@@ -205,7 +223,7 @@ const UserMenu: React.FC<UserMenuProps> = ({
       {/* User Menu Button */}
       <motion.button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center space-x-2 p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors duration-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+        className="flex items-center space-x-2 p-2 text-gray-900 hover:text-primary transition-colors duration-200 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
         aria-label="User Menu"
@@ -214,7 +232,7 @@ const UserMenu: React.FC<UserMenuProps> = ({
         {/* User Avatar */}
         <div className="relative">
           {showAvatar && user?.avatar ? (
-            <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-gray-200 dark:border-gray-700">
+            <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-gray-200">
               <div className="w-full h-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center">
                 <span className="text-sm font-semibold text-white">
                   {user.name.charAt(0).toUpperCase()}
@@ -222,14 +240,14 @@ const UserMenu: React.FC<UserMenuProps> = ({
               </div>
             </div>
           ) : (
-            <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-              <UserIcon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+            <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+              <UserIcon className="w-5 h-5 text-gray-600" />
             </div>
           )}
 
           {/* Verification Badge */}
           {user?.isVerified && (
-            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-900 flex items-center justify-center">
+            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-white flex items-center justify-center">
               <ShieldCheckIcon className="w-2 h-2 text-white" />
             </div>
           )}
@@ -237,7 +255,7 @@ const UserMenu: React.FC<UserMenuProps> = ({
 
         {/* User Info (Desktop) */}
         <div className="hidden lg:block text-left">
-          <div className="text-sm font-medium text-gray-900 dark:text-white">
+          <div className="text-sm font-medium text-gray-900">
             {user?.name || 'User'}
           </div>
         </div>
@@ -255,17 +273,17 @@ const UserMenu: React.FC<UserMenuProps> = ({
             initial="hidden"
             animate="visible"
             exit="hidden"
-            className="absolute right-0 top-full mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 z-50 overflow-hidden"
+            className="absolute right-0 top-full mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 z-50 overflow-hidden"
           >
             {/* User Profile Header */}
             <motion.div
               variants={sectionVariants}
-              className="p-4 bg-gradient-to-r from-primary-50 to-primary-100 dark:from-primary-900/20 dark:to-primary-900/30 border-b border-gray-200 dark:border-gray-700"
+              className="p-4 bg-gradient-to-r from-primary-50 to-primary-100 border-b border-gray-200"
             >
               <div className="flex items-start space-x-3">
                 {/* Avatar */}
                 <div className="relative">
-                  <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white dark:border-gray-700">
+                  <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white">
                     {user?.avatar ? (
                       <div className="w-full h-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center">
                         <span className="text-lg font-bold text-white">
@@ -279,7 +297,7 @@ const UserMenu: React.FC<UserMenuProps> = ({
                     )}
                   </div>
                   {user?.isVerified && (
-                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white dark:border-gray-800 flex items-center justify-center">
+                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white flex items-center justify-center">
                       <ShieldCheckIcon className="w-2.5 h-2.5 text-white" />
                     </div>
                   )}
@@ -288,14 +306,14 @@ const UserMenu: React.FC<UserMenuProps> = ({
                 {/* User Details */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center space-x-2 mb-1">
-                    <h3 className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                    <h3 className="text-sm font-semibold text-gray-900 truncate">
                       {user?.name || 'Guest User'}
                     </h3>
                   </div>
-                  <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
+                  <p className="text-xs text-gray-600 truncate">
                     {user?.email}
                   </p>
-                  <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500 dark:text-gray-400">
+                  <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
                     <span>{user?.orderCount} orders</span>
                   </div>
                 </div>
@@ -308,7 +326,7 @@ const UserMenu: React.FC<UserMenuProps> = ({
                     setIsOpen(false);
                     onProfileClick?.();
                   }}
-                  className="w-full px-3 py-1.5 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+                  className="w-full px-3 py-1.5 bg-white text-gray-700 text-xs font-medium rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   View Profile
                 </button>
@@ -323,7 +341,7 @@ const UserMenu: React.FC<UserMenuProps> = ({
                   variants={sectionVariants}
                   className="p-2"
                 >
-                  <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-3 py-2">
+                  <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider px-3 py-2">
                     {section.title}
                   </h4>
                   <div className="space-y-1">
@@ -338,17 +356,17 @@ const UserMenu: React.FC<UserMenuProps> = ({
                             href={item.href}
                             className={`
                               flex items-center space-x-3 px-3 py-2.5 rounded-lg text-left transition-all duration-200
-                              hover:bg-gray-100 dark:hover:bg-gray-700 group
-                              ${hoveredItem === item.id ? 'bg-primary-50 dark:bg-primary-900/20' : ''}
+                              hover:bg-gray-100 group
+                              ${hoveredItem === item.id ? 'bg-primary-50' : ''}
                             `}
                             onMouseEnter={() => setHoveredItem(item.id)}
                             onMouseLeave={() => setHoveredItem(null)}
                             onClick={() => setIsOpen(false)}
                           >
-                            <IconComponent className="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors" />
+                            <IconComponent className="w-5 h-5 text-gray-500 group-hover:text-primary transition-colors" />
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center justify-between">
-                                <span className="text-sm font-medium text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                                <span className="text-sm font-medium text-gray-900 group-hover:text-primary transition-colors">
                                   {item.label}
                                 </span>
                                 <div className="flex items-center space-x-2">
@@ -358,14 +376,14 @@ const UserMenu: React.FC<UserMenuProps> = ({
                                     </span>
                                   )}
                                   {item.badge && (
-                                    <span className="px-2 py-0.5 bg-primary-100 text-primary-600 text-xs font-semibold rounded-full">
+                                    <span className="px-2 py-0.5 bg-primary-100 text-primary text-xs font-semibold rounded-full">
                                       {item.badge}
                                     </span>
                                   )}
                                 </div>
                               </div>
                               {item.description && (
-                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                <p className="text-xs text-gray-500 mt-0.5">
                                   {item.description}
                                 </p>
                               )}
@@ -382,11 +400,11 @@ const UserMenu: React.FC<UserMenuProps> = ({
             {/* Logout Section */}
             <motion.div
               variants={sectionVariants}
-              className="p-2 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50"
+              className="p-2 border-t border-gray-200 bg-gray-50"
             >
               <button
                 onClick={handleLogout}
-                className="w-full flex items-center space-x-3 px-3 py-2.5 text-left text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors group"
+                className="w-full flex items-center space-x-3 px-3 py-2.5 text-left text-red-600 hover:bg-red-50 rounded-lg transition-colors group"
               >
                 <ArrowRightOnRectangleIcon className="w-5 h-5 group-hover:scale-110 transition-transform" />
                 <span className="text-sm font-medium">Sign Out</span>
@@ -394,8 +412,8 @@ const UserMenu: React.FC<UserMenuProps> = ({
             </motion.div>
 
             {/* Member Since */}
-            <div className="px-4 py-2 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
-              <div className="text-center text-xs text-gray-500 dark:text-gray-400">
+            <div className="px-4 py-2 bg-gray-50 border-t border-gray-200">
+              <div className="text-center text-xs text-gray-500">
                 Member since {new Date(user?.memberSince || '').toLocaleDateString('en-US', {
                   year: 'numeric',
                   month: 'long'

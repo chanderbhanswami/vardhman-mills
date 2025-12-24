@@ -29,9 +29,29 @@ export const useAddToWishlist = (options: UseAddToWishlistOptions = {}) => {
   // Add to wishlist mutation
   const addToWishlistMutation = useMutation({
     mutationFn: async (data: AddToWishlistData): Promise<{ success: boolean; message: string }> => {
+      // GUEST MODE: Use localStorage
       if (!isAuthenticated || !user) {
-        throw new Error('You must be logged in to add items to wishlist');
+        const { addToGuestWishlist, isInGuestWishlist } = await import('@/lib/wishlist/guestWishlist');
+
+        // Check if already in wishlist
+        if (isInGuestWishlist(data.productId)) {
+          throw new Error('Product is already in your wishlist');
+        }
+
+        // Add to localStorage
+        const success = addToGuestWishlist(data.productId);
+
+        if (!success) {
+          throw new Error('Failed to add to wishlist');
+        }
+
+        return {
+          success: true,
+          message: 'Product added to wishlist successfully',
+        };
       }
+
+      // AUTHENTICATED MODE: Use API
 
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 800));
@@ -97,8 +117,8 @@ export const useAddToWishlist = (options: UseAddToWishlistOptions = {}) => {
       onError?.(error instanceof Error ? error : new Error('Failed to add to wishlist'), variables.productId);
     },
     onSuccess: (result, variables) => {
-      // Invalidate and refetch wishlist to get accurate data
-      queryClient.invalidateQueries({ queryKey: ['wishlist', user?.id] });
+      // Invalidate ALL wishlist queries to refetch (works for both guest and authenticated)
+      queryClient.invalidateQueries({ queryKey: ['wishlist'] });
 
       // Also invalidate product queries to update wishlist status
       queryClient.invalidateQueries({ queryKey: ['product', variables.productId] });
@@ -215,25 +235,25 @@ export const useAddToWishlist = (options: UseAddToWishlistOptions = {}) => {
     // Primary action
     addToWishlist: addToWishlistMutation.mutate,
     addToWishlistAsync: addToWishlistMutation.mutateAsync,
-    
+
     // Helpers
     quickAdd,
     addMultiple,
     canAddToWishlist,
-    
+
     // State
     isAdding: addToWishlistMutation.isPending,
     isAddingMultiple: addMultipleToWishlistMutation.isPending,
     error: addToWishlistMutation.error,
-    
+
     // Status helpers
     isLoading: addToWishlistMutation.isPending || addMultipleToWishlistMutation.isPending,
     isSuccess: addToWishlistMutation.isSuccess,
     isError: addToWishlistMutation.isError,
-    
+
     // Reset function
     reset: addToWishlistMutation.reset,
-    
+
     // Mutation objects for advanced usage
     addMutation: addToWishlistMutation,
     addMultipleMutation: addMultipleToWishlistMutation,

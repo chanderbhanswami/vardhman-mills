@@ -3,7 +3,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Product } from '@/types/product.types';
-import { ProductCard } from '@/components/products/ProductCard';
+import { FeaturedCard } from '@/components/home/FeaturedProducts/FeaturedCard';
 import { ProductGridSkeleton } from './ProductGridSkeleton';
 import { ProductList } from './ProductList';
 import { QuickView } from '@/components/products/QuickView';
@@ -11,6 +11,8 @@ import { Grid, List, LayoutGrid, Layers } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
 import { Tooltip } from '@/components/ui/Tooltip';
+import { useCart } from '@/components/providers/CartProvider';
+import { useWishlist } from '@/components/providers/WishlistProvider';
 
 export type GridLayout = 'grid' | 'list' | 'compact' | 'masonry';
 
@@ -25,7 +27,7 @@ export interface ProductGridProps {
   gap?: 'sm' | 'md' | 'lg';
   animateItems?: boolean;
   enableQuickView?: boolean;
-  showQuickView?: boolean; // Alias for enableQuickView
+  showQuickView?: boolean;
   showBadges?: boolean;
   showRating?: boolean;
   showActions?: boolean;
@@ -59,7 +61,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
   gap = 'md',
   animateItems = true,
   enableQuickView: propEnableQuickView = true,
-  showQuickView, // Alias for enableQuickView
+  showQuickView,
   showBadges = true,
   showRating = true,
   showActions = true,
@@ -72,7 +74,38 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
 
+  // Use global cart and wishlist providers
+  const { items: cartItems, addToCart, updateQuantity, removeFromCart } = useCart();
+  const { items: wishlistItems, isInWishlist, addToWishlist, removeFromWishlist } = useWishlist();
+
   const layout = controlledLayout ?? internalLayout;
+
+  // Helper to get product ID
+  const getProductId = (product: Product): string => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return product.id || (product as any)._id || '';
+  };
+
+  // Helper functions for cart state
+  const hasCartItem = useCallback((productId: string): boolean => {
+    return cartItems.some(item => item.productId === productId);
+  }, [cartItems]);
+
+  const getItemQuantity = useCallback((productId: string): number => {
+    const item = cartItems.find(item => item.productId === productId);
+    return item?.quantity || 0;
+  }, [cartItems]);
+
+  const getCartItemId = useCallback((productId: string): string | undefined => {
+    const item = cartItems.find(item => item.productId === productId);
+    return item?.id;
+  }, [cartItems]);
+
+  // Helper for wishlist
+  const getWishlistItemId = useCallback((productId: string): string | undefined => {
+    const item = wishlistItems.find(item => item.productId === productId);
+    return item?.id;
+  }, [wishlistItems]);
 
   const handleLayoutChange = useCallback(
     (newLayout: GridLayout) => {
@@ -103,6 +136,54 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
     },
     [onProductClick]
   );
+
+  // Handle add to cart using provider
+  const handleAddToCart = useCallback(async (product: Product, quantity: number) => {
+    try {
+      const productId = getProductId(product);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const variant = (product as any).variants?.[0];
+
+      await addToCart(productId, quantity, variant ? {
+        color: variant.color,
+        size: variant.size,
+        material: variant.material,
+      } : undefined);
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+    }
+  }, [addToCart]);
+
+  // Handle update cart quantity using provider
+  const handleUpdateCartQuantity = useCallback(async (product: Product, quantity: number) => {
+    const productId = getProductId(product);
+    const itemId = getCartItemId(productId);
+    if (itemId) {
+      await updateQuantity(itemId, quantity);
+    }
+  }, [updateQuantity, getCartItemId]);
+
+  // Handle remove from cart using provider
+  const handleRemoveFromCart = useCallback(async (product: Product) => {
+    const productId = getProductId(product);
+    const itemId = getCartItemId(productId);
+    if (itemId) {
+      await removeFromCart(itemId);
+    }
+  }, [removeFromCart, getCartItemId]);
+
+  // Handle wishlist toggle using provider
+  const handleToggleWishlist = useCallback(async (product: Product) => {
+    const productId = getProductId(product);
+    if (isInWishlist(productId)) {
+      const itemId = getWishlistItemId(productId);
+      if (itemId) {
+        await removeFromWishlist(itemId);
+      }
+    } else {
+      await addToWishlist(productId);
+    }
+  }, [addToWishlist, removeFromWishlist, isInWishlist, getWishlistItemId]);
 
   // Save layout preference to localStorage
   useEffect(() => {
@@ -197,31 +278,44 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
           )}
         >
           <AnimatePresence mode="popLayout">
-            {products.map((product, index) => (
-              <motion.div
-                key={product.id}
-                initial={animateItems ? { opacity: 0, y: 20 } : false}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{
-                  duration: 0.3,
-                  delay: animateItems ? index * 0.05 : 0,
-                  ease: 'easeOut',
-                }}
-                layout={animateItems}
-              >
-                <ProductCard
-                  product={product}
-                  variant={layout === 'compact' ? 'compact' : 'grid'}
-                  showQuickView={enableQuickView}
-                  showBadges={showBadges}
-                  showRating={showRating}
-                  showActions={showActions}
-                  priority={priority && index < 4}
-                  onQuickView={enableQuickView ? handleQuickView : undefined}
-                />
-              </motion.div>
-            ))}
+            {products.map((product, index) => {
+              const productId = getProductId(product);
+              return (
+                <motion.div
+                  key={`product-grid-${productId || index}-${index}`}
+                  initial={animateItems ? { opacity: 0, y: 20 } : false}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{
+                    duration: 0.3,
+                    delay: animateItems ? index * 0.05 : 0,
+                    ease: 'easeOut',
+                  }}
+                  layout={animateItems}
+                >
+                  <FeaturedCard
+                    product={product}
+                    showQuickView={enableQuickView}
+                    showWishlist={true}
+                    showAddToCart={true}
+                    showShare={true}
+                    showCompare={true}
+                    showRating={showRating}
+                    showColorSwatches={true}
+                    enableImageZoom={true}
+                    isInWishlist={isInWishlist(productId)}
+                    isInCart={hasCartItem(productId)}
+                    cartQuantity={getItemQuantity(productId)}
+                    onAddToCart={handleAddToCart}
+                    onUpdateCartQuantity={handleUpdateCartQuantity}
+                    onRemoveFromCart={handleRemoveFromCart}
+                    onAddToWishlist={() => handleToggleWishlist(product)}
+                    onRemoveFromWishlist={() => handleToggleWishlist(product)}
+                    onQuickView={enableQuickView ? handleQuickView : undefined}
+                  />
+                </motion.div>
+              );
+            })}
           </AnimatePresence>
         </div>
       )}

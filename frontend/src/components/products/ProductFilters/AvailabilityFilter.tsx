@@ -31,9 +31,9 @@ const AvailabilityFilter: React.FC<AvailabilityFilterProps> = ({
   disabled = false,
 }) => {
   return (
-    <div className={cn('space-y-3', className)}>
-      <h3 className="font-semibold text-gray-900">Availability</h3>
-      
+    <div className="space-y-3">
+      <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">Availability</h3>
+
       <div className="space-y-2">
         {availabilityOptions.map((option, index) => {
           const isSelected = selectedAvailability === option.value;
@@ -75,7 +75,7 @@ const AvailabilityFilter: React.FC<AvailabilityFilterProps> = ({
                     </motion.div>
                   )}
                 </div>
-                
+
                 <span className={cn('font-medium', option.color)}>
                   {option.label}
                 </span>

@@ -56,7 +56,7 @@ const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
 
     // Default route configurations
     const defaultRouteLabels: RouteConfig = {
-      '/': { label: 'Home', icon: <HomeIcon className="w-4 h-4" /> },
+      '/': { label: 'Home', icon: <HomeIcon className="w-4 h-4 text-black" /> },
       '/products': { label: 'Products' },
       '/categories': { label: 'Categories' },
       '/brands': { label: 'Brands' },
@@ -89,7 +89,7 @@ const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
       breadcrumbItems.push({
         label: homeLabel,
         href: homeHref,
-        icon: <HomeIcon className="w-4 h-4" />,
+        icon: <HomeIcon className="w-4 h-4 text-black" />,
         isActive: pathname === homeHref,
       });
     }
@@ -99,7 +99,7 @@ const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
     pathSegments.forEach((segment, index) => {
       currentPath += `/${segment}`;
       const isLast = index === pathSegments.length - 1;
-      
+
       // Get label from route config or format segment
       const routeConfig = routeLabels[currentPath];
       let label: string;
@@ -113,7 +113,7 @@ const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
       } else {
         label = formatSegmentLabel(segment);
       }
-      
+
       // Handle dynamic routes - check if segment exists in search params
       const queryValue = searchParams.get(segment);
       if (queryValue) {

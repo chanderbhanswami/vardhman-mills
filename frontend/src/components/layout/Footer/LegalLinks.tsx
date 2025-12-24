@@ -33,7 +33,7 @@ const LegalLinks: React.FC<LegalLinksProps> = ({
   showIcons = false,
 }) => {
   const linkVariants = {
-    hover: { 
+    hover: {
       y: -1,
       transition: { duration: 0.2 }
     }
@@ -52,9 +52,9 @@ const LegalLinks: React.FC<LegalLinksProps> = ({
               href={link.href}
               className={`
                 block text-sm transition-colors duration-200
-                ${link.isImportant 
-                  ? 'text-gray-900 dark:text-white font-medium hover:text-blue-600 dark:hover:text-blue-400' 
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                ${link.isImportant
+                  ? 'text-white font-bold hover:text-blue-400'
+                  : 'text-gray-400 hover:text-white font-medium'
                 }
               `}
             >
@@ -82,9 +82,9 @@ const LegalLinks: React.FC<LegalLinksProps> = ({
             href={link.href}
             className={`
               text-sm transition-colors duration-200
-              ${link.isImportant 
-                ? 'text-gray-900 dark:text-white font-medium hover:text-blue-600 dark:hover:text-blue-400' 
-                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+              ${link.isImportant
+                ? 'text-white font-bold hover:text-blue-400'
+                : 'text-gray-400 hover:text-white font-medium'
               }
             `}
           >
@@ -93,10 +93,10 @@ const LegalLinks: React.FC<LegalLinksProps> = ({
               <span className="absolute -top-1 -right-1 w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
             )}
           </Link>
-          
+
           {/* Separator */}
           {index < legalLinks.length - 1 && variant === 'horizontal' && (
-            <span className="absolute -right-3 top-1/2 transform -translate-y-1/2 text-gray-300 dark:text-gray-600">
+            <span className="absolute -right-3 top-1/2 transform -translate-y-1/2 text-gray-600">
               •
             </span>
           )}

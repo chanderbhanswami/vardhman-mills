@@ -37,14 +37,14 @@ const QuickLinks: React.FC<QuickLinksProps> = ({
   variant = 'default',
 }) => {
   const linkVariants = {
-    hover: { 
+    hover: {
       x: 4,
       transition: { type: 'tween' as const, duration: 0.2 }
     }
   };
 
   const iconVariants = {
-    hover: { 
+    hover: {
       x: 2,
       transition: { type: 'tween' as const, duration: 0.2 }
     }
@@ -53,7 +53,7 @@ const QuickLinks: React.FC<QuickLinksProps> = ({
   if (variant === 'minimal') {
     return (
       <div className={`${className}`}>
-        <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
+        <h3 className="text-sm font-semibold text-white mb-3">
           {title}
         </h3>
         <ul className="space-y-2">
@@ -61,7 +61,7 @@ const QuickLinks: React.FC<QuickLinksProps> = ({
             <li key={link.href}>
               <Link
                 href={link.href}
-                className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors duration-200"
+                className="text-sm text-gray-300 hover:text-white transition-colors duration-200"
               >
                 {link.label}
               </Link>
@@ -74,10 +74,10 @@ const QuickLinks: React.FC<QuickLinksProps> = ({
 
   return (
     <div className={`${className}`}>
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">
+      <h3 className="text-lg font-semibold text-white mb-4">
         {title}
       </h3>
-      
+
       <div className="space-y-3">
         {defaultLinks.map((link) => (
           <motion.div
@@ -88,7 +88,7 @@ const QuickLinks: React.FC<QuickLinksProps> = ({
           >
             <Link
               href={link.href}
-              className="flex items-center text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200"
+              className="flex items-center text-gray-300 hover:text-blue-400 transition-colors duration-200"
             >
               <motion.div
                 variants={iconVariants}
@@ -96,17 +96,17 @@ const QuickLinks: React.FC<QuickLinksProps> = ({
               >
                 <ChevronRightIcon className="w-4 h-4 mr-1" />
               </motion.div>
-              
-              <span className="relative">
+
+              <span className="relative font-medium">
                 {link.label}
-                
+
                 {/* New badge */}
                 {link.isNew && (
                   <span className="absolute -top-2 -right-8 px-1.5 py-0.5 text-xs font-bold text-white bg-green-500 rounded-full">
                     New
                   </span>
                 )}
-                
+
                 {/* Popular badge */}
                 {link.isPopular && (
                   <span className="absolute -top-2 -right-12 px-1.5 py-0.5 text-xs font-bold text-white bg-orange-500 rounded-full">
@@ -118,18 +118,18 @@ const QuickLinks: React.FC<QuickLinksProps> = ({
           </motion.div>
         ))}
       </div>
-      
+
       {/* Call to Action */}
-      <div className="mt-8 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-        <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-100 mb-2">
+      <div className="mt-8 p-4 bg-gray-800 border border-gray-700 rounded-lg shadow-sm">
+        <h4 className="text-sm font-semibold text-blue-100 mb-2">
           Need Custom Solutions?
         </h4>
-        <p className="text-xs text-blue-700 dark:text-blue-300 mb-3">
+        <p className="text-xs text-blue-300 mb-3 font-medium">
           Get in touch with our experts for customized textile solutions.
         </p>
         <Link
           href="/contact"
-          className="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 transition-colors duration-200"
+          className="inline-flex items-center text-sm font-bold text-blue-400 hover:text-blue-200 transition-colors duration-200"
         >
           Contact Us
           <ChevronRightIcon className="w-4 h-4 ml-1" />

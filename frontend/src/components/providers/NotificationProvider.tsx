@@ -191,7 +191,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
   const processingQueue = useRef(false);
 
   // Configuration
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5000/api/v1';
   const MAX_NOTIFICATIONS = 100;
   const QUEUE_PROCESS_INTERVAL = 1000; // 1 second
 

@@ -78,7 +78,7 @@ const MaterialFilter: React.FC<MaterialFilterProps> = ({
   return (
     <div className={cn('space-y-4', className)}>
       <div className="flex items-center justify-between">
-        <h3 className="font-semibold text-gray-900">Material</h3>
+        <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">Material</h3>
         {selectedCount > 0 && (
           <button
             onClick={handleClearAll}
@@ -154,22 +154,23 @@ const MaterialFilter: React.FC<MaterialFilterProps> = ({
 
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 min-w-0 flex-1">
                           <span
                             className={cn(
-                              'text-sm',
+                              'text-sm truncate',
                               isSelected ? 'font-medium text-gray-900' : 'text-gray-700'
                             )}
+                            title={material.name}
                           >
                             {material.name}
                           </span>
                           {showDescriptions && material.description && (
                             <Tooltip content={material.description}>
-                              <Info className="h-3.5 w-3.5 text-gray-400 cursor-help" />
+                              <Info className="h-3.5 w-3.5 text-gray-400 cursor-help flex-shrink-0" />
                             </Tooltip>
                           )}
                         </div>
-                        <span className="text-xs text-gray-500 whitespace-nowrap">
+                        <span className="text-xs text-gray-500 whitespace-nowrap flex-shrink-0">
                           ({material.count})
                         </span>
                       </div>

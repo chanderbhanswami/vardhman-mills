@@ -46,7 +46,7 @@ import {
   PlusIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
-import { 
+import {
   BellIcon as BellSolidIcon,
 } from '@heroicons/react/24/solid';
 import { useSelector, useDispatch } from 'react-redux';
@@ -64,8 +64,8 @@ import { useMediaQuery } from '@/hooks/common/useMediaQuery';
 import { useLocalStorage } from '@/hooks/localStorage/useLocalStorage';
 import { ACCOUNT_ROUTES } from '@/constants/routes.constants';
 import { useAuth } from '@/components/providers';
-import { useCart } from '@/contexts/CartContext';
-import { useWishlist } from '@/contexts/WishlistContext';
+import { useCart } from '@/components/providers/CartProvider';
+import { useWishlist } from '@/components/providers/WishlistProvider';
 import { useNotification } from '@/hooks/notification/useNotification';
 import { selectUserProfile } from '@/store/slices/userSlice';
 import { clearUser } from '@/store/slices/userSlice';
@@ -133,31 +133,31 @@ export const AccountHeader: React.FC<AccountHeaderProps> = ({
     enableBrowserNotifications: false,
     position: 'top-right',
   });
-  const { 
+  const {
     notifications: allNotifications,
     unreadCount,
     markAsRead,
     markAllAsRead,
   } = notificationHook;
-  
+
   // Filter notifications to show only relevant ones (not toast notifications)
-  const notifications = useMemo(() => 
+  const notifications = useMemo(() =>
     allNotifications
       .filter(n => n.category !== 'toast')
       .slice(0, 10),
     [allNotifications]
   );
-  
+
   // Convert StoredNotification to Notification type for NotificationPanel
-  const displayNotifications: Notification[] = useMemo(() => 
+  const displayNotifications: Notification[] = useMemo(() =>
     notifications.map(notif => ({
       id: notif.id,
       title: notif.title || 'Notification',
       message: notif.message,
-      type: (notif.type === 'success' ? 'order_update' : 
-             notif.type === 'error' ? 'system_alert' : 
-             notif.type === 'warning' ? 'account_security' : 
-             notif.type === 'info' ? 'announcement' : 'system_alert'),
+      type: (notif.type === 'success' ? 'order_update' :
+        notif.type === 'error' ? 'system_alert' :
+          notif.type === 'warning' ? 'account_security' :
+            notif.type === 'info' ? 'announcement' : 'system_alert'),
       category: 'transactional',
       priority: notif.priority || 'normal',
       channels: ['in_app'],
@@ -237,7 +237,7 @@ export const AccountHeader: React.FC<AccountHeaderProps> = ({
     } as Notification)),
     [notifications]
   );
-  
+
   const userProfile = useSelector(selectUserProfile);
   const isMobile = useMediaQuery('(max-width: 768px)');
   const recentSearchesStorage = useLocalStorage<string[]>('account-recent-searches', { defaultValue: [] });
@@ -258,7 +258,7 @@ export const AccountHeader: React.FC<AccountHeaderProps> = ({
   // Quick actions configuration
   const cartItems = cartContext.state.items?.length || 0;
   const wishlistItems = wishlistContext.state.items?.length || 0;
-  
+
   // Handlers - Define handleLogout early since it's used in userMenuActions
   const handleLogout = useCallback(async () => {
     try {
@@ -372,8 +372,8 @@ export const AccountHeader: React.FC<AccountHeaderProps> = ({
       href?: string;
       icon?: React.ComponentType<{ className?: string }>;
     }> = [
-      { label: 'Account', href: ACCOUNT_ROUTES.DASHBOARD, icon: UserIcon },
-    ];
+        { label: 'Account', href: ACCOUNT_ROUTES.DASHBOARD, icon: UserIcon },
+      ];
 
     if (title && title !== 'Dashboard') {
       items.push({ label: title, href: undefined, icon: undefined });
@@ -388,7 +388,7 @@ export const AccountHeader: React.FC<AccountHeaderProps> = ({
       // Add to recent searches
       const updated = [query, ...recentSearches.filter((s: string) => s !== query)].slice(0, 5);
       recentSearchesStorage.setValue(updated);
-      
+
       // Navigate to search results
       router.push(`/search?q=${encodeURIComponent(query)}`);
       setShowSearchModal(false);

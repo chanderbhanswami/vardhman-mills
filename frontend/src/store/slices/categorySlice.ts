@@ -29,11 +29,11 @@ export const fetchCategories = createAsyncThunk(
     filters?: CategoryFilters;
   } = {}) => {
     const queryParams = new URLSearchParams();
-    
+
     if (params.parentId) queryParams.append('parentId', params.parentId);
     if (params.level !== undefined) queryParams.append('level', params.level.toString());
     if (params.includeProducts) queryParams.append('includeProducts', 'true');
-    
+
     if (params.filters) {
       if (params.filters.status) queryParams.append('status', params.filters.status);
       if (params.filters.featured !== undefined) queryParams.append('featured', params.filters.featured.toString());
@@ -46,7 +46,7 @@ export const fetchCategories = createAsyncThunk(
     if (!response.ok) {
       throw new Error('Failed to fetch categories');
     }
-    
+
     return response.json();
   }
 );
@@ -105,11 +105,11 @@ export const fetchCategoryProducts = createAsyncThunk(
     filters?: Record<string, unknown>;
   }) => {
     const queryParams = new URLSearchParams();
-    
+
     if (params.page) queryParams.append('page', params.page.toString());
     if (params.limit) queryParams.append('limit', params.limit.toString());
     if (params.sortBy) queryParams.append('sortBy', params.sortBy);
-    
+
     if (params.filters) {
       Object.entries(params.filters).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
@@ -122,7 +122,7 @@ export const fetchCategoryProducts = createAsyncThunk(
     if (!response.ok) {
       throw new Error('Failed to fetch category products');
     }
-    
+
     return response.json();
   }
 );
@@ -138,7 +138,7 @@ export const searchCategories = createAsyncThunk(
     if (!response.ok) {
       throw new Error('Failed to search categories');
     }
-    
+
     return response.json();
   }
 );
@@ -149,40 +149,40 @@ interface CategoryState {
   featuredCategories: Category[];
   categoryHierarchy: CategoryHierarchy[];
   currentCategory: Category | null;
-  
+
   // Category products
   categoryProducts: Product[];
   productsPagination: PaginationMeta;
-  
+
   // Navigation and breadcrumbs
   breadcrumbs: Category[];
   navigationPath: string[];
-  
+
   // Search
   searchResults: Category[];
   searchQuery: string;
-  
+
   // Filters and sorting
   filters: CategoryFilters;
-  
+
   // Loading states
   isLoading: boolean;
   isLoadingCategory: boolean;
   isLoadingProducts: boolean;
   isSearching: boolean;
-  
+
   // UI state
-  expandedCategories: Set<string>;
+  expandedCategories: string[];
   selectedLevel: number;
   showSubcategories: boolean;
   viewType: 'grid' | 'list' | 'tree';
-  
+
   // Error handling
   error: string | null;
   categoryError: string | null;
   productsError: string | null;
   searchError: string | null;
-  
+
   // Cache management
   lastFetch: number;
   categoryCache: Record<string, { category: Category; timestamp: number }>;
@@ -212,7 +212,7 @@ const initialState: CategoryState = {
   isLoadingCategory: false,
   isLoadingProducts: false,
   isSearching: false,
-  expandedCategories: new Set<string>(),
+  expandedCategories: [],
   selectedLevel: 0,
   showSubcategories: true,
   viewType: 'grid',
@@ -233,17 +233,17 @@ const categorySlice = createSlice({
     setFilters: (state, action: PayloadAction<CategoryFilters>) => {
       state.filters = action.payload;
     },
-    
+
     clearFilters: (state) => {
       state.filters = {};
     },
-    
+
     // Navigation and UI
     setBreadcrumbs: (state, action: PayloadAction<Category[]>) => {
       state.breadcrumbs = action.payload;
       state.navigationPath = action.payload.map(cat => cat.slug);
     },
-    
+
     addToBreadcrumbs: (state, action: PayloadAction<Category>) => {
       const exists = state.breadcrumbs.find(cat => cat.id === action.payload.id);
       if (!exists) {
@@ -251,70 +251,71 @@ const categorySlice = createSlice({
         state.navigationPath.push(action.payload.slug);
       }
     },
-    
+
     clearBreadcrumbs: (state) => {
       state.breadcrumbs = [];
       state.navigationPath = [];
     },
-    
+
     // Expanded categories management
     toggleCategoryExpansion: (state, action: PayloadAction<string>) => {
       const categoryId = action.payload;
-      if (state.expandedCategories.has(categoryId)) {
-        state.expandedCategories.delete(categoryId);
+      if (state.expandedCategories.includes(categoryId)) {
+        state.expandedCategories = state.expandedCategories.filter(id => id !== categoryId);
       } else {
-        state.expandedCategories.add(categoryId);
+        state.expandedCategories.push(categoryId);
       }
     },
-    
+
     expandCategory: (state, action: PayloadAction<string>) => {
-      state.expandedCategories.add(action.payload);
+      if (!state.expandedCategories.includes(action.payload)) {
+        state.expandedCategories.push(action.payload);
+      }
     },
-    
+
     collapseCategory: (state, action: PayloadAction<string>) => {
-      state.expandedCategories.delete(action.payload);
+      state.expandedCategories = state.expandedCategories.filter(id => id !== action.payload);
     },
-    
+
     expandAllCategories: (state) => {
-      state.categories.forEach(category => {
-        state.expandedCategories.add(category.id);
-      });
+      const allIds = state.categories.map(category => category.id);
+      state.expandedCategories = Array.from(new Set([...state.expandedCategories, ...allIds]));
     },
-    
+
     collapseAllCategories: (state) => {
-      state.expandedCategories.clear();
+      state.expandedCategories = [];
     },
-    
+
     // View settings
     setSelectedLevel: (state, action: PayloadAction<number>) => {
       state.selectedLevel = action.payload;
     },
-    
+
     setShowSubcategories: (state, action: PayloadAction<boolean>) => {
       state.showSubcategories = action.payload;
     },
-    
+
     setViewType: (state, action: PayloadAction<'grid' | 'list' | 'tree'>) => {
       state.viewType = action.payload;
     },
-    
+
     // Search
     setSearchQuery: (state, action: PayloadAction<string>) => {
       state.searchQuery = action.payload;
     },
-    
+
     clearSearchResults: (state) => {
       state.searchResults = [];
       state.searchQuery = '';
     },
-    
+
     // Category management
     clearCurrentCategory: (state) => {
       state.currentCategory = null;
       state.categoryProducts = [];
       state.productsPagination = initialState.productsPagination;
     },
-    
+
     // Error handling
     clearError: (state) => {
       state.error = null;
@@ -322,18 +323,18 @@ const categorySlice = createSlice({
       state.productsError = null;
       state.searchError = null;
     },
-    
+
     // Cache management
     invalidateCache: (state) => {
       state.lastFetch = 0;
       state.hierarchyLastFetch = 0;
       state.categoryCache = {};
     },
-    
+
     invalidateCategoryCache: (state, action: PayloadAction<string>) => {
       delete state.categoryCache[action.payload];
     },
-    
+
     // Set featured categories
     setFeaturedCategories: (state, action: PayloadAction<Category[]>) => {
       state.featuredCategories = action.payload;
@@ -367,7 +368,7 @@ const categorySlice = createSlice({
         state.isLoadingCategory = false;
         const category = action.payload.category || action.payload;
         state.currentCategory = category;
-        
+
         // Cache the category
         if (category?.id) {
           state.categoryCache[category.id] = {
@@ -375,7 +376,7 @@ const categorySlice = createSlice({
             timestamp: Date.now(),
           };
         }
-        
+
         state.categoryError = null;
       })
       .addCase(fetchCategoryById.rejected, (state, action) => {
@@ -393,7 +394,7 @@ const categorySlice = createSlice({
         state.isLoadingCategory = false;
         const category = action.payload.category || action.payload;
         state.currentCategory = category;
-        
+
         // Cache the category
         if (category?.id) {
           state.categoryCache[category.id] = {
@@ -401,7 +402,7 @@ const categorySlice = createSlice({
             timestamp: Date.now(),
           };
         }
-        
+
         state.categoryError = null;
       })
       .addCase(fetchCategoryBySlug.rejected, (state, action) => {
@@ -525,7 +526,7 @@ export const selectCategoryBySlug = (state: { category: CategoryState }, slug: s
 
 export const selectCategoryStats = (state: { category: CategoryState }) => {
   const { categories } = state.category;
-  
+
   return {
     totalCategories: categories.length,
     activeCategories: categories.filter(cat => cat.status === 'active').length,
@@ -537,26 +538,26 @@ export const selectCategoryStats = (state: { category: CategoryState }) => {
 
 export const selectFilteredCategories = (state: { category: CategoryState }) => {
   const { categories, filters } = state.category;
-  
+
   return categories.filter(category => {
     // Parent filter
     if (filters.parentId !== undefined && category.parentId !== filters.parentId) return false;
-    
+
     // Level filter
     if (filters.level !== undefined && category.level !== filters.level) return false;
-    
+
     // Status filter
     if (filters.status && category.status !== filters.status) return false;
-    
+
     // Featured filter
     if (filters.featured !== undefined && category.isFeatured !== filters.featured) return false;
-    
+
     // Has products filter
     if (filters.hasProducts !== undefined) {
       const hasProducts = category.productCount > 0;
       if (hasProducts !== filters.hasProducts) return false;
     }
-    
+
     return true;
   });
 };

@@ -105,13 +105,13 @@ export const searchProducts = createAsyncThunk(
     includeSuggestions?: boolean;
   }) => {
     const queryParams = new URLSearchParams();
-    
+
     queryParams.append('q', params.query);
     if (params.page) queryParams.append('page', params.page.toString());
     if (params.limit) queryParams.append('limit', params.limit.toString());
     if (params.includeCategories) queryParams.append('includeCategories', 'true');
     if (params.includeSuggestions) queryParams.append('includeSuggestions', 'true');
-    
+
     if (params.filters) {
       if (params.filters.categories?.length) {
         queryParams.append('categories', params.filters.categories.join(','));
@@ -145,9 +145,9 @@ export const searchProducts = createAsyncThunk(
     if (!response.ok) {
       throw new Error('Search failed');
     }
-    
+
     const result = await response.json();
-    
+
     // Store search analytics
     if (params.query.trim()) {
       const analytics: SearchAnalytics = {
@@ -158,19 +158,19 @@ export const searchProducts = createAsyncThunk(
         filters: params.filters || {},
         sessionId: sessionStorage.getItem('sessionId') || 'anonymous',
       };
-      
+
       // Store in localStorage for analytics
       const existingAnalytics = JSON.parse(localStorage.getItem('searchAnalytics') || '[]');
       existingAnalytics.push(analytics);
-      
+
       // Keep only last 100 searches
       if (existingAnalytics.length > 100) {
         existingAnalytics.splice(0, existingAnalytics.length - 100);
       }
-      
+
       localStorage.setItem('searchAnalytics', JSON.stringify(existingAnalytics));
     }
-    
+
     return result;
   }
 );
@@ -179,12 +179,12 @@ export const fetchSearchSuggestions = createAsyncThunk(
   'search/fetchSearchSuggestions',
   async (query: string) => {
     if (!query.trim()) return { suggestions: [] };
-    
+
     const response = await fetch(`/api/search/suggestions?q=${encodeURIComponent(query)}`);
     if (!response.ok) {
       throw new Error('Failed to fetch suggestions');
     }
-    
+
     return response.json();
   }
 );
@@ -196,7 +196,7 @@ export const fetchPopularSearches = createAsyncThunk(
     if (!response.ok) {
       throw new Error('Failed to fetch popular searches');
     }
-    
+
     return response.json();
   }
 );
@@ -208,7 +208,7 @@ export const fetchTrendingSearches = createAsyncThunk(
     if (!response.ok) {
       throw new Error('Failed to fetch trending searches');
     }
-    
+
     return response.json();
   }
 );
@@ -220,7 +220,7 @@ export const fetchSearchFacets = createAsyncThunk(
     if (!response.ok) {
       throw new Error('Failed to fetch search facets');
     }
-    
+
     return response.json();
   }
 );
@@ -239,11 +239,11 @@ export const trackSearchClick = createAsyncThunk(
       },
       body: JSON.stringify(params),
     });
-    
+
     if (!response.ok) {
       throw new Error('Failed to track search click');
     }
-    
+
     return response.json();
   }
 );
@@ -254,51 +254,51 @@ interface SearchState {
   suggestions: SearchSuggestion[];
   popularSearches: PopularSearch[];
   trendingSearches: PopularSearch[];
-  
+
   // Current search
   query: string;
   lastQuery: string;
   filters: SearchFilters;
-  
+
   // Recent searches
   recentSearches: RecentSearch[];
-  
+
   // Pagination
   pagination: PaginationMeta;
-  
+
   // Loading states
   isSearching: boolean;
   isLoadingSuggestions: boolean;
   isLoadingFacets: boolean;
-  
+
   // UI state
   showSuggestions: boolean;
   showFilters: boolean;
   selectedSuggestionIndex: number;
   searchInputFocused: boolean;
-  
+
   // Search history and analytics
   searchHistory: RecentSearch[];
   searchAnalytics: SearchAnalytics[];
-  
+
   // Auto-complete and suggestions
   autoCompleteEnabled: boolean;
   suggestionDelay: number;
   suggestionMinLength: number;
-  
+
   // Advanced search
   advancedSearchVisible: boolean;
   searchMode: 'simple' | 'advanced' | 'visual';
-  
+
   // Error handling
   error: string | null;
   suggestionError: string | null;
-  
+
   // Performance metrics
   lastSearchTime: number;
   averageSearchTime: number;
   searchCount: number;
-  
+
   // Cache
   resultsCache: Record<string, { result: SearchResult; timestamp: number; filters: SearchFilters }>;
   suggestionCache: Record<string, { suggestions: SearchSuggestion[]; timestamp: number }>;
@@ -315,7 +315,7 @@ const initialState: SearchState = {
   filters: {
     sortBy: 'relevance',
   },
-  recentSearches: JSON.parse(localStorage.getItem('recentSearches') || '[]'),
+  recentSearches: typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('recentSearches') || '[]') : [],
   pagination: {
     page: 1,
     limit: 20,
@@ -331,8 +331,8 @@ const initialState: SearchState = {
   showFilters: false,
   selectedSuggestionIndex: -1,
   searchInputFocused: false,
-  searchHistory: JSON.parse(localStorage.getItem('searchHistory') || '[]'),
-  searchAnalytics: JSON.parse(localStorage.getItem('searchAnalytics') || '[]'),
+  searchHistory: typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('searchHistory') || '[]') : [],
+  searchAnalytics: typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('searchAnalytics') || '[]') : [],
   autoCompleteEnabled: true,
   suggestionDelay: 300,
   suggestionMinLength: 2,
@@ -356,22 +356,22 @@ const searchSlice = createSlice({
     setQuery: (state, action: PayloadAction<string>) => {
       state.query = action.payload;
     },
-    
+
     clearQuery: (state) => {
       state.query = '';
       state.results = null;
       state.suggestions = [];
     },
-    
+
     // Filter management
     setFilters: (state, action: PayloadAction<SearchFilters>) => {
       state.filters = { ...state.filters, ...action.payload };
     },
-    
+
     clearFilters: (state) => {
       state.filters = { sortBy: 'relevance' };
     },
-    
+
     updateFilter: (state, action: PayloadAction<{ key: keyof SearchFilters; value: unknown }>) => {
       const { key, value } = action.payload;
       if (value === null || value === undefined) {
@@ -380,16 +380,16 @@ const searchSlice = createSlice({
         state.filters[key] = value as never;
       }
     },
-    
+
     // Suggestion management
     setShowSuggestions: (state, action: PayloadAction<boolean>) => {
       state.showSuggestions = action.payload;
     },
-    
+
     setSelectedSuggestionIndex: (state, action: PayloadAction<number>) => {
       state.selectedSuggestionIndex = action.payload;
     },
-    
+
     selectNextSuggestion: (state) => {
       if (state.selectedSuggestionIndex < state.suggestions.length - 1) {
         state.selectedSuggestionIndex += 1;
@@ -397,7 +397,7 @@ const searchSlice = createSlice({
         state.selectedSuggestionIndex = 0;
       }
     },
-    
+
     selectPreviousSuggestion: (state) => {
       if (state.selectedSuggestionIndex > 0) {
         state.selectedSuggestionIndex -= 1;
@@ -405,7 +405,7 @@ const searchSlice = createSlice({
         state.selectedSuggestionIndex = state.suggestions.length - 1;
       }
     },
-    
+
     // UI state
     setSearchInputFocused: (state, action: PayloadAction<boolean>) => {
       state.searchInputFocused = action.payload;
@@ -414,113 +414,123 @@ const searchSlice = createSlice({
         state.selectedSuggestionIndex = -1;
       }
     },
-    
+
     setShowFilters: (state, action: PayloadAction<boolean>) => {
       state.showFilters = action.payload;
     },
-    
+
     toggleFilters: (state) => {
       state.showFilters = !state.showFilters;
     },
-    
+
     setAdvancedSearchVisible: (state, action: PayloadAction<boolean>) => {
       state.advancedSearchVisible = action.payload;
     },
-    
+
     setSearchMode: (state, action: PayloadAction<'simple' | 'advanced' | 'visual'>) => {
       state.searchMode = action.payload;
     },
-    
+
     // Recent searches
     addRecentSearch: (state, action: PayloadAction<RecentSearch>) => {
       // Remove if already exists
       state.recentSearches = state.recentSearches.filter(
         search => search.query !== action.payload.query
       );
-      
+
       // Add to beginning
       state.recentSearches.unshift(action.payload);
-      
+
       // Keep only last 20
       if (state.recentSearches.length > 20) {
         state.recentSearches = state.recentSearches.slice(0, 20);
       }
-      
-      // Persist to localStorage
-      localStorage.setItem('recentSearches', JSON.stringify(state.recentSearches));
+
+      // Persist to localStorage (SSR-safe)
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('recentSearches', JSON.stringify(state.recentSearches));
+      }
     },
-    
+
     removeRecentSearch: (state, action: PayloadAction<string>) => {
       state.recentSearches = state.recentSearches.filter(
         search => search.query !== action.payload
       );
-      localStorage.setItem('recentSearches', JSON.stringify(state.recentSearches));
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('recentSearches', JSON.stringify(state.recentSearches));
+      }
     },
-    
+
     clearRecentSearches: (state) => {
       state.recentSearches = [];
-      localStorage.removeItem('recentSearches');
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('recentSearches');
+      }
     },
-    
+
     // Search analytics
     addSearchAnalytics: (state, action: PayloadAction<SearchAnalytics>) => {
       state.searchAnalytics.push(action.payload);
-      
+
       // Keep only last 100
       if (state.searchAnalytics.length > 100) {
         state.searchAnalytics = state.searchAnalytics.slice(-100);
       }
-      
-      localStorage.setItem('searchAnalytics', JSON.stringify(state.searchAnalytics));
+
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('searchAnalytics', JSON.stringify(state.searchAnalytics));
+      }
     },
-    
+
     updateSearchAnalytics: (state, action: PayloadAction<{ query: string; productId: string }>) => {
       const { query, productId } = action.payload;
       const analytics = state.searchAnalytics.find(
         item => item.query === query && Math.abs(item.timestamp - Date.now()) < 60000
       );
-      
+
       if (analytics) {
         analytics.clickedProducts.push(productId);
-        localStorage.setItem('searchAnalytics', JSON.stringify(state.searchAnalytics));
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('searchAnalytics', JSON.stringify(state.searchAnalytics));
+        }
       }
     },
-    
+
     // Settings
     setAutoCompleteEnabled: (state, action: PayloadAction<boolean>) => {
       state.autoCompleteEnabled = action.payload;
     },
-    
+
     setSuggestionDelay: (state, action: PayloadAction<number>) => {
       state.suggestionDelay = action.payload;
     },
-    
+
     setSuggestionMinLength: (state, action: PayloadAction<number>) => {
       state.suggestionMinLength = action.payload;
     },
-    
+
     // Error handling
     clearError: (state) => {
       state.error = null;
       state.suggestionError = null;
     },
-    
+
     // Cache management
     invalidateCache: (state) => {
       state.resultsCache = {};
       state.suggestionCache = {};
     },
-    
+
     cleanupCache: (state) => {
       const now = Date.now();
-      
+
       // Clean results cache
       Object.keys(state.resultsCache).forEach(key => {
         if (now - state.resultsCache[key].timestamp > state.cacheExpiry) {
           delete state.resultsCache[key];
         }
       });
-      
+
       // Clean suggestion cache
       Object.keys(state.suggestionCache).forEach(key => {
         if (now - state.suggestionCache[key].timestamp > state.cacheExpiry) {
@@ -528,15 +538,15 @@ const searchSlice = createSlice({
         }
       });
     },
-    
+
     // Performance tracking
     updateSearchMetrics: (state, action: PayloadAction<{ searchTime: number }>) => {
       const { searchTime } = action.payload;
       state.lastSearchTime = searchTime;
       state.searchCount += 1;
-      
+
       // Calculate average search time
-      state.averageSearchTime = 
+      state.averageSearchTime =
         (state.averageSearchTime * (state.searchCount - 1) + searchTime) / state.searchCount;
     },
   },
@@ -552,7 +562,7 @@ const searchSlice = createSlice({
         state.results = action.payload;
         state.lastQuery = state.query;
         state.pagination = action.payload.pagination || state.pagination;
-        
+
         // Cache results
         const cacheKey = `${state.query}_${JSON.stringify(state.filters)}`;
         state.resultsCache[cacheKey] = {
@@ -560,7 +570,7 @@ const searchSlice = createSlice({
           timestamp: Date.now(),
           filters: { ...state.filters },
         };
-        
+
         // Add to recent searches if query is not empty
         if (state.query.trim()) {
           const recentSearch: RecentSearch = {
@@ -569,14 +579,14 @@ const searchSlice = createSlice({
             results: action.payload.totalResults || 0,
             filters: { ...state.filters },
           };
-          
+
           // Use the reducer to add recent search
           searchSlice.caseReducers.addRecentSearch(state, {
             type: 'search/addRecentSearch',
             payload: recentSearch,
           } as PayloadAction<RecentSearch>);
         }
-        
+
         state.error = null;
       })
       .addCase(searchProducts.rejected, (state, action) => {
@@ -593,7 +603,7 @@ const searchSlice = createSlice({
       .addCase(fetchSearchSuggestions.fulfilled, (state, action) => {
         state.isLoadingSuggestions = false;
         state.suggestions = action.payload.suggestions || [];
-        
+
         // Cache suggestions
         if (state.query) {
           state.suggestionCache[state.query] = {
@@ -601,7 +611,7 @@ const searchSlice = createSlice({
             timestamp: Date.now(),
           };
         }
-        
+
         state.suggestionError = null;
       })
       .addCase(fetchSearchSuggestions.rejected, (state, action) => {
@@ -693,13 +703,13 @@ export const selectSelectedSuggestionIndex = (state: { search: SearchState }) =>
 export const selectSearchPagination = (state: { search: SearchState }) => state.search.pagination;
 
 // Complex selectors
-export const selectSearchProducts = (state: { search: SearchState }) => 
+export const selectSearchProducts = (state: { search: SearchState }) =>
   state.search.results?.products || [];
 
-export const selectSearchCategories = (state: { search: SearchState }) => 
+export const selectSearchCategories = (state: { search: SearchState }) =>
   state.search.results?.categories || [];
 
-export const selectSearchFacets = (state: { search: SearchState }) => 
+export const selectSearchFacets = (state: { search: SearchState }) =>
   state.search.results?.facets;
 
 export const selectSearchStats = (state: { search: SearchState }) => ({

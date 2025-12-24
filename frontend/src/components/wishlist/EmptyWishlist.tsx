@@ -30,7 +30,7 @@ import { Spinner } from '@/components/ui/Spinner';
 
 // Hooks and Contexts
 import { useAuth } from '@/components/providers';
-import { useWishlist } from '@/contexts/WishlistContext';
+import { useWishlist } from '@/components/providers/WishlistProvider';
 import { useToast } from '@/hooks/useToast';
 
 // Utils
@@ -93,12 +93,12 @@ const EmptyWishlist: React.FC<EmptyWishlistProps> = ({
   const { user, isAuthenticated } = useAuth();
   const { addToWishlist } = useWishlist();
   const { toast } = useToast();
-  
+
   // Mock analytics function
   const trackEvent = useCallback((event: string, data?: Record<string, unknown>) => {
     console.log('Analytics event:', event, data);
   }, []);
-  
+
   // State
   const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});
   const [activeTab, setActiveTab] = useState<'trending' | 'new' | 'recommended'>('trending');
@@ -158,7 +158,7 @@ const EmptyWishlist: React.FC<EmptyWishlistProps> = ({
   const [loadingNew] = useState(false);
   const [loadingRecommended] = useState(false);
   const [loadingCategories] = useState(false);
-  
+
   // Use mock data
   const trendingProducts = mockTrendingProducts;
   const newProducts = mockTrendingProducts;
@@ -224,7 +224,7 @@ const EmptyWishlist: React.FC<EmptyWishlistProps> = ({
     }
 
     setProductLoading(product.id, true);
-    
+
     try {
       await addToWishlist(product.id);
 
@@ -330,7 +330,7 @@ const EmptyWishlist: React.FC<EmptyWishlistProps> = ({
         <div className="flex justify-center">
           <div className={cn(
             'rounded-full p-6',
-            variant === 'decorative' 
+            variant === 'decorative'
               ? 'bg-gradient-to-br from-primary-100 to-primary-50 text-primary-600'
               : 'bg-gray-100 text-gray-400'
           )}>
@@ -361,7 +361,7 @@ const EmptyWishlist: React.FC<EmptyWishlistProps> = ({
             <ShoppingBagIcon className="w-4 h-4" />
             Browse Products
           </Button>
-          
+
           {showCategories && (
             <Button
               variant="outline"
@@ -453,7 +453,7 @@ const EmptyWishlist: React.FC<EmptyWishlistProps> = ({
           {/* Product Info */}
           <CardContent className="p-3 space-y-2">
             <div>
-              <h3 
+              <h3
                 className="font-medium text-sm text-gray-900 line-clamp-2 cursor-pointer hover:text-primary-600"
                 onClick={() => handleProductClick(product)}
               >
@@ -508,7 +508,7 @@ const EmptyWishlist: React.FC<EmptyWishlistProps> = ({
         whileHover={{ scale: 1.05 }}
         transition={{ duration: 0.2 }}
       >
-        <Card 
+        <Card
           className="overflow-hidden cursor-pointer hover:shadow-lg transition-all duration-200"
           style={{ backgroundColor: `${category.color}10` }}
           onClick={() => handleCategoryClick(category)}

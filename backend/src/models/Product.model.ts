@@ -40,6 +40,7 @@ export interface IProduct extends Document {
   isFeatured: boolean;
   averageRating: number;
   totalReviews: number;
+  salesCount: number;
   reviews: IProductReview[];
   seoTitle?: string;
   seoDescription?: string;
@@ -185,6 +186,12 @@ const productSchema = new Schema<IProduct>({
     default: 0,
     min: 0
   },
+  salesCount: {
+    type: Number,
+    default: 0,
+    min: 0,
+    index: true
+  },
   reviews: [reviewSchema],
   seoTitle: {
     type: String,
@@ -201,7 +208,7 @@ const productSchema = new Schema<IProduct>({
 });
 
 // Calculate average rating before saving
-productSchema.pre('save', function() {
+productSchema.pre('save', function () {
   if (this.reviews.length > 0) {
     const totalRating = this.reviews.reduce((sum, review) => sum + review.rating, 0);
     this.averageRating = totalRating / this.reviews.length;

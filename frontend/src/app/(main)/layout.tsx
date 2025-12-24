@@ -326,7 +326,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
           >
             {/* Breadcrumbs */}
             {showBreadcrumbs && (
-              <div className="bg-background border-b border-border sticky top-20 z-30">
+              <div className="bg-white border-b border-border sticky top-24 z-30 shadow-sm">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
                   <Breadcrumbs />
                 </div>

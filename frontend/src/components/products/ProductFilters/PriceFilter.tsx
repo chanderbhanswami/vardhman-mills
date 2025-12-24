@@ -108,7 +108,7 @@ const PriceFilter: React.FC<PriceFilterProps> = ({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <CurrencyIcon className="h-4 w-4 text-gray-600" />
-          <h3 className="font-semibold text-gray-900">Price Range</h3>
+          <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">Price Range</h3>
         </div>
         {isFiltered && (
           <button

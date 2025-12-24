@@ -19,6 +19,7 @@ import Tooltip from '@/components/ui/Tooltip';
 
 // Layout Components
 import Breadcrumbs from '@/components/layout/Breadcrumbs';
+import { Separator } from '@/components/ui/Separator';
 
 // Common Components
 import {
@@ -45,6 +46,9 @@ import {
   PriceFilter,
   MaterialFilter,
   ArrivalFilter,
+  PatternFilter,
+  OccasionFilter,
+  DiscountFilter,
   defaultFilterState,
   NoResults,
 } from '@/components/products';
@@ -52,12 +56,16 @@ import {
 // Hooks
 import { useToast } from '@/hooks/useToast';
 import { useAuth } from '@/components/providers';
-import { useCart } from '@/hooks/useCart';
-// import { useWishlist } from '@/hooks/useWishlist'; // Available for future wishlist features
+import { useCart } from '@/hooks/cart/useCart';
+import { useAddToCart } from '@/hooks/cart/useAddToCart';
+import { useRemoveFromCart } from '@/hooks/cart/useRemoveFromCart';
+import { useWishlist } from '@/hooks/useWishlist'; // Use the same hook as home page
 import { useDebounce, useLocalStorage, useMediaQuery } from '@/hooks';
 
 // API
 import { useInfiniteProducts } from '@/lib/api/productApi';
+import useCategories from '@/hooks/categories/useCategories';
+import useBrands from '@/hooks/brands/useBrands';
 
 // Types
 import type { Product, Brand } from '@/types/product.types';
@@ -83,55 +91,71 @@ import {
 
 // Constants
 const PRODUCTS_PER_PAGE = 24;
-// Cache duration constant available for future caching implementation
-// const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 // ============================================================================
 // MOCK FILTER DATA
 // ============================================================================
 
-// Mock data for filter options (replace with API data in production)
-const mockCategories: Array<{ id: string; name: string; count: number; level: number }> = [
-  { id: '1', name: 'Cotton Bedsheets', count: 145, level: 0 },
-  { id: '2', name: 'Silk Bedsheets', count: 89, level: 0 },
-  { id: '3', name: 'Linen Bedsheets', count: 67, level: 0 },
-  { id: '4', name: 'Satin Bedsheets', count: 54, level: 0 },
-];
-
-const mockColors: Array<{ id: string; name: string; hex: string; count: number }> = [
+// Static filter data (until API supports these)
+const staticColors: Array<{ id: string; name: string; hex: string; count: number }> = [
   { id: 'white', name: 'White', hex: '#FFFFFF', count: 120 },
   { id: 'blue', name: 'Blue', hex: '#0000FF', count: 95 },
   { id: 'red', name: 'Red', hex: '#FF0000', count: 78 },
   { id: 'green', name: 'Green', hex: '#00FF00', count: 65 },
   { id: 'black', name: 'Black', hex: '#000000', count: 87 },
+  { id: 'yellow', name: 'Yellow', hex: '#FFFF00', count: 45 },
+  { id: 'purple', name: 'Purple', hex: '#800080', count: 34 },
+  { id: 'pink', name: 'Pink', hex: '#FFC0CB', count: 56 },
+  { id: 'orange', name: 'Orange', hex: '#FFA500', count: 42 },
+  { id: 'gray', name: 'Gray', hex: '#808080', count: 67 },
+  { id: 'brown', name: 'Brown', hex: '#A52A2A', count: 38 },
+  { id: 'beige', name: 'Beige', hex: '#F5F5DC', count: 89 },
+  { id: 'navy', name: 'Navy', hex: '#000080', count: 52 },
+  { id: 'teal', name: 'Teal', hex: '#008080', count: 29 },
+  { id: 'maroon', name: 'Maroon', hex: '#800000', count: 31 },
 ];
 
-const mockSizes: Array<{ id: string; name: string; count: number; isAvailable: boolean }> = [
+const staticSizes: Array<{ id: string; name: string; count: number; isAvailable: boolean }> = [
   { id: 'single', name: 'Single', count: 98, isAvailable: true },
   { id: 'double', name: 'Double', count: 156, isAvailable: true },
   { id: 'queen', name: 'Queen', count: 134, isAvailable: true },
   { id: 'king', name: 'King', count: 112, isAvailable: true },
 ];
 
-const mockMaterials: Array<{ id: string; name: string; count: number }> = [
+const staticMaterials: Array<{ id: string; name: string; count: number }> = [
   { id: 'cotton-100', name: '100% Cotton', count: 145 },
   { id: 'cotton-blend', name: 'Cotton Blend', count: 89 },
   { id: 'pure-silk', name: 'Pure Silk', count: 67 },
   { id: 'linen-mix', name: 'Linen Mix', count: 54 },
 ];
 
-const mockBrands: Array<{ id: string; name: string; count: number }> = [
-  { id: 'brand-1', name: 'Vardhman Mills', count: 234 },
-  { id: 'brand-2', name: 'Premium Home', count: 156 },
-  { id: 'brand-3', name: 'Luxury Linens', count: 98 },
+const staticPatterns: Array<{ id: string; name: string; count: number }> = [
+  { id: 'solid', name: 'Solid', count: 210 },
+  { id: 'stripe', name: 'Stripe', count: 85 },
+  { id: 'check', name: 'Check', count: 64 },
+  { id: 'floral', name: 'Floral', count: 92 },
+  { id: 'abstract', name: 'Abstract', count: 45 },
+  { id: 'geometric', name: 'Geometric', count: 58 },
+  { id: 'paisley', name: 'Paisley', count: 23 },
+  { id: 'polka-dot', name: 'Polka Dot', count: 19 },
 ];
 
+const staticOccasions: Array<{ id: string; name: string; count: number }> = [
+  { id: 'daily-use', name: 'Daily Use', count: 320 },
+  { id: 'luxury', name: 'Luxury', count: 85 },
+  { id: 'wedding', name: 'Wedding', count: 42 },
+  { id: 'party', name: 'Party', count: 28 },
+  { id: 'hotel', name: 'Hotel Collection', count: 65 },
+];
+
+// Mock ratings
 const mockRatings: Array<{ value: number; label: string; count: number }> = [
   { value: 4, label: '4 Stars & Up', count: 234 },
   { value: 3, label: '3 Stars & Up', count: 345 },
   { value: 2, label: '2 Stars & Up', count: 423 },
   { value: 1, label: '1 Star & Up', count: 500 },
 ];
+
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -145,6 +169,8 @@ interface ProductWithAttributes extends Omit<Product, 'brand'> {
     material?: string;
     brand?: string;
     threadCount?: number;
+    pattern?: string;
+    occasion?: string;
   };
   color?: string;
   size?: string;
@@ -162,7 +188,14 @@ function ProductsPageContent({ initialProducts = [], initialTotal = 0 }: Product
   const searchParams = useSearchParams();
   const { toast } = useToast();
   const { user } = useAuth();
-  const { addToCart } = useCart();
+
+  // Cart hooks
+  const { cart, getItemQuantity } = useCart();
+  const { addToCart: addToCartMutation } = useAddToCart();
+  const { removeByProduct: removeFromCartByProduct } = useRemoveFromCart();
+
+  // Wishlist - Use same localStorage hook as home page
+  const { items: wishlistItems, addToWishlist, removeFromWishlist } = useWishlist();
 
   // Responsive
   const isMobile = useMediaQuery('(max-width: 768px)');
@@ -204,11 +237,38 @@ function ProductsPageContent({ initialProducts = [], initialTotal = 0 }: Product
     error,
   } = useInfiniteProducts({
     limit: PRODUCTS_PER_PAGE,
-    search: debouncedSearch || undefined,
-    sortBy: sortBy as string,
+    // search: debouncedSearch || undefined, // Removed invalid prop, using client-side filtering
+    sort: sortBy as string,
   });
 
-  // Flatten all pages into a single products array
+  // Fetch Filters Data
+  const { categories: apiCategories } = useCategories();
+  const { brands: apiBrands } = useBrands();
+
+  const categories = useMemo(() => apiCategories.map(c => ({
+    id: c.id,
+    name: c.name,
+    count: c.productCount || 0,
+    level: c.level,
+    children: c.children?.map(child => ({
+      id: child.id,
+      name: child.name,
+      count: child.productCount || 0,
+      level: child.level,
+    }))
+  })), [apiCategories]);
+
+
+  const brands = useMemo(() => apiBrands
+    .map((b, index) => ({
+      id: b.id && b.id.trim() !== '' ? b.id : `brand-fallback-${index}-${b.name}`, // Ensure unique ID
+      name: b.name || `Brand ${index}`,
+      count: 0
+    }))
+    .filter(b => b.id && b.name), // Remove any invalid brands
+    [apiBrands]);
+
+  // Combined product list (pages -> single array)
   const products = useMemo(() => {
     if (!data?.pages) return [];
     return data.pages.flatMap(page => page.data || []);
@@ -220,21 +280,21 @@ function ProductsPageContent({ initialProducts = [], initialTotal = 0 }: Product
     return data.pages[0].meta.total || 0;
   }, [data]);
 
-  // Apply sorting function - defined before applyFilters
+  // Apply sorting function
   const applySorting = useCallback((items: Product[], sort: ProductSortOption): Product[] => {
     const sorted = [...items];
 
     switch (sort) {
       case 'price_asc':
         return sorted.sort((a, b) => {
-          const aPrice = a.pricing.salePrice?.amount || a.pricing.basePrice.amount;
-          const bPrice = b.pricing.salePrice?.amount || b.pricing.basePrice.amount;
+          const aPrice = a.pricing?.salePrice?.amount || a.pricing?.basePrice?.amount || 0;
+          const bPrice = b.pricing?.salePrice?.amount || b.pricing?.basePrice?.amount || 0;
           return aPrice - bPrice;
         });
       case 'price_desc':
         return sorted.sort((a, b) => {
-          const aPrice = a.pricing.salePrice?.amount || a.pricing.basePrice.amount;
-          const bPrice = b.pricing.salePrice?.amount || b.pricing.basePrice.amount;
+          const aPrice = a.pricing?.salePrice?.amount || a.pricing?.basePrice?.amount || 0;
+          const bPrice = b.pricing?.salePrice?.amount || b.pricing?.basePrice?.amount || 0;
           return bPrice - aPrice;
         });
       case 'name_asc':
@@ -264,6 +324,17 @@ function ProductsPageContent({ initialProducts = [], initialTotal = 0 }: Product
   // Filter products
   const applyFilters = useCallback(() => {
     let filtered = [...products];
+
+    // Search filter
+    if (debouncedSearch) {
+      const searchLower = debouncedSearch.toLowerCase();
+      filtered = filtered.filter(
+        p =>
+          p.name.toLowerCase().includes(searchLower) ||
+          p.description?.toLowerCase().includes(searchLower) ||
+          (typeof p.brand === 'object' && p.brand?.name?.toLowerCase().includes(searchLower))
+      );
+    }
 
     // Category filter
     if (filters.categoryIds.length > 0) {
@@ -305,6 +376,24 @@ function ProductsPageContent({ initialProducts = [], initialTotal = 0 }: Product
       });
     }
 
+    // Pattern filter
+    if (filters.patterns && filters.patterns.length > 0) {
+      filtered = filtered.filter(p => {
+        const productWithAttrs = p as ProductWithAttributes;
+        const pattern = productWithAttrs.attributes?.pattern || '';
+        return filters.patterns.includes(pattern);
+      });
+    }
+
+    // Occasion filter
+    if (filters.occasions && filters.occasions.length > 0) {
+      filtered = filtered.filter(p => {
+        const productWithAttrs = p as ProductWithAttributes;
+        const occasion = productWithAttrs.attributes?.occasion || '';
+        return filters.occasions.includes(occasion);
+      });
+    }
+
     // Brand filter
     if (filters.brandIds.length > 0) {
       filtered = filtered.filter(p => {
@@ -325,9 +414,9 @@ function ProductsPageContent({ initialProducts = [], initialTotal = 0 }: Product
 
     // Availability filter
     if (filters.availability === 'in_stock') {
-      filtered = filtered.filter(p => p.inventory.isInStock !== false);
+      filtered = filtered.filter(p => p.inventory?.isInStock !== false);
     } else if (filters.availability === 'out_of_stock') {
-      filtered = filtered.filter(p => p.inventory.isInStock === false);
+      filtered = filtered.filter(p => p.inventory?.isInStock === false);
     }
 
     // Thread count filter
@@ -357,11 +446,24 @@ function ProductsPageContent({ initialProducts = [], initialTotal = 0 }: Product
       });
     }
 
+    // Discount Filter
+    if (filters.discount !== null) {
+      filtered = filtered.filter(p => {
+        const salePrice = p.pricing?.salePrice?.amount;
+        const basePrice = p.pricing?.basePrice?.amount;
+        if (salePrice && basePrice && basePrice > 0) {
+          const discountPercent = ((basePrice - salePrice) / basePrice) * 100;
+          return discountPercent >= filters.discount!;
+        }
+        return false;
+      });
+    }
+
     // Apply sorting
     filtered = applySorting(filtered, sortBy);
 
     return filtered;
-  }, [products, filters, sortBy, applySorting]);
+  }, [products, filters, sortBy, applySorting, debouncedSearch]);
 
   const filteredProducts = useMemo(() => applyFilters(), [applyFilters]);
 
@@ -384,63 +486,74 @@ function ProductsPageContent({ initialProducts = [], initialTotal = 0 }: Product
     setShowQuickView(true);
   }, []);
 
-  const handleAddToCart = useCallback(async (product: Product) => {
-    try {
-      await addToCart(product, 1);
-      toast({
-        title: 'Added to cart',
-        description: `${product.name} has been added to your cart`,
-        variant: 'success',
-      });
-    } catch (error) {
-      const err = error as Error;
-      toast({
-        title: 'Error',
-        description: err.message || 'Failed to add product to cart',
-        variant: 'destructive',
-      });
-    }
-  }, [addToCart, toast]);
+  // Compute cart quantities for each product
+  const cartQuantities = useMemo(() => {
+    const quantities: Record<string, number> = {};
+    products.forEach(product => {
+      const quantity = getItemQuantity(product.id);
+      if (quantity > 0) {
+        quantities[product.id] = quantity;
+      }
+    });
+    return quantities;
+  }, [products, getItemQuantity, cart]);
 
-  // Wishlist toggle handler - available for future use when QuickView or ProductGrid components add wishlist support
-  // const handleToggleWishlist = useCallback(async (product: Product) => {
-  //   try {
-  //     if (isInWishlist(product.id)) {
-  //       await removeFromWishlist(product.id);
-  //       toast({
-  //         title: 'Removed from wishlist',
-  //         description: `${product.name} has been removed from your wishlist`,
-  //         variant: 'success',
-  //       });
-  //     } else {
-  //       await addToWishlist(product);
-  //       toast({
-  //         title: 'Added to wishlist',
-  //         description: `${product.name} has been added to your wishlist`,
-  //         variant: 'success',
-  //       });
-  //     }
-  //   } catch (error) {
-  //     const err = error as Error;
-  //     toast({
-  //       title: 'Error',
-  //       description: err.message || 'Failed to update wishlist',
-  //       variant: 'destructive',
-  //     });
-  //   }
-  // }, [addToWishlist, removeFromWishlist, isInWishlist, toast]);
+  // Compute wishlist item IDs
+  const wishlistItemIds = useMemo(() => {
+    const ids = new Set<string>();
+    wishlistItems.forEach(item => {
+      ids.add(item.productId);
+    });
+    return ids;
+  }, [wishlistItems]);
+
+  const handleAddToCart = useCallback(async (product: Product, quantity: number) => {
+    try {
+      await addToCartMutation(product.id, quantity);
+    } catch (error) {
+      console.error('Failed to add to cart:', error);
+    }
+  }, [addToCartMutation]);
+
+  const handleUpdateCartQuantity = useCallback(async (product: Product, quantity: number) => {
+    try {
+      // For now, just call add with the new quantity
+      // In a real app, you'd have an update mutation
+      await addToCartMutation(product.id, quantity, { replaceQuantity: true });
+    } catch (error) {
+      console.error('Failed to update cart quantity:', error);
+    }
+  }, [addToCartMutation]);
+
+  const handleRemoveFromCart = useCallback(async (product: Product) => {
+    try {
+      await removeFromCartByProduct(product.id);
+    } catch (error) {
+      console.error('Failed to remove from cart:', error);
+    }
+  }, [removeFromCartByProduct]);
+
+  const handleAddToWishlist = useCallback(async (product: Product) => {
+    try {
+      await addToWishlist(product);
+    } catch (error) {
+      console.error('Failed to add to wishlist:', error);
+    }
+  }, [addToWishlist]);
+
+  const handleRemoveFromWishlist = useCallback(async (product: Product) => {
+    try {
+      await removeFromWishlist(product.id);
+    } catch (error) {
+      console.error('Failed to remove from wishlist:', error);
+    }
+  }, [removeFromWishlist]);
 
   const handleLoadMore = useCallback(() => {
     if (!isFetchingNextPage && hasNextPage) {
       fetchNextPage();
     }
   }, [fetchNextPage, isFetchingNextPage, hasNextPage]);
-
-  // No longer need fetchProducts useEffect - React Query handles it
-  // applyFilters on filter/sort changes
-  useEffect(() => {
-    // Filters are applied via useMemo, no action needed
-  }, [filters, sortBy]);
 
   // Active filters count
   const activeFiltersCount = useMemo(() => {
@@ -454,6 +567,9 @@ function ProductsPageContent({ initialProducts = [], initialTotal = 0 }: Product
     if (filters.availability !== 'all') count++;
     if (filters.threadCount.min > 0 || filters.threadCount.max < 1000) count++;
     if (filters.arrivalPeriod !== 'all') count++;
+    if (filters.patterns && filters.patterns.length > 0) count++;
+    if (filters.occasions && filters.occasions.length > 0) count++;
+    if (filters.discount !== null) count++;
     if (debouncedSearch) count++;
     return count;
   }, [filters, debouncedSearch]);
@@ -491,183 +607,158 @@ function ProductsPageContent({ initialProducts = [], initialTotal = 0 }: Product
       />
 
       <div className="min-h-screen bg-gray-50">
-        {/* Header */}
-        <div className="bg-white border-b">
-          <div className="container mx-auto px-4 py-6">
-            <Breadcrumbs
-              items={[
-                { label: 'Home', href: '/' },
-                { label: 'Products', href: '/products' },
-              ]}
-            />
-            <div className="mt-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">
-                  {user ? `Welcome back, ${user.email?.split('@')[0] || 'User'}!` : 'Our Products'}
-                </h1>
-                <p className="text-gray-600 mt-2">
-                  Showing {filteredProducts.length} of {total} products
-                  {user && ' curated for you'}
-                </p>
-              </div>
-
-              {/* Search Bar */}
-              <div className="flex-1 max-w-md">
-                <div className="relative">
-                  <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <Input
-                    type="search"
-                    placeholder="Search products..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 pr-10"
-                  />
-                  {searchQuery && (
-                    <button
-                      onClick={() => setSearchQuery('')}
-                      className="absolute right-3 top-1/2 -translate-y-1/2"
-                      aria-label="Clear search"
-                      title="Clear search"
-                    >
-                      <XMarkIcon className="w-5 h-5 text-gray-400 hover:text-gray-600" />
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Quick Actions */}
-              {!isMobile && (
-                <div className="flex items-center gap-2">
-                  <Tooltip content="View Wishlist">
-                    <Button variant="ghost" size="sm" onClick={() => router.push('/wishlist')}>
-                      <HeartIcon className="w-5 h-5" />
-                    </Button>
-                  </Tooltip>
-                  <Tooltip content="View Cart">
-                    <Button variant="ghost" size="sm" onClick={() => router.push('/cart')}>
-                      <ShoppingCartIcon className="w-5 h-5" />
-                    </Button>
-                  </Tooltip>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Main Content */}
         <div className="container mx-auto px-4 py-8">
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Filters Sidebar */}
             <AnimatePresence>
               {(showFilters || !isMobile) && (
                 <motion.aside
-                  initial={{ x: -300, opacity: 0 }}
+                  initial={{ x: -280, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
-                  exit={{ x: -300, opacity: 0 }}
+                  exit={{ x: -280, opacity: 0 }}
+                  transition={{ duration: 0.3, ease: 'easeInOut' }}
                   className={cn(
                     'lg:w-64 flex-shrink-0',
-                    isMobile && 'fixed inset-0 z-50 bg-white overflow-y-auto'
+                    isMobile && 'fixed inset-0 z-50 bg-white overflow-y-auto w-80 shadow-2xl p-4' // Mobile drawer style
                   )}
                 >
-                  <Card className={cn(isMobile && 'h-full rounded-none')}>
-                    <CardHeader className="flex flex-row items-center justify-between">
-                      <CardTitle className="flex items-center gap-2">
-                        <FunnelIcon className="w-5 h-5" />
-                        Filters
-                        {activeFiltersCount > 0 && (
-                          <Badge variant="default" className="ml-2">
-                            {activeFiltersCount}
-                          </Badge>
-                        )}
-                      </CardTitle>
-                      {isMobile && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setShowFilters(false)}
-                        >
-                          <XMarkIcon className="w-5 h-5" />
-                        </Button>
-                      )}
-                    </CardHeader>
-                    <CardContent className="space-y-6">
+                  <div className="space-y-4">
+                    {/* Sidebar Header */}
+                    <div className="flex items-center justify-between lg:hidden mb-4">
+                      <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                        <FunnelIcon className="w-5 h-5" /> Filters
+                      </h2>
+                      <Button variant="ghost" size="sm" onClick={() => setShowFilters(false)}>
+                        <XMarkIcon className="w-6 h-6" />
+                      </Button>
+                    </div>
+
+                    {/* Filters Stack - No Card Wrapper, cleaner look */}
+                    <div className="bg-white rounded-lg shadow-sm border border-gray-100 divide-y divide-gray-100">
                       <CategoryFilter
-                        categories={mockCategories}
+                        categories={categories}
                         selectedCategoryIds={filters.categoryIds}
                         onCategoryChange={(categoryIds) => handleFilterChange({ categoryIds })}
+                        className="p-2"
                       />
                       <PriceFilter
                         minPrice={0}
                         maxPrice={10000}
                         selectedRange={filters.priceRange}
                         onRangeChange={(priceRange) => handleFilterChange({ priceRange })}
+                        className="p-2"
                       />
                       <ColorFilter
-                        colors={mockColors}
+                        colors={staticColors}
                         selectedColors={filters.colors}
                         onColorChange={(colors) => handleFilterChange({ colors })}
+                        className="p-2"
+                      />
+                      <DiscountFilter
+                        selectedDiscount={filters.discount}
+                        onDiscountChange={(discount) => handleFilterChange({ discount })}
+                        className="p-2"
                       />
                       <SizeFilter
-                        sizes={mockSizes}
+                        sizes={staticSizes}
                         selectedSizes={filters.sizes}
                         onSizeChange={(sizes) => handleFilterChange({ sizes })}
+                        className="p-2"
                       />
                       <MaterialFilter
-                        materials={mockMaterials}
+                        materials={staticMaterials}
                         selectedMaterials={filters.materials}
                         onMaterialChange={(materials) => handleFilterChange({ materials })}
+                        className="p-2"
+                      />
+                      <PatternFilter
+                        patterns={staticPatterns}
+                        selectedPatterns={filters.patterns || []}
+                        onPatternChange={(patterns) => handleFilterChange({ patterns })}
+                        className="p-2"
+                      />
+                      <OccasionFilter
+                        occasions={staticOccasions}
+                        selectedOccasions={filters.occasions || []}
+                        onOccasionChange={(occasions) => handleFilterChange({ occasions })}
+                        className="p-2"
                       />
                       <BrandFilter
-                        brands={mockBrands}
+                        brands={brands}
                         selectedBrandIds={filters.brandIds}
                         onBrandChange={(brandIds) => handleFilterChange({ brandIds })}
+                        className="p-2"
                       />
                       <RatingFilter
                         ratings={mockRatings}
                         selectedRatings={filters.ratings}
                         onRatingChange={(ratings) => handleFilterChange({ ratings })}
+                        className="p-2"
                       />
                       <ThreadCountFilter
                         minThreadCount={0}
                         maxThreadCount={1000}
                         selectedRange={filters.threadCount}
                         onRangeChange={(threadCount) => handleFilterChange({ threadCount })}
+                        className="p-2"
                       />
                       <AvailabilityFilter
                         selectedAvailability={filters.availability}
                         onAvailabilityChange={(availability) => handleFilterChange({ availability })}
+                        className="p-2"
                       />
                       <ArrivalFilter
                         selectedPeriod={filters.arrivalPeriod}
                         onPeriodChange={(arrivalPeriod) => handleFilterChange({ arrivalPeriod })}
+                        className="p-2"
                       />
+                    </div>
 
-                      {activeFiltersCount > 0 && (
-                        <Button
-                          variant="outline"
-                          className="w-full"
-                          onClick={handleClearFilters}
-                        >
-                          Clear All Filters
-                        </Button>
-                      )}
-                    </CardContent>
-                  </Card>
+                    {/* Clear Button */}
+                    {activeFiltersCount > 0 && (
+                      <Button
+                        variant="outline"
+                        className="w-full text-sm mt-4 border-dashed"
+                        onClick={handleClearFilters}
+                      >
+                        Clear All Filters
+                      </Button>
+                    )}
+                  </div>
+
+                  {/* Backdrop for Mobile */}
+                  {isMobile && (
+                    <div
+                      className="fixed inset-0 bg-black/50 -z-10"
+                      onClick={() => setShowFilters(false)}
+                      aria-hidden="true"
+                    />
+                  )}
                 </motion.aside>
               )}
             </AnimatePresence>
 
             {/* Products Grid */}
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
+              {/* Info Panel */}
+              <div className="mb-6">
+                <h1 className="text-3xl font-bold text-gray-900">Our Products</h1>
+                <p className="text-gray-600 mt-1">
+                  Showing {filteredProducts?.length || 0} of {total || 0} products
+                </p>
+              </div>
+
               {/* Toolbar */}
-              <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
-                <div className="flex flex-wrap items-center justify-between gap-4">
-                  <div className="flex items-center gap-2">
+              <div className="bg-white rounded-lg shadow-sm p-4 mb-6 sticky top-20 z-10 border border-gray-100">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                  {/* Left: Mobile Filter & Search */}
+                  <div className="flex items-center gap-4 w-full md:w-auto flex-1">
                     {(isMobile || isTablet) && (
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => setShowFilters(true)}
+                        className="shrink-0"
                       >
                         <AdjustmentsHorizontalIcon className="w-4 h-4 mr-2" />
                         Filters
@@ -678,17 +769,44 @@ function ProductsPageContent({ initialProducts = [], initialTotal = 0 }: Product
                         )}
                       </Button>
                     )}
+
+                    {/* Search Bar */}
+                    <div className="relative flex-1 max-w-md">
+                      <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <Input
+                        type="text"
+                        placeholder="Search products..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-9 pr-8 h-10 border-gray-200 focus:border-primary-500"
+                      />
+                      {searchQuery && (
+                        <button
+                          onClick={() => setSearchQuery('')}
+                          className="absolute right-2 top-1/2 -translate-y-1/2"
+                          aria-label="Clear search"
+                          title="Clear search"
+                        >
+                          <XMarkIcon className="w-4 h-4 text-gray-600 hover:text-gray-900" />
+                        </button>
+                      )}
+                    </div>
                   </div>
 
-                  <div className="flex items-center gap-4">
-                    <ProductSort value={sortBy} onChange={setSortBy} />
+                  {/* Right: Sort & View */}
+                  <div className="flex items-center gap-4 w-full md:w-auto justify-end">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-gray-600 whitespace-nowrap hidden sm:inline">Sort by:</span>
+                      <ProductSort value={sortBy} onChange={setSortBy} />
+                    </div>
 
-                    <div className="flex items-center gap-1 border rounded-lg p-1">
+                    <div className="flex items-center gap-1 border rounded-lg p-1 bg-white">
                       <Tooltip content="Grid View">
                         <Button
                           variant={viewMode === 'grid' ? 'default' : 'ghost'}
                           size="sm"
                           onClick={() => setViewMode('grid')}
+                          className={viewMode === 'grid' ? 'bg-gray-900 text-white hover:bg-gray-800' : 'text-gray-500'}
                         >
                           <Squares2X2Icon className="w-4 h-4" />
                         </Button>
@@ -698,6 +816,7 @@ function ProductsPageContent({ initialProducts = [], initialTotal = 0 }: Product
                           variant={viewMode === 'list' ? 'default' : 'ghost'}
                           size="sm"
                           onClick={() => setViewMode('list')}
+                          className={viewMode === 'list' ? 'bg-gray-900 text-white hover:bg-gray-800' : 'text-gray-500'}
                         >
                           <ListBulletIcon className="w-4 h-4" />
                         </Button>
@@ -723,6 +842,14 @@ function ProductsPageContent({ initialProducts = [], initialTotal = 0 }: Product
                       isLoading={isLoading}
                       onProductClick={handleProductClick}
                       layout="grid"
+                      showLayoutSwitcher={false}
+                      cartQuantities={cartQuantities}
+                      wishlistItems={wishlistItemIds}
+                      onAddToCart={handleAddToCart}
+                      onUpdateCartQuantity={handleUpdateCartQuantity}
+                      onRemoveFromCart={handleRemoveFromCart}
+                      onAddToWishlist={handleAddToWishlist}
+                      onRemoveFromWishlist={handleRemoveFromWishlist}
                     />
                   ) : (
                     <ProductList
@@ -743,7 +870,7 @@ function ProductsPageContent({ initialProducts = [], initialTotal = 0 }: Product
                       </Button>
                     </div>
                   )}
-                  
+
                   {isFetchingNextPage && (
                     <div className="flex justify-center py-8">
                       <LoadingSpinner size="lg" />
@@ -765,7 +892,6 @@ function ProductsPageContent({ initialProducts = [], initialTotal = 0 }: Product
               setSelectedProduct(null);
             }}
             onAddToCart={(productId: string) => {
-              // QuickView expects productId, but we already have selectedProduct
               if (selectedProduct && selectedProduct.id === productId) {
                 handleAddToCart(selectedProduct);
               }
@@ -788,15 +914,11 @@ function ProductsPageContent({ initialProducts = [], initialTotal = 0 }: Product
             </Tooltip>
           </div>
         )}
-
-        {/* Back to Top */}
-        <BackToTop />
       </div>
     </ErrorBoundary>
   );
 }
 
-// Main export with Suspense wrapper
 export default function ProductsPage() {
   return (
     <Suspense fallback={<ProductGridSkeleton count={24} layout="grid" />}>

@@ -2,11 +2,11 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Heart, 
-  ShoppingCart, 
-  Eye, 
-  Share2, 
+import {
+  Heart,
+  ShoppingCart,
+  Eye,
+  Share2,
   GitCompare,
   Check,
   Loader2,
@@ -72,7 +72,7 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
   const [isLoadingCompare, setIsLoadingCompare] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
 
-  const inWishlist = useMemo(() => 
+  const inWishlist = useMemo(() =>
     isInWishlist(product.id, variant?.id),
     [isInWishlist, product.id, variant?.id]
   );
@@ -203,13 +203,28 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
     layoutClasses[layout],
     theme === 'dark' && 'text-white',
     theme === 'light' && 'text-gray-900',
+    // Add advanced liquid glass effect for overlay and floating layouts
+    (layout === 'overlay' || layout === 'floating') && [
+      'p-2 rounded-full overflow-hidden',
+      'bg-gradient-to-br from-white/80 via-white/60 to-white/40',
+      'backdrop-blur-2xl backdrop-saturate-150',
+      'border border-white/60',
+      'ring-1 ring-black/5',
+      'shadow-[0_8px_32px_rgba(0,0,0,0.15),0_2px_8px_rgba(0,0,0,0.08),inset_0_2px_4px_rgba(255,255,255,0.9),inset_0_-1px_2px_rgba(0,0,0,0.05)]',
+    ],
     className
   );
 
+  // Check if we're in glass container mode
+  const isGlassContainer = layout === 'overlay' || layout === 'floating';
+
   const actionButtonClasses = cn(
-    'relative flex items-center justify-center rounded-full transition-all duration-200',
-    'hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2',
+    'relative flex items-center justify-center transition-all duration-200',
+    'focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2',
     'disabled:opacity-50 disabled:cursor-not-allowed',
+    isGlassContainer
+      ? 'rounded-full hover:scale-105 hover:bg-white/60'
+      : 'rounded-full hover:scale-110',
     sizeClasses[size]
   );
 
@@ -283,11 +298,11 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
         <motion.button
           className={cn(
             actionButtonClasses,
-            isAddedToCart 
-              ? 'bg-green-500 text-white' 
+            isAddedToCart
+              ? 'bg-green-500 text-white'
               : isOutOfStock
-              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              : 'bg-primary text-white hover:bg-primary-dark'
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                : 'bg-primary text-white hover:bg-primary-dark'
           )}
           onClick={handleAddToCart}
           disabled={isAddingToCart || isOutOfStock || isAddedToCart}
@@ -371,9 +386,9 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
       )}
 
       {/* Low Stock Badge */}
-      {!isOutOfStock && (variant ? variant.inventory.quantity : product.inventory.quantity) < 5 && !compact && (
+      {!isOutOfStock && ((variant ? variant.inventory?.quantity : product.inventory?.quantity) ?? 0) < 5 && !compact && (
         <Badge variant="warning" className="ml-2">
-          Only {variant ? variant.inventory.quantity : product.inventory.quantity} left
+          Only {variant ? variant.inventory?.quantity : product.inventory?.quantity} left
         </Badge>
       )}
     </div>

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Wishlist API Client
  * Comprehensive wishlist management with essential features
  */
@@ -71,7 +71,7 @@ export interface WishlistDetailed extends Wishlist {
  * Provides comprehensive wishlist management functionality
  */
 export class WishlistApiService {
-  private baseUrl = '/api/v1/wishlist';
+  private baseUrl = '/wishlist';
 
   // ============================================================================
   // BASIC CRUD OPERATIONS

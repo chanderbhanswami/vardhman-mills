@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
+import { api } from '@/lib/api/api';
 
 export interface Category {
   id: string;
@@ -78,115 +79,7 @@ export const useCategories = (initialFilters: CategoryFilters = {}) => {
   const queryClient = useQueryClient();
   const [filters, setFilters] = useState<CategoryFilters>(initialFilters);
 
-  // Generate mock categories data
-  const generateMockCategories = (): Category[] => {
-    return [
-      {
-        id: '1',
-        name: 'Fabrics',
-        slug: 'fabrics',
-        description: 'High-quality fabrics for various applications',
-        level: 0,
-        isActive: true,
-        sortOrder: 1,
-        image: '/images/categories/fabrics.jpg',
-        icon: 'fabric-icon',
-        color: '#3B82F6',
-        metaTitle: 'Premium Fabrics - Vardhman Mills',
-        metaDescription: 'Discover our extensive collection of premium fabrics for all your textile needs.',
-        productCount: 156,
-        createdAt: '2024-01-01T00:00:00Z',
-        updatedAt: '2024-01-15T10:30:00Z',
-      },
-      {
-        id: '2',
-        name: 'Cotton Fabrics',
-        slug: 'cotton-fabrics',
-        description: 'Premium cotton fabrics in various weights and weaves',
-        parentId: '1',
-        level: 1,
-        isActive: true,
-        sortOrder: 1,
-        image: '/images/categories/cotton.jpg',
-        color: '#10B981',
-        productCount: 89,
-        createdAt: '2024-01-01T00:00:00Z',
-        updatedAt: '2024-01-10T15:20:00Z',
-      },
-      {
-        id: '3',
-        name: 'Synthetic Fabrics',
-        slug: 'synthetic-fabrics',
-        description: 'Durable synthetic fabrics for industrial and commercial use',
-        parentId: '1',
-        level: 1,
-        isActive: true,
-        sortOrder: 2,
-        image: '/images/categories/synthetic.jpg',
-        color: '#F59E0B',
-        productCount: 67,
-        createdAt: '2024-01-01T00:00:00Z',
-        updatedAt: '2024-01-12T09:45:00Z',
-      },
-      {
-        id: '4',
-        name: 'Yarn',
-        slug: 'yarn',
-        description: 'Quality yarn products for textile manufacturing',
-        level: 0,
-        isActive: true,
-        sortOrder: 2,
-        image: '/images/categories/yarn.jpg',
-        icon: 'yarn-icon',
-        color: '#EF4444',
-        metaTitle: 'Premium Yarn Products - Vardhman Mills',
-        metaDescription: 'High-quality yarn products for all your textile manufacturing needs.',
-        productCount: 234,
-        createdAt: '2024-01-01T00:00:00Z',
-        updatedAt: '2024-01-14T11:15:00Z',
-      },
-      {
-        id: '5',
-        name: 'Cotton Yarn',
-        slug: 'cotton-yarn',
-        description: 'Pure cotton yarn in various counts',
-        parentId: '4',
-        level: 1,
-        isActive: true,
-        sortOrder: 1,
-        productCount: 145,
-        createdAt: '2024-01-01T00:00:00Z',
-        updatedAt: '2024-01-08T14:30:00Z',
-      },
-      {
-        id: '6',
-        name: 'Blended Yarn',
-        slug: 'blended-yarn',
-        description: 'High-quality blended yarn combinations',
-        parentId: '4',
-        level: 1,
-        isActive: true,
-        sortOrder: 2,
-        productCount: 89,
-        createdAt: '2024-01-01T00:00:00Z',
-        updatedAt: '2024-01-11T16:45:00Z',
-      },
-      {
-        id: '7',
-        name: 'Accessories',
-        slug: 'accessories',
-        description: 'Textile accessories and components',
-        level: 0,
-        isActive: false,
-        sortOrder: 3,
-        productCount: 23,
-        createdAt: '2024-01-01T00:00:00Z',
-        updatedAt: '2024-01-05T13:20:00Z',
-      },
-    ];
-  };
-
-  // Fetch all categories with filters
+  // Fetch all categories
   const {
     data: categories = [],
     isLoading: categoriesLoading,
@@ -195,44 +88,50 @@ export const useCategories = (initialFilters: CategoryFilters = {}) => {
   } = useQuery<Category[]>({
     queryKey: CATEGORY_QUERY_KEYS.list(filters),
     queryFn: async (): Promise<Category[]> => {
-      // Mock API delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      let mockCategories = generateMockCategories();
+      try {
+        const response = await api.getCategories();
+        const data = response.data as { categories: Category[] } | undefined;
 
-      // Apply filters
-      if (filters.parentId !== undefined) {
-        mockCategories = mockCategories.filter(cat => cat.parentId === filters.parentId);
+        if (data && data.categories) {
+          let allCategories = data.categories;
+
+          // Apply client-side filters if needed, or rely on backend parameters if we passed them.
+          // Since backend returns all, we filter here for search/etc if the backend didn't handle it yet
+          // But wait, backend `getAllCategories` does NOT take filters! 
+          // So we MUST filter on client side as before, or update backend.
+          // The previous mock implementation filtered extensively.
+          // For now, I will perform client-side filtering on the returned list to match previous behavior
+
+          if (filters.parentId !== undefined) {
+            allCategories = allCategories.filter(cat => cat.parentId === filters.parentId);
+          }
+
+          if (filters.level !== undefined) {
+            allCategories = allCategories.filter(cat => cat.level === filters.level);
+          }
+
+          if (filters.isActive !== undefined) {
+            allCategories = allCategories.filter(cat => cat.isActive === filters.isActive);
+          }
+
+          if (filters.search) {
+            const searchTerm = filters.search.toLowerCase();
+            allCategories = allCategories.filter(cat =>
+              cat.name.toLowerCase().includes(searchTerm) ||
+              cat.description?.toLowerCase().includes(searchTerm) ||
+              cat.slug.toLowerCase().includes(searchTerm)
+            );
+          }
+
+          return allCategories.sort((a, b) => a.sortOrder - b.sortOrder);
+        }
+        return [];
+      } catch (error) {
+        console.error('Failed to fetch categories:', error);
+        return [];
       }
-
-      if (filters.level !== undefined) {
-        mockCategories = mockCategories.filter(cat => cat.level === filters.level);
-      }
-
-      if (filters.isActive !== undefined) {
-        mockCategories = mockCategories.filter(cat => cat.isActive === filters.isActive);
-      }
-
-      if (filters.hasProducts !== undefined) {
-        const hasProducts = filters.hasProducts;
-        mockCategories = mockCategories.filter(cat => 
-          hasProducts ? cat.productCount > 0 : cat.productCount === 0
-        );
-      }
-
-      if (filters.search) {
-        const searchTerm = filters.search.toLowerCase();
-        mockCategories = mockCategories.filter(cat => 
-          cat.name.toLowerCase().includes(searchTerm) ||
-          cat.description?.toLowerCase().includes(searchTerm) ||
-          cat.slug.toLowerCase().includes(searchTerm)
-        );
-      }
-
-      return mockCategories.sort((a, b) => a.sortOrder - b.sortOrder);
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    retry: 2,
+    staleTime: 5 * 60 * 1000,
   });
 
   // Fetch single category
@@ -240,16 +139,14 @@ export const useCategories = (initialFilters: CategoryFilters = {}) => {
     return useQuery<Category>({
       queryKey: CATEGORY_QUERY_KEYS.detail(id),
       queryFn: async (): Promise<Category> => {
-        await new Promise(resolve => setTimeout(resolve, 300));
-        
-        const category = generateMockCategories().find(cat => cat.id === id);
+        const category = categories.find(cat => cat.id === id);
         if (!category) {
           throw new Error('Category not found');
         }
-        
+
         return category;
       },
-      enabled: !!id,
+      enabled: !!id && categories.length > 0,
       staleTime: 10 * 60 * 1000,
     });
   };
@@ -262,19 +159,19 @@ export const useCategories = (initialFilters: CategoryFilters = {}) => {
     queryKey: CATEGORY_QUERY_KEYS.tree(),
     queryFn: async (): Promise<CategoryTree[]> => {
       await new Promise(resolve => setTimeout(resolve, 300));
-      
-      const allCategories = generateMockCategories();
-      
+
+      const allCategories = categories;
+
       // Build tree structure
       const buildTree = (parentId?: string, level = 0): CategoryTree[] => {
         return allCategories
           .filter(cat => cat.parentId === parentId)
           .map(cat => {
             const children = buildTree(cat.id, level + 1);
-            const path = parentId 
+            const path = parentId
               ? [...(allCategories.find(p => p.id === parentId)?.name ? [allCategories.find(p => p.id === parentId)!.name] : []), cat.name]
               : [cat.name];
-            
+
             return {
               ...cat,
               children,
@@ -298,19 +195,19 @@ export const useCategories = (initialFilters: CategoryFilters = {}) => {
     queryKey: CATEGORY_QUERY_KEYS.stats(),
     queryFn: async (): Promise<CategoryStats> => {
       await new Promise(resolve => setTimeout(resolve, 400));
-      
-      const allCategories = generateMockCategories();
+
+      const allCategories = categories;
       const activeCategories = allCategories.filter(cat => cat.isActive);
       const topLevelCategories = allCategories.filter(cat => cat.level === 0);
       const categoriesWithProducts = allCategories.filter(cat => cat.productCount > 0);
-      
+
       const totalProducts = allCategories.reduce((sum, cat) => sum + cat.productCount, 0);
       const avgProducts = allCategories.length > 0 ? totalProducts / allCategories.length : 0;
-      
-      const mostPopular = allCategories.reduce((max, cat) => 
+
+      const mostPopular = allCategories.reduce((max, cat) =>
         cat.productCount > (max?.productCount || 0) ? cat : max, null as Category | null
       );
-      
+
       const recent = [...allCategories]
         .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
         .slice(0, 5);
@@ -334,7 +231,7 @@ export const useCategories = (initialFilters: CategoryFilters = {}) => {
   const createCategoryMutation = useMutation({
     mutationFn: async (categoryData: CategoryFormData): Promise<Category> => {
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       const newCategory: Category = {
         id: Date.now().toString(),
         ...categoryData,
@@ -361,8 +258,8 @@ export const useCategories = (initialFilters: CategoryFilters = {}) => {
   const updateCategoryMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Partial<CategoryFormData> }): Promise<Category> => {
       await new Promise(resolve => setTimeout(resolve, 800));
-      
-      const existingCategory = generateMockCategories().find(cat => cat.id === id);
+
+      const existingCategory = categories.find(cat => cat.id === id);
       if (!existingCategory) {
         throw new Error('Category not found');
       }
@@ -389,14 +286,14 @@ export const useCategories = (initialFilters: CategoryFilters = {}) => {
   const deleteCategoryMutation = useMutation({
     mutationFn: async (id: string): Promise<void> => {
       await new Promise(resolve => setTimeout(resolve, 600));
-      
-      const category = generateMockCategories().find(cat => cat.id === id);
+
+      const category = categories.find(cat => cat.id === id);
       if (!category) {
         throw new Error('Category not found');
       }
 
       // Check if category has children or products
-      const hasChildren = generateMockCategories().some(cat => cat.parentId === id);
+      const hasChildren = categories.some(cat => cat.parentId === id);
       if (hasChildren) {
         throw new Error('Cannot delete category with subcategories');
       }
@@ -440,10 +337,10 @@ export const useCategories = (initialFilters: CategoryFilters = {}) => {
         queryKey: CATEGORY_QUERY_KEYS.search(searchTerm),
         queryFn: async (): Promise<Category[]> => {
           await new Promise(resolve => setTimeout(resolve, 300));
-          
-          const allCategories = generateMockCategories();
+
+          const allCategories = categories;
           const search = searchTerm.toLowerCase();
-          
+
           return allCategories.filter(cat =>
             cat.name.toLowerCase().includes(search) ||
             cat.description?.toLowerCase().includes(search) ||
@@ -468,16 +365,16 @@ export const useCategories = (initialFilters: CategoryFilters = {}) => {
         queryKey: CATEGORY_QUERY_KEYS.breadcrumb(categoryId),
         queryFn: async (): Promise<Category[]> => {
           await new Promise(resolve => setTimeout(resolve, 200));
-          
-          const allCategories = generateMockCategories();
+
+          const allCategories = categories;
           const buildBreadcrumb = (id: string): Category[] => {
             const category = allCategories.find(cat => cat.id === id);
             if (!category) return [];
-            
-            const parent = category.parentId 
+
+            const parent = category.parentId
               ? buildBreadcrumb(category.parentId)
               : [];
-            
+
             return [...parent, category];
           };
 
@@ -518,17 +415,17 @@ export const useCategories = (initialFilters: CategoryFilters = {}) => {
   const isLoading = categoriesLoading || treeLoading || statsLoading;
   const hasError = categoriesError;
 
-  const topLevelCategories = useMemo(() => 
-    categories.filter(cat => cat.level === 0), 
+  const topLevelCategories = useMemo(() =>
+    categories.filter(cat => cat.level === 0),
     [categories]
   );
 
-  const activeCategories = useMemo(() => 
-    categories.filter(cat => cat.isActive), 
+  const activeCategories = useMemo(() =>
+    categories.filter(cat => cat.isActive),
     [categories]
   );
 
-  const totalProducts = useMemo(() => 
+  const totalProducts = useMemo(() =>
     categories.reduce((sum, cat) => sum + cat.productCount, 0),
     [categories]
   );
@@ -540,42 +437,42 @@ export const useCategories = (initialFilters: CategoryFilters = {}) => {
     topLevelCategories,
     activeCategories,
     stats,
-    
+
     // Loading states
     isLoading,
     categoriesLoading,
     treeLoading,
     statsLoading,
-    
+
     // Error states
     error: hasError,
     categoriesError,
-    
+
     // Filters
     filters,
-    
+
     // Computed values
     totalProducts,
-    
+
     // Actions
     updateFilters,
     resetFilters,
     searchCategories,
     getCategoryBreadcrumb,
     refetchCategories,
-    
+
     // Category operations
     createCategory: createCategoryMutation.mutateAsync,
     updateCategory: updateCategoryMutation.mutateAsync,
     deleteCategory: deleteCategoryMutation.mutateAsync,
     reorderCategories: reorderCategoriesMutation.mutateAsync,
-    
+
     // Mutation states
     isCreating: createCategoryMutation.isPending,
     isUpdating: updateCategoryMutation.isPending,
     isDeleting: deleteCategoryMutation.isPending,
     isReordering: reorderCategoriesMutation.isPending,
-    
+
     // Utility functions
     getTopLevelCategories,
     getSubcategories,

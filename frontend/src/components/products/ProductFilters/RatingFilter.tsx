@@ -77,7 +77,7 @@ const RatingFilter: React.FC<RatingFilterProps> = ({
   return (
     <div className={cn('space-y-4', className)}>
       <div className="flex items-center justify-between">
-        <h3 className="font-semibold text-gray-900">Customer Rating</h3>
+        <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">Customer Rating</h3>
         <div className="flex items-center gap-2">
           {selectedCount > 0 && (
             <button
@@ -114,7 +114,7 @@ const RatingFilter: React.FC<RatingFilterProps> = ({
           >
             {sortedRatings.map((rating, index) => {
               const isSelected = selectedRatings.includes(rating.value);
-              
+
               return (
                 <motion.label
                   key={rating.value}
@@ -144,7 +144,7 @@ const RatingFilter: React.FC<RatingFilterProps> = ({
                       aria-label={`Select ${rating.value} stars rating`}
                       title={`${rating.value} stars rating`}
                     />
-                    
+
                     <div className="flex items-center gap-2">
                       {renderStars(rating.value)}
                       {showAndUp && rating.value < 5 && (

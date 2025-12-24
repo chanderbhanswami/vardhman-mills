@@ -113,6 +113,8 @@ export interface ValuePropositionProps {
   title?: string;
   /** Section subtitle */
   subtitle?: string;
+  /** Badge text (e.g., "TRUSTED SINCE 1975") */
+  badge?: string;
   /** USPs to display */
   usps?: USP[];
   /** Stats to display */
@@ -219,6 +221,7 @@ const DEFAULT_TRUST_BADGES: TrustBadge[] = [
 export const ValueProposition: React.FC<ValuePropositionProps> = ({
   title = 'Why Choose Us',
   subtitle = 'Discover the advantages that set us apart from the competition',
+  badge,
   usps = DEFAULT_USPS,
   stats = DEFAULT_STATS,
   comparisonFeatures = [],
@@ -275,7 +278,7 @@ export const ValueProposition: React.FC<ValuePropositionProps> = ({
       const timer = setInterval(() => {
         currentFrame++;
         const currentValue = Math.min(increment * currentFrame, stat.value);
-        
+
         setAnimatedStats((prev) => ({
           ...prev,
           [stat.id]: currentValue,
@@ -314,91 +317,155 @@ export const ValueProposition: React.FC<ValuePropositionProps> = ({
   // RENDER FUNCTIONS
   // ============================================================================
 
-  const renderUSPs = () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-      <AnimatePresence mode="wait">
-        {activeUSPs.map((usp, index) => {
-          const Icon = usp.icon;
-          return (
-            <motion.div
-              key={usp.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.4, delay: index * 0.1 }}
-            >
-              <Card className="h-full hover:shadow-lg transition-shadow duration-300">
-                <CardContent className="p-6">
+  const renderUSPs = () => {
+    // Gradient colors for each card icon
+    const gradients = [
+      'from-blue-500 to-indigo-600',
+      'from-emerald-500 to-teal-600',
+      'from-amber-500 to-orange-600',
+      'from-purple-500 to-violet-600',
+      'from-rose-500 to-pink-600',
+      'from-cyan-500 to-sky-600',
+    ];
+
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-16">
+        <AnimatePresence mode="wait">
+          {activeUSPs.map((usp, index) => {
+            const Icon = usp.icon;
+            const gradient = gradients[index % gradients.length];
+            const isFirst = index === 0;
+
+            return (
+              <motion.div
+                key={usp.id}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.5, delay: index * 0.08 }}
+                className={cn(
+                  isFirst && 'md:col-span-2 lg:col-span-1'
+                )}
+              >
+                <div
+                  className={cn(
+                    'group relative h-full p-6 rounded-2xl',
+                    'bg-white backdrop-blur-xl',
+                    'border border-gray-200',
+                    'hover:bg-gray-50',
+                    'hover:border-gray-300',
+                    'hover:shadow-xl hover:shadow-gray-200/50',
+                    'transition-all duration-300 cursor-default'
+                  )}
+                >
+                  {/* Gradient glow on hover */}
+                  <div className={cn(
+                    'absolute -inset-0.5 rounded-2xl opacity-0 group-hover:opacity-100',
+                    'bg-gradient-to-r', gradient,
+                    'blur-xl transition-opacity duration-500 -z-10'
+                  )} style={{ opacity: 0.15 }} />
+
                   <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
-                      <Icon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                    {/* Icon with gradient background */}
+                    <div className={cn(
+                      'flex-shrink-0 w-14 h-14 rounded-xl',
+                      'bg-gradient-to-br', gradient,
+                      'flex items-center justify-center',
+                      'shadow-lg group-hover:shadow-xl',
+                      'group-hover:scale-110 transition-transform duration-300'
+                    )}>
+                      <Icon className="w-7 h-7 text-white" />
                     </div>
+
+                    {/* Content */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-2">
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                        <h3 className="text-lg font-semibold text-gray-900 group-hover:text-gray-800">
                           {usp.title}
                         </h3>
                         {usp.badge && (
-                          <Badge variant="default" className="text-xs">
+                          <Badge
+                            variant="default"
+                            className="text-[10px] uppercase tracking-wide bg-gradient-to-r from-amber-400 to-orange-500 text-white border-0 shadow-sm"
+                          >
                             {usp.badge}
                           </Badge>
                         )}
                       </div>
-                      <p className="text-gray-600 dark:text-gray-400 text-sm">
+                      <p className="text-gray-600 text-sm leading-relaxed">
                         {usp.description}
                       </p>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          );
-        })}
-      </AnimatePresence>
-    </div>
-  );
-
-  const renderStats = () => (
-    <div ref={statsRef} className="py-12 bg-gray-50 dark:bg-gray-800 rounded-xl mb-12">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 px-6">
-        {stats.map((stat, index) => {
-          const Icon = stat.icon;
-          const displayValue = animateCounters && isStatsInView
-            ? (animatedStats[stat.id] || 0)
-            : stat.value;
-          
-          const formattedValue = stat.value % 1 !== 0
-            ? displayValue.toFixed(1)
-            : Math.floor(displayValue).toLocaleString();
-
-          return (
-            <motion.div
-              key={stat.id}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="text-center"
-            >
-              {Icon && (
-                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-white dark:bg-gray-700 mb-3">
-                  <Icon className={cn('w-6 h-6', stat.color || 'text-gray-600')} />
                 </div>
-              )}
-              <div className={cn('text-3xl font-bold mb-1', stat.color || 'text-gray-900 dark:text-white')}>
-                {stat.prefix}{formattedValue}{stat.suffix}
-              </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                {stat.label}
-              </div>
-              {stat.progress !== undefined && (
-                <Progress value={stat.progress} className="h-1 max-w-[120px] mx-auto" />
-              )}
-            </motion.div>
-          );
-        })}
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
       </div>
-    </div>
-  );
+    );
+  };
+
+  const renderStats = () => {
+    // Only show first 4 stats for cleaner look
+    const displayStats = stats.slice(0, 4);
+
+    return (
+      <div
+        ref={statsRef}
+        className="relative py-10 px-8 mb-16 rounded-2xl overflow-hidden bg-white border border-gray-200 shadow-lg"
+      >
+        {/* Subtle pattern overlay */}
+        <div className="absolute inset-0 opacity-5" style={{
+          backgroundImage: 'radial-gradient(circle at 1px 1px, #6366f1 1px, transparent 0)',
+          backgroundSize: '40px 40px'
+        }} />
+
+        <div className="relative grid grid-cols-2 lg:grid-cols-4 gap-8">
+          {displayStats.map((stat, index) => {
+            const Icon = stat.icon;
+            const displayValue = animateCounters && isStatsInView
+              ? (animatedStats[stat.id] || 0)
+              : stat.value;
+
+            const formattedValue = stat.value % 1 !== 0
+              ? displayValue.toFixed(1)
+              : Math.floor(displayValue).toLocaleString();
+
+            return (
+              <motion.div
+                key={stat.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                className="text-center group"
+              >
+                {Icon && (
+                  <div className="relative inline-flex items-center justify-center w-16 h-16 mb-4">
+                    {/* Gradient ring */}
+                    <div className="absolute inset-0 rounded-full bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 opacity-20 group-hover:opacity-40 transition-opacity" />
+                    <div className="absolute inset-[3px] rounded-full bg-white" />
+                    <Icon className={cn('relative w-7 h-7', stat.color || 'text-blue-600')} />
+                  </div>
+                )}
+                <motion.div
+                  className="text-4xl font-bold text-gray-900 mb-1 tracking-tight"
+                  initial={{ scale: 0.8 }}
+                  animate={{ scale: isStatsInView ? 1 : 0.8 }}
+                  transition={{ type: 'spring', stiffness: 200, delay: index * 0.1 + 0.3 }}
+                >
+                  {stat.prefix}{formattedValue}{stat.suffix}
+                </motion.div>
+                <div className="text-sm text-gray-500 font-medium uppercase tracking-wider">
+                  {stat.label}
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
 
   const renderComparison = () => (
     <div className="mb-12">
@@ -466,31 +533,35 @@ export const ValueProposition: React.FC<ValuePropositionProps> = ({
   );
 
   const renderTrustBadges = () => (
-    <div className="flex flex-wrap items-center justify-center gap-4 mb-12">
+    <div className="flex flex-wrap items-center justify-center gap-3 mb-16">
       {trustBadges.map((badge, index) => {
         const Icon = badge.icon;
         return (
           <motion.div
             key={badge.id}
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.3, delay: index * 0.05 }}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.4, delay: index * 0.08 }}
+            whileHover={{ scale: 1.05 }}
           >
-            <Tooltip content={badge.label}>
-              <Card className="hover:shadow-md transition-shadow duration-300">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3">
-                    <Icon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-                    <span className="text-sm font-medium text-gray-900 dark:text-white">
-                      {badge.label}
-                    </span>
-                    {badge.verified && (
-                      <CheckBadgeIcon className="w-5 h-5 text-green-600" />
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            </Tooltip>
+            <div
+              className={cn(
+                'group flex items-center gap-2.5 px-5 py-2.5 rounded-full',
+                'bg-white backdrop-blur-sm',
+                'border border-gray-200',
+                'hover:border-green-400 hover:bg-green-50',
+                'hover:shadow-lg hover:shadow-green-500/20',
+                'transition-all duration-300 cursor-pointer'
+              )}
+            >
+              <Icon className="w-5 h-5 text-gray-600 group-hover:text-green-600 transition-colors" />
+              <span className="text-sm font-medium text-gray-700 group-hover:text-green-700 transition-colors">
+                {badge.label}
+              </span>
+              {badge.verified && (
+                <CheckBadgeIcon className="w-5 h-5 text-green-500" />
+              )}
+            </div>
           </motion.div>
         );
       })}
@@ -529,9 +600,9 @@ export const ValueProposition: React.FC<ValuePropositionProps> = ({
                 <div className="flex items-center gap-3">
                   {testimonial.avatar && (
                     <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden relative">
-                      <Image 
-                        src={testimonial.avatar} 
-                        alt={testimonial.name} 
+                      <Image
+                        src={testimonial.avatar}
+                        alt={testimonial.name}
                         fill
                         className="object-cover"
                       />
@@ -582,23 +653,33 @@ export const ValueProposition: React.FC<ValuePropositionProps> = ({
   // ============================================================================
 
   return (
-    <section className={cn('w-full py-16', className)}>
+    <section className={cn('w-full py-12', className)}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center mb-12">
-          <motion.h2
+        <div className="text-center mb-16">
+          <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="text-4xl font-bold text-gray-900 dark:text-white mb-4"
+            transition={{ duration: 0.6 }}
           >
-            {title}
-          </motion.h2>
+            {badge && (
+              <Badge
+                variant="outline"
+                className="mb-4 text-xs font-bold uppercase tracking-widest bg-primary-50 text-primary-700 border-primary-200 px-4 py-1.5"
+              >
+                {badge}
+              </Badge>
+            )}
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 tracking-tight">
+              {title}
+            </h2>
+            <div className="w-24 h-1.5 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 mx-auto mb-6 rounded-full" />
+          </motion.div>
           <motion.p
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto"
+            transition={{ duration: 0.5, delay: 0.15 }}
+            className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto font-normal"
           >
             {subtitle}
           </motion.p>
@@ -644,16 +725,26 @@ export const ValueProposition: React.FC<ValuePropositionProps> = ({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
-          className="text-center"
+          className="text-center pt-8"
         >
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Button size="lg" onClick={handleCTAClick} asChild>
+            <Button
+              size="lg"
+              onClick={handleCTAClick}
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white hover:text-white shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30 transition-all duration-300 px-8 py-6 text-base font-semibold"
+              asChild
+            >
               <a href={ctaLink}>
                 {ctaText}
                 <RocketLaunchIcon className="w-5 h-5 ml-2" />
               </a>
             </Button>
-            <Button variant="outline" size="lg" asChild>
+            <Button
+              variant="outline"
+              size="lg"
+              className="border-gray-300 text-gray-700 hover:bg-gray-100 hover:border-gray-400 px-8 py-6 text-base font-semibold transition-all duration-300"
+              asChild
+            >
               <a href={secondaryCTALink}>
                 {secondaryCTAText}
                 <SparklesIcon className="w-5 h-5 ml-2" />

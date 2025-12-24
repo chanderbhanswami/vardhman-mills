@@ -7,6 +7,13 @@ const router = express.Router();
 // ==================== PUBLIC ROUTES ====================
 
 /**
+ * @route   GET /api/v1/collections
+ * @desc    Get all collections with filters (public)
+ * @access  Public
+ */
+router.get('/', collectionController.getCollections);
+
+/**
  * @route   GET /api/v1/collections/slug/:slug
  * @desc    Get collection by slug (public)
  * @access  Public
@@ -24,13 +31,6 @@ router.get('/:id/products', collectionController.getCollectionProducts);
 
 // Protect all routes after this middleware
 router.use(protect, restrictTo('admin', 'super-admin'));
-
-/**
- * @route   GET /api/v1/collections
- * @desc    Get all collections with filters
- * @access  Admin
- */
-router.get('/', collectionController.getCollections);
 
 /**
  * @route   POST /api/v1/collections

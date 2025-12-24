@@ -128,11 +128,11 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
   });
   const [windowWidth, setWindowWidth] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
-  
+
   const containerRef = useRef<HTMLDivElement>(null);
   const autoPlayTimerRef = useRef<NodeJS.Timeout | null>(null);
   const dragStartX = useRef(0);
-  
+
   const x = useMotionValue(0);
   const controls = useAnimation();
 
@@ -144,14 +144,14 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
     const breakpointKeys = Object.keys(breakpoints)
       .map(Number)
       .sort((a, b) => b - a);
-    
+
     for (const bp of breakpointKeys) {
       if (windowWidth >= bp) {
         const result = breakpoints[bp as keyof typeof breakpoints];
         return result || { slidesPerView: 1, slidesToScroll: 1, spaceBetween: 16 };
       }
     }
-    
+
     return { slidesPerView: 1, slidesToScroll: 1, spaceBetween: 16 };
   }, [windowWidth, breakpoints]);
 
@@ -269,7 +269,7 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
 
     setState(prev => {
       let newIndex = prev.currentIndex - effectiveSlidesToScroll;
-      
+
       if (newIndex < 0) {
         newIndex = infinite ? maxIndex : 0;
       }
@@ -291,7 +291,7 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
 
     setState(prev => {
       let newIndex = prev.currentIndex + effectiveSlidesToScroll;
-      
+
       if (newIndex > maxIndex) {
         newIndex = infinite ? 0 : maxIndex;
       }
@@ -500,26 +500,29 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
           style={{ x }}
           initial={{ x: 0 }}
         >
-          {products.map((product, index) => (
-            <motion.div
-              key={product.id}
-              className="flex-shrink-0"
-              style={{
-                width: slideWidth,
-                marginRight: index < products.length - 1 ? effectiveSpaceBetween : 0,
-              }}
-              initial={animated ? { opacity: 0, scale: 0.9 } : undefined}
-              animate={animated ? { opacity: 1, scale: 1 } : undefined}
-              transition={animated ? { duration: 0.3, delay: index * 0.05 } : undefined}
-            >
-              <BestSellersCard
-                product={product}
-                variant="default"
-                animated={false}
-                enableZoom={!isDragging}
-              />
-            </motion.div>
-          ))}
+          {products.map((product, index) => {
+            if (!product) return null;
+            return (
+              <motion.div
+                key={product.id}
+                className="flex-shrink-0"
+                style={{
+                  width: slideWidth,
+                  marginRight: index < products.length - 1 ? effectiveSpaceBetween : 0,
+                }}
+                initial={animated ? { opacity: 0, scale: 0.9 } : undefined}
+                animate={animated ? { opacity: 1, scale: 1 } : undefined}
+                transition={animated ? { duration: 0.3, delay: index * 0.05 } : undefined}
+              >
+                <BestSellersCard
+                  product={product}
+                  variant="default"
+                  animated={false}
+                  enableZoom={!isDragging}
+                />
+              </motion.div>
+            );
+          })}
         </motion.div>
       </div>
 

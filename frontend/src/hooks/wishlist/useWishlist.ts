@@ -100,16 +100,28 @@ export const useWishlist = (options: UseWishlistOptions = {}) => {
     totalPages: number;
     stats: WishlistStats;
   }>({
-    queryKey: ['wishlist', user?.id, filters, currentPage, itemsPerPage],
+    queryKey: ['wishlist', user?.id, filters, currentPage, itemsPerPage, isAuthenticated],
     queryFn: async () => {
+      // GUEST MODE: Use localStorage
       if (!isAuthenticated || !user) {
+        const { getGuestWishlist } = await import('@/lib/wishlist/guestWishlist');
+        const guestProductIds = getGuestWishlist();
+
         return {
-          items: [],
-          total: 0,
+          items: guestProductIds.map(productId => ({
+            id: productId,
+            productId: productId,
+            userId: 'guest',
+            variant: undefined,
+            product: {} as any,
+            addedAt: new Date().toISOString(),
+            notes: null,
+          } as WishlistItem)),
+          total: guestProductIds.length,
           page: 1,
           totalPages: 1,
           stats: {
-            totalItems: 0,
+            totalItems: guestProductIds.length,
             totalValue: 0,
             totalSavings: 0,
             categories: [],
@@ -124,6 +136,7 @@ export const useWishlist = (options: UseWishlistOptions = {}) => {
         };
       }
 
+      // AUTHENTICATED MODE: Use API (existing behavior)
       // Simulate API call with filters and pagination
       await new Promise(resolve => setTimeout(resolve, 800));
 
@@ -140,7 +153,7 @@ export const useWishlist = (options: UseWishlistOptions = {}) => {
         if (filters.onSale && !item.product.salePrice) return false;
         if (filters.rating && (!item.product.rating || item.product.rating < filters.rating)) return false;
         if (filters.tags?.length && !filters.tags.some(tag => item.product.tags?.includes(tag))) return false;
-        
+
         if (filters.priceRange) {
           const price = item.product.salePrice || item.product.price;
           if (price < filters.priceRange.min || price > filters.priceRange.max) return false;
@@ -153,7 +166,7 @@ export const useWishlist = (options: UseWishlistOptions = {}) => {
       if (filters.sortBy) {
         filteredItems.sort((a, b) => {
           const order = filters.sortOrder === 'desc' ? -1 : 1;
-          
+
           switch (filters.sortBy) {
             case 'addedAt':
               return order * (new Date(a.addedAt).getTime() - new Date(b.addedAt).getTime());
@@ -216,12 +229,12 @@ export const useWishlist = (options: UseWishlistOptions = {}) => {
         outOfStockItems: filteredItems.filter(item => !item.product.inStock).length,
         onSaleItems: filteredItems.filter(item => item.product.salePrice).length,
         averageRating: filteredItems.reduce((sum, item) => sum + (item.product.rating || 0), 0) / filteredItems.length || 0,
-        oldestItem: filteredItems.reduce((oldest, item) => 
-          new Date(item.addedAt) < new Date(oldest.addedAt) ? item : oldest, 
+        oldestItem: filteredItems.reduce((oldest, item) =>
+          new Date(item.addedAt) < new Date(oldest.addedAt) ? item : oldest,
           filteredItems[0]
         )?.addedAt || '',
-        newestItem: filteredItems.reduce((newest, item) => 
-          new Date(item.addedAt) > new Date(newest.addedAt) ? item : newest, 
+        newestItem: filteredItems.reduce((newest, item) =>
+          new Date(item.addedAt) > new Date(newest.addedAt) ? item : newest,
           filteredItems[0]
         )?.addedAt || '',
       };
@@ -259,7 +272,7 @@ export const useWishlist = (options: UseWishlistOptions = {}) => {
     },
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['wishlist', user?.id] });
-      
+
       toast.success(
         `Wishlist synced! ${result.synced} items updated, ${result.removed} items removed`,
         { duration: 3000, icon: '🔄' }
@@ -291,12 +304,12 @@ export const useWishlist = (options: UseWishlistOptions = {}) => {
 
   const priceRange = useMemo(() => {
     if (!items.length) return { min: 0, max: 0 };
-    
+
     const prices = items.map((item: WishlistItem) => {
       const price = item.variant?.salePrice || item.variant?.price || item.product.salePrice || item.product.price;
       return price;
     });
-    
+
     return {
       min: Math.min(...prices),
       max: Math.max(...prices),
@@ -331,7 +344,7 @@ export const useWishlist = (options: UseWishlistOptions = {}) => {
   // Search functionality
   const searchItems = useCallback((searchTerm: string) => {
     const term = searchTerm.toLowerCase();
-    return items.filter((item: WishlistItem) => 
+    return items.filter((item: WishlistItem) =>
       item.product.name.toLowerCase().includes(term) ||
       item.product.description?.toLowerCase().includes(term) ||
       item.product.brand?.toLowerCase().includes(term) ||
@@ -346,7 +359,7 @@ export const useWishlist = (options: UseWishlistOptions = {}) => {
     stats,
     totalPages,
     currentPage,
-    
+
     // State
     hasItems,
     isEmpty,
@@ -355,13 +368,13 @@ export const useWishlist = (options: UseWishlistOptions = {}) => {
     error: wishlistQuery.error,
     isFetching: wishlistQuery.isFetching,
     isSuccess: wishlistQuery.isSuccess,
-    
+
     // Filters
     filters,
     availableCategories,
     availableBrands,
     priceRange,
-    
+
     // Actions
     updateFilters,
     clearFilters,
@@ -369,23 +382,23 @@ export const useWishlist = (options: UseWishlistOptions = {}) => {
     refresh,
     sync,
     searchItems,
-    
+
     // View mode
     viewMode,
     setViewMode,
-    
+
     // Sync state
     isSyncing: syncWishlistMutation.isPending,
-    
+
     // Query object
     query: wishlistQuery,
     syncMutation: syncWishlistMutation,
-    
+
     // Helper functions
     getItemById: (id: string) => items.find((item: WishlistItem) => item.id === id),
-    getItemByProductId: (productId: string, variantId?: string) => 
+    getItemByProductId: (productId: string, variantId?: string) =>
       items.find((item: WishlistItem) => item.productId === productId && item.variantId === variantId),
-    
+
     // Bulk selection helpers
     selectAll: () => items.map((item: WishlistItem) => item.id),
     selectInStock: () => items.filter((item: WishlistItem) => item.product.inStock).map((item: WishlistItem) => item.id),

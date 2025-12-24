@@ -1,4 +1,4 @@
-import { 
+﻿import { 
   useMutation, 
   useQuery, 
   useQueryClient, 
@@ -404,7 +404,7 @@ export interface ReplyModerationQueue {
 // ==================== API SERVICE CLASS ====================
 
 export class ReviewRepliesApiService {
-  private readonly baseUrl = '/api/v1/review-replies';
+  private readonly baseUrl = '/review-replies';
 
   // ==================== CRUD Operations ====================
 

@@ -53,29 +53,29 @@ const BreadcrumbItem: React.FC<BreadcrumbItemProps> = ({
 
   const baseClasses = `
     flex items-center space-x-1 text-sm font-medium transition-colors duration-200
-    ${isActive 
-      ? `text-primary-600 dark:text-primary-400 cursor-default ${activeClassName}` 
-      : `text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 ${linkClassName}`
+    ${isActive
+      ? `text-black font-bold cursor-default ${activeClassName}`
+      : `text-black hover:text-black ${linkClassName}`
     }
     ${className}
   `;
 
   const separatorClasses = `
-    flex items-center text-gray-400 dark:text-gray-500 mx-2
+    flex items-center text-gray-400 mx-2
     ${separatorClassName}
   `;
 
   const renderContent = () => (
     <motion.span
       variants={itemVariants}
-      className="flex items-center space-x-1"
+      className="flex items-center space-x-1 text-black"
     >
       {icon && (
         <span className="w-4 h-4 flex items-center justify-center">
           {icon}
         </span>
       )}
-      <span className="truncate max-w-[120px] sm:max-w-[200px] md:max-w-none">
+      <span className="truncate max-w-[120px] sm:max-w-[200px] md:max-w-none text-black font-medium">
         {label}
       </span>
     </motion.span>

@@ -290,7 +290,7 @@ export const CollectionCard: React.FC<CollectionCardProps> = ({
         {showProductCount && (
           <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
             <TagIcon className="w-4 h-4" />
-            <span>{formatNumber(collection.productCount)} products</span>
+            <span>{formatNumber(collection.productCount || 0)} products</span>
           </div>
         )}
 
@@ -324,48 +324,110 @@ export const CollectionCard: React.FC<CollectionCardProps> = ({
         onHoverStart={() => setIsHovered(true)}
         onHoverEnd={() => setIsHovered(false)}
         className={cn(
-          'relative group bg-white dark:bg-gray-800 rounded-xl overflow-hidden',
+          'relative group bg-white dark:bg-gray-800 rounded-lg overflow-hidden',
           'border border-gray-200 dark:border-gray-700',
-          'shadow-lg hover:shadow-xl transition-shadow',
+          'shadow-sm hover:shadow-lg transition-all duration-300',
           className
         )}
       >
         {/* Image Container */}
         <div className="relative h-64 bg-gray-100 dark:bg-gray-700 overflow-hidden">
-          <motion.div variants={animated ? imageVariants : undefined}>
+          <motion.div
+            variants={animated ? imageVariants : undefined}
+            className="relative w-full h-full"
+          >
             <Image
               src={collectionImage}
               alt={collection.name}
               fill
-              className="object-cover"
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
           </motion.div>
 
-          {/* Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          {/* Subtle Overlay on Hover */}
+          <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-          {/* Badges */}
-          {renderBadges()}
+          {/* Featured Badge */}
+          {collection.isFeatured && (
+            <div className="absolute top-3 right-3 z-10">
+              <Badge
+                variant="default"
+                size="sm"
+                className="bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-200 shadow-sm font-semibold px-3"
+              >
+                <span className="flex items-center gap-1.5">
+                  <SparklesIcon className="w-3.5 h-3.5 text-amber-700" />
+                  <span>Featured</span>
+                </span>
+              </Badge>
+            </div>
+          )}
 
-          {/* Quick Actions */}
-          {renderQuickActions()}
+          {/* Product Count Pill - Bottom Left */}
+          {showProductCount && (
+            <div className="absolute bottom-3 left-3 z-10">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/95 backdrop-blur-md text-gray-900 shadow-sm border border-gray-100">
+                <TagIcon className="w-3.5 h-3.5 text-gray-500" />
+                <span className="text-xs font-bold">
+                  {formatNumber(collection.productCount || 0)}
+                </span>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Content */}
-        <div className="p-6">
-          {renderInfo()}
+        {/* Content Section - Below Image */}
+        <div className="p-5 flex flex-col flex-1">
+          <div className="mb-2">
+            {/* Type Badge */}
+            {collectionType && (
+              <Badge
+                variant="secondary"
+                size="sm"
+                className="mb-3 text-[10px] uppercase tracking-wider font-bold bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300 border-0"
+              >
+                {collectionType}
+              </Badge>
+            )}
 
-          {/* CTA */}
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full mt-4 group/btn"
-            aria-label={`View ${collection.name}`}
-          >
-            View Collection
-            <ArrowRightIcon className="w-4 h-4 ml-2 group-hover/btn:translate-x-1 transition-transform" />
-          </Button>
+            {/* Collection Name */}
+            <h3 className="text-xl font-semibold text-black dark:text-white leading-tight mb-2 group-hover:text-primary-600 transition-colors">
+              {collection.name}
+            </h3>
+          </div>
+
+          {/* Description */}
+          {collection.description && (
+            <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed mb-5">
+              {collection.description}
+            </p>
+          )}
+
+          <div className="mt-auto pt-4 border-t border-gray-100 dark:border-gray-700/50">
+            {/* Dates */}
+            {showDates && (collection.startDate || collection.endDate) && (
+              <div className="flex items-center gap-2 text-xs font-medium text-gray-400 dark:text-gray-500 mb-4">
+                <CalendarIcon className="w-4 h-4" />
+                <span>
+                  {collection.startDate && new Date(collection.startDate).toLocaleDateString()}
+                  {collection.startDate && collection.endDate && ' - '}
+                  {collection.endDate && new Date(collection.endDate).toLocaleDateString()}
+                </span>
+              </div>
+            )}
+
+            {/* CTA Button */}
+            <Button
+              variant="default"
+              size="sm"
+              className="w-full bg-gray-900 hover:bg-black text-white border-0 shadow-md hover:shadow-lg transition-all duration-300 font-bold tracking-wide py-5"
+              aria-label={`View ${collection.name}`}
+            >
+              <span>View Collection</span>
+              <ArrowRightIcon className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+            </Button>
+          </div>
         </div>
       </motion.div>
     </Link>
@@ -406,7 +468,7 @@ export const CollectionCard: React.FC<CollectionCardProps> = ({
             </h3>
             {showProductCount && (
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                {formatNumber(collection.productCount)} products
+                {formatNumber(collection.productCount || 0)} products
               </p>
             )}
           </div>
@@ -516,7 +578,7 @@ export const CollectionCard: React.FC<CollectionCardProps> = ({
         {/* Product Count */}
         {showProductCount && (
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            {formatNumber(collection.productCount)} products
+            {formatNumber(collection.productCount || 0)} products
           </p>
         )}
       </motion.div>

@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
+﻿import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 import { toast } from 'react-hot-toast';
 import { ApiResponse, ApiError } from './types';
 
@@ -11,7 +11,7 @@ interface ClientConfig {
 }
 
 const defaultConfig: ClientConfig = {
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000',
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5000/api/v1',
   timeout: 30000, // 30 seconds
   withCredentials: true,
   headers: {
@@ -22,7 +22,7 @@ const defaultConfig: ClientConfig = {
 
 // Debug: Log the actual base URL being used
 if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
-  console.log('🔧 API Client Config:', {
+  console.log('ðŸ”§ API Client Config:', {
     baseURL: defaultConfig.baseURL,
     env: process.env.NEXT_PUBLIC_API_URL,
   });
@@ -45,7 +45,7 @@ export class HttpClient {
 
   constructor(config: Partial<ClientConfig> = {}) {
     const finalConfig = { ...defaultConfig, ...config };
-    
+
     this.client = axios.create(finalConfig);
     this.setupInterceptors();
     this.loadTokenFromStorage();
@@ -102,7 +102,7 @@ export class HttpClient {
 
         // Log request in development
         if (process.env.NODE_ENV === 'development') {
-          console.log(`🚀 ${config.method?.toUpperCase()} ${config.url}`, {
+          console.log(`ðŸš€ ${config.method?.toUpperCase()} ${config.url}`, {
             headers: config.headers,
             data: config.data,
           });
@@ -121,13 +121,13 @@ export class HttpClient {
       (response: AxiosResponse) => {
         // Calculate request duration
         const configWithMetadata = response.config as AxiosRequestConfig & { metadata?: { startTime: number } };
-        const duration = configWithMetadata.metadata?.startTime 
+        const duration = configWithMetadata.metadata?.startTime
           ? Date.now() - configWithMetadata.metadata.startTime
           : 0;
 
         // Log response in development
         if (process.env.NODE_ENV === 'development') {
-          console.log(`✅ ${response.config.method?.toUpperCase()} ${response.config.url} (${duration}ms)`, {
+          console.log(`âœ… ${response.config.method?.toUpperCase()} ${response.config.url} (${duration}ms)`, {
             status: response.status,
             data: response.data,
           });
@@ -140,7 +140,7 @@ export class HttpClient {
 
         // Log error in development
         if (process.env.NODE_ENV === 'development') {
-          console.error(`❌ ${originalRequest?.method?.toUpperCase()} ${originalRequest?.url}`, {
+          console.error(`âŒ ${originalRequest?.method?.toUpperCase()} ${originalRequest?.url}`, {
             status: error.response?.status,
             message: error.message,
             data: error.response?.data,
@@ -167,10 +167,10 @@ export class HttpClient {
             const response = await this.refreshAuthToken();
             if (response.data?.token) {
               this.setToken(response.data.token, response.data.refreshToken);
-              
+
               // Retry all failed requests
               this.processQueue(null);
-              
+
               return this.client(originalRequest);
             }
           } catch (refreshError) {
@@ -199,7 +199,7 @@ export class HttpClient {
         resolve();
       }
     });
-    
+
     this.failedQueue = [];
   }
 
@@ -221,7 +221,7 @@ export class HttpClient {
    * Refresh authentication token
    */
   private async refreshAuthToken(): Promise<ApiResponse<{ token: string; refreshToken?: string }>> {
-    const response = await axios.post('/api/v1/auth/refresh', {
+    const response = await axios.post('/auth/refresh', {
       refreshToken: this.refreshToken,
     });
     return response.data;
@@ -322,8 +322,8 @@ export class HttpClient {
    * POST request
    */
   public async post<T>(
-    url: string, 
-    data?: unknown, 
+    url: string,
+    data?: unknown,
     config?: AxiosRequestConfig
   ): Promise<ApiResponse<T>> {
     return this.request<T>({ ...config, method: 'POST', url, data });
@@ -333,8 +333,8 @@ export class HttpClient {
    * PUT request
    */
   public async put<T>(
-    url: string, 
-    data?: unknown, 
+    url: string,
+    data?: unknown,
     config?: AxiosRequestConfig
   ): Promise<ApiResponse<T>> {
     return this.request<T>({ ...config, method: 'PUT', url, data });
@@ -344,8 +344,8 @@ export class HttpClient {
    * PATCH request
    */
   public async patch<T>(
-    url: string, 
-    data?: unknown, 
+    url: string,
+    data?: unknown,
     config?: AxiosRequestConfig
   ): Promise<ApiResponse<T>> {
     return this.request<T>({ ...config, method: 'PATCH', url, data });
@@ -362,8 +362,8 @@ export class HttpClient {
    * Upload file(s)
    */
   public async upload<T>(
-    url: string, 
-    formData: FormData, 
+    url: string,
+    formData: FormData,
     config?: AxiosRequestConfig,
     onUploadProgress?: (progressEvent: { loaded: number; total?: number }) => void
   ): Promise<ApiResponse<T>> {
@@ -384,8 +384,8 @@ export class HttpClient {
    * Download file
    */
   public async download(
-    url: string, 
-    filename?: string, 
+    url: string,
+    filename?: string,
     config?: AxiosRequestConfig
   ): Promise<void> {
     try {
@@ -427,7 +427,7 @@ export class HttpClient {
         return await requestFn();
       } catch (error) {
         lastError = error;
-        
+
         if (attempt === maxRetries) {
           break;
         }

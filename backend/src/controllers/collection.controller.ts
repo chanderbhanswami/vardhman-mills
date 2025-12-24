@@ -18,8 +18,12 @@ export const getCollections = catchAsync(async (req: Request, res: Response) => 
     search
   } = req.query;
 
-  const filter: any = {};
+  // Default filter for public access - show only active collections
+  const filter: any = {
+    isActive: true
+  };
 
+  // Override defaults if explicitly specified
   if (status) filter.status = status;
   if (type) filter.type = type;
   if (isActive !== undefined) filter.isActive = isActive === 'true';
@@ -48,7 +52,7 @@ export const getCollections = catchAsync(async (req: Request, res: Response) => 
     total,
     page: Number(page),
     pages: Math.ceil(total / Number(limit)),
-    data: { collections }
+    data: collections  // Return collections array directly, not wrapped in object
   });
 });
 
@@ -132,7 +136,7 @@ export const getCollectionBySlug = catchAsync(async (req: Request, res: Response
 
   res.status(200).json({
     status: 'success',
-    data: { 
+    data: {
       collection,
       products,
       productCount: products.length
@@ -281,7 +285,7 @@ export const addProductsToCollection = catchAsync(async (req: Request, res: Resp
   // Add products (avoid duplicates)
   const currentProducts = collection.manualProducts?.map(p => p.toString()) || [];
   const newProducts = productIds.filter((id: string) => !currentProducts.includes(id));
-  
+
   collection.manualProducts = [...(collection.manualProducts || []), ...newProducts] as any;
   await collection.save();
 
@@ -360,7 +364,7 @@ export const getCollectionProducts = catchAsync(async (req: Request, res: Respon
   if (collection.type === 'manual') {
     total = collection.manualProducts?.length || 0;
     const skip = (Number(page) - 1) * Number(limit);
-    
+
     products = await Product.find({
       _id: { $in: collection.manualProducts }
     })
@@ -473,7 +477,7 @@ export const validateRules = catchAsync(async (req: Request, res: Response) => {
 
   try {
     const query = (Collection as any).buildQueryFromRules(rules, matchType);
-    
+
     const count = await Product.countDocuments(query);
     const sampleProducts = await Product.find(query).limit(5);
 
@@ -590,7 +594,7 @@ export const getCollectionStats = catchAsync(async (req: Request, res: Response,
         conversions: collection.analytics.conversions,
         revenue: collection.analytics.revenue,
         productsSold: collection.analytics.productsSold,
-        conversionRate: collection.analytics.views > 0 
+        conversionRate: collection.analytics.views > 0
           ? ((collection.analytics.conversions / collection.analytics.views) * 100).toFixed(2)
           : 0
       }

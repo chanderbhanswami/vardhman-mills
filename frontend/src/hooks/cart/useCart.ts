@@ -179,14 +179,14 @@ export const useCart = (options: UseCartOptions = {}) => {
     } catch (error) {
       console.error('Error parsing local cart:', error);
     }
-    
+
     return createEmptyCart();
   }, [enableLocalStorage, createEmptyCart]);
 
   // Save to localStorage
   const saveToLocalStorage = useCallback((cartData: Cart) => {
     if (!enableLocalStorage) return;
-    
+
     try {
       localStorage.setItem('vardhman_cart', JSON.stringify(cartData));
     } catch (error) {
@@ -245,7 +245,7 @@ export const useCart = (options: UseCartOptions = {}) => {
     const categories = Array.from(new Set(items.map(item => item.product.category)));
     const brands = Array.from(new Set(items.map(item => item.product.brand).filter(Boolean)));
     const outOfStockCount = items.filter(item => !item.product.inStock).length;
-    
+
     return {
       totalItems: items.length,
       totalQuantity: items.reduce((sum, item) => sum + item.quantity, 0),
@@ -336,35 +336,46 @@ export const useCart = (options: UseCartOptions = {}) => {
     }
   }, [isAuthenticated, localCart, getLocalCart]);
 
+  // Listen for storage events from other components (ProductCarousel, etc.)
+  useEffect(() => {
+    const handleStorageChange = () => {
+      // Refresh local cart from localStorage when storage event fires
+      setLocalCart(getLocalCart());
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [getLocalCart]);
+
   return {
     // Data
     cart: cart || localCart,
     items: filteredItems(),
     summary: (cart || localCart)?.summary,
     coupons: (cart || localCart)?.coupons || [],
-    
+
     // State
     isLoading,
     error,
     isEmpty: (cart || localCart)?.items.length === 0,
     itemCount: (cart || localCart)?.summary.itemCount || 0,
     totalQuantity: (cart || localCart)?.summary.totalQuantity || 0,
-    
+
     // Filters
     filters,
     applyFilters,
     clearFilters,
-    
+
     // Actions
     clearCart,
     refreshCart,
-    
+
     // Utilities
     hasItem,
     getItem,
     getItemQuantity,
     getCartStats,
-    
+
     // Sync
     syncCart: () => syncCartMutation.mutate(cart || localCart || createEmptyCart()),
     isSyncing: syncCartMutation.isPending,

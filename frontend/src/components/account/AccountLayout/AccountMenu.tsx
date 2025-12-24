@@ -53,8 +53,8 @@ import { Input } from '@/components/ui/Input';
 import { cn } from '@/lib/utils';
 import { formatCurrency } from '@/lib/format';
 import { useAuth } from '@/components/providers';
-import { useCart } from '@/contexts/CartContext';
-import { useWishlist } from '@/contexts/WishlistContext';
+import { useCart } from '@/components/providers/CartProvider';
+import { useWishlist } from '@/components/providers/WishlistProvider';
 import toast from 'react-hot-toast';
 
 // Types
@@ -101,7 +101,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
 
   // State
   const [searchQuery, setSearchQuery] = useState('');
-  
+
   // Calculate totals
   const cartItems = getCartItems();
   const wishlistItems = wishlistState.items.length;

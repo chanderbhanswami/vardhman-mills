@@ -384,108 +384,6 @@ export const BrandCarousel: React.FC<BrandCarouselProps> = ({
   }, [pauseOnHover, autoPlay]);
 
   // ============================================================================
-  // RENDER HELPERS
-  // ============================================================================
-
-  const renderArrows = useCallback(() => {
-    if (!showArrows) return null;
-
-    return (
-      <>
-        <Tooltip content="Previous">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handlePrev}
-            disabled={!canGoPrev}
-            className={cn(
-              'absolute left-2 top-1/2 -translate-y-1/2 z-10',
-              'bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm',
-              'hover:bg-white dark:hover:bg-gray-800',
-              'shadow-lg rounded-full p-2',
-              'disabled:opacity-50 disabled:cursor-not-allowed'
-            )}
-            aria-label="Previous slide"
-          >
-            <ChevronLeftIcon className="w-6 h-6" />
-          </Button>
-        </Tooltip>
-
-        <Tooltip content="Next">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleNext}
-            disabled={!canGoNext}
-            className={cn(
-              'absolute right-2 top-1/2 -translate-y-1/2 z-10',
-              'bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm',
-              'hover:bg-white dark:hover:bg-gray-800',
-              'shadow-lg rounded-full p-2',
-              'disabled:opacity-50 disabled:cursor-not-allowed'
-            )}
-            aria-label="Next slide"
-          >
-            <ChevronRightIcon className="w-6 h-6" />
-          </Button>
-        </Tooltip>
-      </>
-    );
-  }, [showArrows, handlePrev, handleNext, canGoPrev, canGoNext]);
-
-  const renderDots = useCallback(() => {
-    if (!showDots) return null;
-
-    const dotCount = Math.ceil(totalSlides / effectiveSlidesToScroll);
-    const dots = Array.from({ length: dotCount }, (_, i) => i);
-
-    return (
-      <div className="flex items-center justify-center gap-2 mt-6">
-        {dots.map(index => (
-          <button
-            key={index}
-            onClick={() => handleDotClick(index * effectiveSlidesToScroll)}
-            className={cn(
-              'rounded-full transition-all',
-              state.currentIndex === index * effectiveSlidesToScroll
-                ? 'w-8 h-2 bg-blue-600'
-                : 'w-2 h-2 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500'
-            )}
-            aria-label={`Go to slide ${index + 1}`}
-          />
-        ))}
-      </div>
-    );
-  }, [showDots, totalSlides, effectiveSlidesToScroll, state.currentIndex, handleDotClick]);
-
-  const renderAutoPlayControl = useCallback(() => {
-    if (!autoPlay) return null;
-
-    return (
-      <Tooltip content={state.isPaused ? 'Play' : 'Pause'}>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={togglePause}
-          className={cn(
-            'absolute bottom-4 right-4 z-10',
-            'bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm',
-            'hover:bg-white dark:hover:bg-gray-800',
-            'shadow-lg rounded-full p-2'
-          )}
-          aria-label={state.isPaused ? 'Play carousel' : 'Pause carousel'}
-        >
-          {state.isPaused ? (
-            <PlayIcon className="w-5 h-5" />
-          ) : (
-            <PauseIcon className="w-5 h-5" />
-          )}
-        </Button>
-      </Tooltip>
-    );
-  }, [autoPlay, state.isPaused, togglePause]);
-
-  // ============================================================================
   // RENDER
   // ============================================================================
 
@@ -500,16 +398,14 @@ export const BrandCarousel: React.FC<BrandCarouselProps> = ({
   return (
     <div
       className={cn('relative w-full', className)}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
     >
       {/* Carousel Container */}
-      <div ref={containerRef} className="overflow-hidden">
+      <div ref={containerRef} className="overflow-hidden py-4">
         <motion.div
           className={cn('flex', isDragging && 'cursor-grabbing')}
           drag="x"
           dragConstraints={{ left: 0, right: 0 }}
-          dragElastic={DRAG_ELASTIC}
+          dragElastic={0.9}
           dragMomentum={false}
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
@@ -528,6 +424,8 @@ export const BrandCarousel: React.FC<BrandCarouselProps> = ({
               initial={animated ? { opacity: 0, scale: 0.9 } : undefined}
               animate={animated ? { opacity: 1, scale: 1 } : undefined}
               transition={animated ? { duration: 0.3, delay: index * 0.05 } : undefined}
+              onMouseEnter={() => setState(prev => ({ ...prev, isPaused: true }))}
+              onMouseLeave={() => setState(prev => ({ ...prev, isPaused: false }))}
             >
               <BrandCard
                 brand={brand}
@@ -542,14 +440,85 @@ export const BrandCarousel: React.FC<BrandCarouselProps> = ({
         </motion.div>
       </div>
 
-      {/* Navigation Arrows */}
-      {renderArrows()}
+      {/* Bottom Navigation Controls */}
+      {(showDots || showArrows) && (
+        <div className="flex items-center justify-between mt-6 px-4">
+          {/* Play/Pause Button + Dots */}
+          {showDots && (
+            <div className="flex items-center gap-4 flex-1 justify-center">
+              {autoPlay && (
+                <button
+                  onClick={togglePause}
+                  className="w-8 h-8 p-0 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors"
+                  aria-label={state.isPaused ? 'Play auto-scroll' : 'Pause auto-scroll'}
+                >
+                  {state.isPaused ? (
+                    <PlayIcon className="w-4 h-4" />
+                  ) : (
+                    <PauseIcon className="w-4 h-4" />
+                  )}
+                </button>
+              )}
 
-      {/* Dots */}
-      {renderDots()}
+              {/* Dots */}
+              <div className="flex items-center gap-2">
+                {Array.from({ length: Math.ceil(totalSlides / effectiveSlidesToScroll) }, (_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleDotClick(index * effectiveSlidesToScroll)}
+                    className={cn(
+                      'transition-all duration-200',
+                      'rounded-full',
+                      state.currentIndex === index * effectiveSlidesToScroll
+                        ? 'w-8 h-2 bg-primary-600'
+                        : 'w-2 h-2 bg-gray-300 hover:bg-gray-400'
+                    )}
+                    aria-label={`Go to slide ${index + 1}`}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
 
-      {/* Auto-play Control */}
-      {renderAutoPlayControl()}
+          {/* Navigation Arrows */}
+          {showArrows && (
+            <div className="flex items-center gap-3 z-10">
+              <button
+                onClick={handlePrev}
+                disabled={!canGoPrev}
+                className={cn(
+                  'w-10 h-10 rounded-full flex items-center justify-center',
+                  'border border-gray-200 shadow-sm',
+                  'hover:border-primary-500 hover:text-primary-600 hover:shadow-md',
+                  'transition-all duration-200',
+                  canGoPrev
+                    ? 'text-gray-700 cursor-pointer'
+                    : 'text-gray-300 cursor-not-allowed opacity-50'
+                )}
+                aria-label="Previous slide"
+              >
+                <ChevronLeftIcon className="w-5 h-5" />
+              </button>
+              <button
+                onClick={handleNext}
+                disabled={!canGoNext}
+                className={cn(
+                  'w-10 h-10 rounded-full flex items-center justify-center',
+                  'border border-gray-200 shadow-sm',
+                  'hover:border-primary-500 hover:text-primary-600 hover:shadow-md',
+                  'transition-all duration-200',
+                  canGoNext
+                    ? 'text-gray-700 cursor-pointer'
+                    : 'text-gray-300 cursor-not-allowed opacity-50'
+                )}
+                aria-label="Next slide"
+              >
+                <ChevronRightIcon className="w-5 h-5" />
+              </button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

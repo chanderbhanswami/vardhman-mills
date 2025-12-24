@@ -182,7 +182,7 @@ export const HeroSlide: React.FC<HeroSlideProps> = ({
     minutes: 0,
     seconds: 0,
   });
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(true); // Default to true so loading overlay doesn't block
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);

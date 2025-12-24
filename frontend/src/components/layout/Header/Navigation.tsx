@@ -4,7 +4,25 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDownIcon } from '@heroicons/react/24/outline';
+import {
+  ChevronDownIcon,
+  HomeIcon,
+  ShoppingBagIcon,
+  Squares2X2Icon,
+  TagIcon,
+  SparklesIcon,
+  InformationCircleIcon,
+  EnvelopeIcon
+} from '@heroicons/react/24/outline';
+import {
+  HomeIcon as HomeIconSolid,
+  ShoppingBagIcon as ShoppingBagIconSolid,
+  Squares2X2Icon as Squares2X2IconSolid,
+  TagIcon as TagIconSolid,
+  SparklesIcon as SparklesIconSolid,
+  InformationCircleIcon as InformationCircleIconSolid,
+  EnvelopeIcon as EnvelopeIconSolid
+} from '@heroicons/react/24/solid';
 
 export interface NavigationItem {
   label: string;
@@ -13,6 +31,8 @@ export interface NavigationItem {
   badge?: string;
   isNew?: boolean;
   isHot?: boolean;
+  icon?: React.ComponentType<{ className?: string }>;
+  iconSolid?: React.ComponentType<{ className?: string }>;
 }
 
 export interface NavigationProps {
@@ -24,9 +44,13 @@ const defaultNavigationItems: NavigationItem[] = [
   {
     label: 'Home',
     href: '/',
+    icon: HomeIcon,
+    iconSolid: HomeIconSolid,
   },
   {
     label: 'Products',
+    icon: ShoppingBagIcon,
+    iconSolid: ShoppingBagIconSolid,
     children: [
       { label: 'Shop All', href: '/products' },
       { label: 'Best Sellers', href: '/best-sellers' },
@@ -38,19 +62,27 @@ const defaultNavigationItems: NavigationItem[] = [
   {
     label: 'Categories',
     href: '/categories',
+    icon: Squares2X2Icon,
+    iconSolid: Squares2X2IconSolid,
   },
   {
     label: 'Brands',
     href: '/brands',
+    icon: TagIcon,
+    iconSolid: TagIconSolid,
   },
   {
     label: 'Deals',
     href: '/sale',
     badge: 'Sale',
     isHot: true,
+    icon: SparklesIcon,
+    iconSolid: SparklesIconSolid,
   },
   {
     label: 'About',
+    icon: InformationCircleIcon,
+    iconSolid: InformationCircleIconSolid,
     children: [
       { label: 'Our Story', href: '/about' },
       { label: 'Our Team', href: '/about/our-team' },
@@ -60,6 +92,8 @@ const defaultNavigationItems: NavigationItem[] = [
   {
     label: 'Contact',
     href: '/contact',
+    icon: EnvelopeIcon,
+    iconSolid: EnvelopeIconSolid,
   },
 ];
 
@@ -71,7 +105,7 @@ const Navigation: React.FC<NavigationProps> = ({
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
   const isActive = (href: string) => {
-    if (!pathname) return false;
+    if (!pathname || !href) return false;
     if (href === '/') {
       return pathname === '/';
     }
@@ -107,14 +141,25 @@ const Navigation: React.FC<NavigationProps> = ({
       scale: 0.95,
       transition: {
         duration: 0.15,
-        ease: [0.4, 0, 0.2, 1] as const,
       },
     },
   };
 
   const renderNavigationItem = (item: NavigationItem) => {
     const hasChildren = item.children && item.children.length > 0;
-    const itemIsActive = item.href ? isActive(item.href) : false;
+    const itemIsActive = isActive(item.href || '') || (hasChildren && item.children?.some(child => isActive(child.href || '')));
+    const Icon = itemIsActive && item.iconSolid ? item.iconSolid : item.icon;
+
+    const navItemClasses = `
+      group relative flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg
+      text-sm font-medium transition-all duration-200
+      ${itemIsActive
+        ? 'text-black bg-gray-100 font-bold shadow-sm hover:text-black'
+        : 'text-gray-800 hover:text-black hover:bg-gray-50'
+      }
+    `;
+
+    const iconClasses = `w-6 h-6 mb-1 transition-transform duration-200 group-hover:scale-110 ${itemIsActive ? 'text-black group-hover:text-black' : 'text-gray-800 group-hover:text-black'}`;
 
     return (
       <div
@@ -125,59 +170,48 @@ const Navigation: React.FC<NavigationProps> = ({
       >
         {hasChildren ? (
           <button
-            className={`
-              flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200
-              ${itemIsActive
-                ? 'text-primary bg-primary/10'
-                : 'text-foreground hover:text-primary hover:bg-accent'
-              }
-            `}
+            className={navItemClasses}
             {...(activeDropdown === item.label ? { 'aria-expanded': true } : { 'aria-expanded': false })}
             aria-haspopup="true"
           >
-            <span className="relative">
+            {Icon && <Icon className={iconClasses} />}
+            <span className="relative flex items-center gap-1">
               {item.label}
               {item.badge && (
                 <span
                   className={`
-                    absolute -top-2 -right-6 px-1.5 py-0.5 text-xs font-bold rounded-full
-                    ${item.isHot
+                      absolute -top-2 -right-6 px-1.5 py-0.5 text-xs font-bold rounded-full
+                      ${item.isHot
                       ? 'bg-red-500 text-white animate-pulse'
                       : 'bg-primary text-primary-foreground'
                     }
-                  `}
+                    `}
                 >
                   {item.badge}
                 </span>
               )}
+              <ChevronDownIcon
+                className={`w-3 h-3 transition-transform duration-200 ${activeDropdown === item.label ? 'rotate-180' : ''}`}
+              />
             </span>
-            <ChevronDownIcon
-              className={`w-4 h-4 transition-transform duration-200 ${activeDropdown === item.label ? 'rotate-180' : ''
-                }`}
-            />
           </button>
         ) : (
           <Link
             href={item.href || '#'}
-            className={`
-              flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200
-              ${itemIsActive
-                ? 'text-primary bg-primary/10'
-                : 'text-foreground hover:text-primary hover:bg-accent'
-              }
-            `}
+            className={navItemClasses}
           >
+            {Icon && <Icon className={iconClasses} />}
             <span className="relative">
               {item.label}
               {item.badge && (
                 <span
                   className={`
-                    absolute -top-2 -right-6 px-1.5 py-0.5 text-xs font-bold rounded-full
-                    ${item.isHot
+                      absolute -top-2 -right-6 px-1.5 py-0.5 text-xs font-bold rounded-full
+                      ${item.isHot
                       ? 'bg-red-500 text-white animate-pulse'
                       : 'bg-primary text-primary-foreground'
                     }
-                  `}
+                    `}
                 >
                   {item.badge}
                 </span>
@@ -197,7 +231,7 @@ const Navigation: React.FC<NavigationProps> = ({
               initial="hidden"
               animate="visible"
               exit="exit"
-              className="absolute top-full left-0 mt-1 w-56 bg-background rounded-lg shadow-lg border border-border z-50"
+              className="absolute top-full left-0 mt-1 w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-50"
             >
               <div className="py-2">
                 {item.children!.map((child) => (
@@ -205,12 +239,12 @@ const Navigation: React.FC<NavigationProps> = ({
                     key={child.label}
                     href={child.href || '#'}
                     className={`
-                      block px-4 py-2 text-sm transition-colors duration-200
-                      ${isActive(child.href || '')
-                        ? 'text-primary bg-primary/10'
-                        : 'text-foreground hover:text-primary hover:bg-accent'
+                        block px-4 py-2 text-sm transition-colors duration-200
+                        ${isActive(child.href || '')
+                        ? 'text-black bg-gray-100 font-bold'
+                        : 'text-gray-900 hover:text-black hover:bg-gray-50'
                       }
-                    `}
+                      `}
                   >
                     {child.label}
                   </Link>
@@ -224,7 +258,7 @@ const Navigation: React.FC<NavigationProps> = ({
   };
 
   return (
-    <nav className={`flex items-center space-x-1 ${className}`} role="navigation">
+    <nav className={`flex items-center gap-2 ${className}`}>
       {items.map(renderNavigationItem)}
     </nav>
   );

@@ -435,37 +435,40 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
         dragElastic={0.1}
         onDragEnd={handleDragEnd}
       >
-        {products.map((product) => (
-          <div
-            key={product.id}
-            className="flex-shrink-0"
-            {...(itemWidth || gap ? {
-              style: {
-                ...(itemWidth ? { width: `${itemWidth}px` } : {}),
-                ...(gap ? { marginRight: `${gap}px` } : {}),
-              }
-            } : {})}
-          >
-            <NewArrivalsCard
-              id={product.id}
-              name={product.name}
-              slug={product.slug}
-              image={product.media.images[0]?.url || ''}
-              hoverImage={product.media.images[1]?.url}
-              price={product.pricing.salePrice ? product.pricing.salePrice.amount : product.pricing.basePrice.amount}
-              originalPrice={product.pricing.salePrice ? product.pricing.basePrice.amount : undefined}
-              rating={product.rating.average}
-              reviewCount={product.reviewCount}
-              colors={product.colors.map(c => ({ id: c.id, name: c.name, hex: c.hexCode, image: c.image?.url }))}
-              sizes={product.sizes.map(s => ({ id: s.id, name: s.name, available: s.isAvailable }))}
-              stock={product.inventory.quantity}
-              isNew={product.isNewArrival}
-              isSale={product.isOnSale}
-              isLimited={product.isFeatured}
-              isTrending={product.isBestseller}
-            />
-          </div>
-        ))}
+        {products.map((product) => {
+          if (!product) return null;
+          return (
+            <div
+              key={product.id}
+              className="flex-shrink-0"
+              {...(itemWidth || gap ? {
+                style: {
+                  ...(itemWidth ? { width: `${itemWidth}px` } : {}),
+                  ...(gap ? { marginRight: `${gap}px` } : {}),
+                }
+              } : {})}
+            >
+              <NewArrivalsCard
+                id={product.id}
+                name={product.name}
+                slug={product.slug}
+                image={product.media?.images?.[0]?.url || ''}
+                hoverImage={product.media?.images?.[1]?.url}
+                price={product.pricing?.salePrice ? product.pricing.salePrice.amount : (product.pricing?.basePrice?.amount || 0)}
+                originalPrice={product.pricing?.salePrice ? product.pricing.basePrice?.amount : undefined}
+                rating={product.rating?.average || 0}
+                reviewCount={product.reviewCount || 0}
+                colors={(product.colors || []).map(c => ({ id: c.id, name: c.name, hex: c.hexCode, image: c.image?.url }))}
+                sizes={(product.sizes || []).map(s => ({ id: s.id, name: s.name, available: s.isAvailable }))}
+                stock={product.inventory?.quantity || 0}
+                isNew={product.isNewArrival}
+                isSale={product.isOnSale}
+                isLimited={product.isFeatured}
+                isTrending={product.isBestseller}
+              />
+            </div>
+          );
+        })}
       </motion.div>
     );
   };

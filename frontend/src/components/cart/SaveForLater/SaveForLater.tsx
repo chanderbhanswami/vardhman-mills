@@ -56,7 +56,7 @@ import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { cn } from '@/lib/utils';
 import { formatCurrency } from '@/lib/format';
-import { useCart } from '@/contexts/CartContext';
+import { useCart } from '@/components/providers/CartProvider';
 import toast from 'react-hot-toast';
 
 // ============================================================================

@@ -64,7 +64,7 @@ export interface WishlistContextType {
   isLoading: boolean;
   isUpdating: boolean;
   totalItems: number;
-  
+
   // Item Actions
   addToWishlist: (
     productId: string,
@@ -76,21 +76,21 @@ export interface WishlistContextType {
       notes?: string;
     }
   ) => Promise<{ success: boolean; error?: string }>;
-  
+
   removeFromWishlist: (itemId: string) => Promise<{ success: boolean; error?: string }>;
-  
+
   isInWishlist: (productId: string, collectionId?: string) => boolean;
-  
+
   // Bulk Operations
   addMultipleToWishlist: (productIds: string[], collectionId?: string) => Promise<{ success: boolean; error?: string }>;
   removeMultipleFromWishlist: (itemIds: string[]) => Promise<{ success: boolean; error?: string }>;
   moveItemsToCollection: (itemIds: string[], targetCollectionId: string) => Promise<{ success: boolean; error?: string }>;
-  
+
   // Collection Management
   createCollection: (name: string, description?: string, isPublic?: boolean) => Promise<{ success: boolean; collection?: WishlistCollection; error?: string }>;
   updateCollection: (collectionId: string, updates: Partial<WishlistCollection>) => Promise<{ success: boolean; error?: string }>;
   deleteCollection: (collectionId: string) => Promise<{ success: boolean; error?: string }>;
-  
+
   // Item Updates
   updateItemSettings: (
     itemId: string,
@@ -101,34 +101,34 @@ export interface WishlistContextType {
       notes?: string;
     }
   ) => Promise<{ success: boolean; error?: string }>;
-  
+
   markAsViewed: (itemId: string) => Promise<{ success: boolean; error?: string }>;
-  
+
   // Filtering & Sorting
   getItemsByCollection: (collectionId?: string) => WishlistItem[];
   getAvailableItems: () => WishlistItem[];
   getUnavailableItems: () => WishlistItem[];
   getDiscountedItems: () => WishlistItem[];
-  
+
   // Comparison
   addToComparison: (itemId: string) => void;
   removeFromComparison: (itemId: string) => void;
   clearComparison: () => void;
   comparisonItems: WishlistItem[];
-  
+
   // Sharing
   shareCollection: (collectionId: string) => Promise<{ success: boolean; shareUrl?: string; error?: string }>;
   getSharedCollection: (shareToken: string) => Promise<{ success: boolean; collection?: WishlistCollection; items?: WishlistItem[]; error?: string }>;
-  
+
   // Analytics
   getRecommendations: () => Promise<{ success: boolean; products?: unknown[]; error?: string }>;
   trackInteraction: (action: 'view' | 'add' | 'remove' | 'share', itemId?: string) => void;
-  
+
   // Sync & Persistence
   refreshWishlist: () => Promise<void>;
   syncWithServer: () => Promise<void>;
   mergeGuestWishlist: () => Promise<void>;
-  
+
   // Cart Integration
   addToCart: (itemId: string, quantity?: number) => Promise<{ success: boolean; error?: string }>;
   addAllToCart: (collectionId?: string) => Promise<{ success: boolean; error?: string }>;
@@ -159,27 +159,36 @@ interface WishlistProviderProps {
 
 export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) => {
   const { user, isAuthenticated } = useAuth();
-  
+
   // State
   const [items, setItems] = useState<WishlistItem[]>([]);
   const [collections, setCollections] = useState<WishlistCollection[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
   const [comparisonItems, setComparisonItems] = useState<WishlistItem[]>([]);
-  
+
   // Persistent storage for guest users
-  const guestWishlistStorage = useLocalStorage<WishlistItem[]>('guestWishlist', { defaultValue: [] });
+  const guestWishlistStorage = useLocalStorage<WishlistItem[]>('vardhman_guest_wishlist', { defaultValue: [] });
   const comparisonStorage = useLocalStorage<string[]>('wishlistComparison', { defaultValue: [] });
-  
+
   // Refs
   const syncTimeout = useRef<NodeJS.Timeout | null>(null);
   const analyticsQueue = useRef<Array<{ action: string; itemId?: string; timestamp: number }>>([]);
 
   // Configuration
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5000/api/v1';
   const SYNC_DELAY = 3000; // 3 seconds
   const MAX_COMPARISON_ITEMS = 4;
-  
+
+  // Helper function to update localStorage and dispatch sync events
+  const dispatchWishlistUpdate = useCallback((newItems: WishlistItem[]) => {
+    guestWishlistStorage.setValue(newItems);
+    // Dispatch custom event for other components using old hooks
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('vardhman_wishlist_updated'));
+    }
+  }, [guestWishlistStorage]);
+
   // Use user data for personalization
   const userId = user?.id;
   const userEmail = user?.email;
@@ -206,7 +215,7 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
     } catch (error) {
       const axiosError = error as AxiosError<{ message?: string }>;
       console.error('Wishlist API Request failed:', axiosError);
-      
+
       return {
         success: false,
         error: axiosError.response?.data?.message || axiosError.message || 'An error occurred'
@@ -227,7 +236,8 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
   ) => {
     try {
       setIsUpdating(true);
-      
+
+      // Try API first
       const result = await apiRequest('/wishlist/add', {
         method: 'POST',
         data: { productId, collectionId, ...options }
@@ -236,20 +246,51 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
       if (result.success) {
         const { item, wishlist } = result.data as { item: WishlistItem; wishlist: WishlistItem[] };
         setItems(wishlist);
-        
-        // Store for guest users
+
         if (!isAuthenticated) {
-          guestWishlistStorage.setValue(wishlist);
+          dispatchWishlistUpdate(wishlist);
         }
-        
-        // Track interaction
+
         trackInteraction('add', item.id);
-        
         toast.success(`${item.title} added to wishlist`);
         return { success: true };
       }
 
-      return { success: false, error: result.error };
+      // API failed - use localStorage fallback
+      console.log('Wishlist API not available, using localStorage fallback');
+      const now = new Date().toISOString();
+
+      // Check if already in wishlist
+      if (items.some(item => item.productId === productId)) {
+        toast.error('Item already in wishlist');
+        return { success: false, error: 'Item already in wishlist' };
+      }
+
+      const newItem: WishlistItem = {
+        id: `local_${productId}_${Date.now()}`,
+        productId,
+        userId: userId || 'guest',
+        title: 'Product',
+        slug: productId,
+        price: 0,
+        images: [],
+        category: '',
+        isAvailable: true,
+        inStock: true,
+        stockQuantity: 100,
+        sku: '',
+        tags: [],
+        addedAt: now,
+        updatedAt: now,
+        ...options
+      };
+
+      const newItems = [...items, newItem];
+      setItems(newItems);
+      dispatchWishlistUpdate(newItems);
+
+      toast.success('Added to wishlist');
+      return { success: true };
     } catch (error) {
       console.error('Add to wishlist error:', error);
       return { success: false, error: 'Failed to add item to wishlist' };
@@ -261,7 +302,8 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
   const removeFromWishlist = async (itemId: string) => {
     try {
       setIsUpdating(true);
-      
+
+      // Try API first
       const result = await apiRequest('/wishlist/remove', {
         method: 'DELETE',
         data: { itemId }
@@ -270,23 +312,30 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
       if (result.success) {
         const { wishlist } = result.data as { wishlist: WishlistItem[] };
         setItems(wishlist);
-        
+
         if (!isAuthenticated) {
-          guestWishlistStorage.setValue(wishlist);
+          dispatchWishlistUpdate(wishlist);
         }
-        
-        // Remove from comparison if present
+
         setComparisonItems(prev => prev.filter(item => item.id !== itemId));
         comparisonStorage.setValue(comparisonStorage.value.filter(id => id !== itemId));
-        
-        // Track interaction
         trackInteraction('remove', itemId);
-        
+
         toast.success('Item removed from wishlist');
         return { success: true };
       }
 
-      return { success: false, error: result.error };
+      // API failed - use localStorage fallback
+      console.log('Wishlist API not available, using localStorage fallback');
+      const newItems = items.filter(item => item.id !== itemId);
+      setItems(newItems);
+      dispatchWishlistUpdate(newItems);
+
+      setComparisonItems(prev => prev.filter(item => item.id !== itemId));
+      comparisonStorage.setValue(comparisonStorage.value.filter(id => id !== itemId));
+
+      toast.success('Item removed from wishlist');
+      return { success: true };
     } catch (error) {
       console.error('Remove from wishlist error:', error);
       return { success: false, error: 'Failed to remove item from wishlist' };
@@ -299,7 +348,7 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
     return items.some(item => {
       const matchesProduct = item.productId === productId;
       if (!collectionId) return matchesProduct;
-      
+
       // For specific collection, we'd need collection-item mapping
       // This is a simplified version
       return matchesProduct;
@@ -310,7 +359,7 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
   const addMultipleToWishlist = async (productIds: string[], collectionId?: string) => {
     try {
       setIsUpdating(true);
-      
+
       const result = await apiRequest('/wishlist/add-multiple', {
         method: 'POST',
         data: { productIds, collectionId }
@@ -319,11 +368,11 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
       if (result.success) {
         const { wishlist } = result.data as { wishlist: WishlistItem[] };
         setItems(wishlist);
-        
+
         if (!isAuthenticated) {
-          guestWishlistStorage.setValue(wishlist);
+          dispatchWishlistUpdate(wishlist);
         }
-        
+
         toast.success(`${productIds.length} items added to wishlist`);
         return { success: true };
       }
@@ -340,7 +389,7 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
   const removeMultipleFromWishlist = async (itemIds: string[]) => {
     try {
       setIsUpdating(true);
-      
+
       const result = await apiRequest('/wishlist/remove-multiple', {
         method: 'DELETE',
         data: { itemIds }
@@ -349,15 +398,15 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
       if (result.success) {
         const { wishlist } = result.data as { wishlist: WishlistItem[] };
         setItems(wishlist);
-        
+
         if (!isAuthenticated) {
-          guestWishlistStorage.setValue(wishlist);
+          dispatchWishlistUpdate(wishlist);
         }
-        
+
         // Remove from comparison
         setComparisonItems(prev => prev.filter(item => !itemIds.includes(item.id)));
         comparisonStorage.setValue(comparisonStorage.value.filter(id => !itemIds.includes(id)));
-        
+
         toast.success(`${itemIds.length} items removed from wishlist`);
         return { success: true };
       }
@@ -374,7 +423,7 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
   const moveItemsToCollection = async (itemIds: string[], targetCollectionId: string) => {
     try {
       setIsUpdating(true);
-      
+
       const result = await apiRequest('/wishlist/move-to-collection', {
         method: 'PATCH',
         data: { itemIds, targetCollectionId }
@@ -383,7 +432,7 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
       if (result.success) {
         const { wishlist } = result.data as { wishlist: WishlistItem[] };
         setItems(wishlist);
-        
+
         toast.success('Items moved to collection');
         return { success: true };
       }
@@ -411,7 +460,7 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
           collections: WishlistCollection[];
         };
         setCollections(updatedCollections);
-        
+
         toast.success(`Collection "${name}" created`);
         return { success: true, collection };
       }
@@ -433,7 +482,7 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
       if (result.success) {
         const { collections: updatedCollections } = result.data as { collections: WishlistCollection[] };
         setCollections(updatedCollections);
-        
+
         toast.success('Collection updated');
         return { success: true };
       }
@@ -454,7 +503,7 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
       if (result.success) {
         const { collections: updatedCollections } = result.data as { collections: WishlistCollection[] };
         setCollections(updatedCollections);
-        
+
         toast.success('Collection deleted');
         return { success: true };
       }
@@ -485,7 +534,7 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
       if (result.success) {
         const { wishlist } = result.data as { wishlist: WishlistItem[] };
         setItems(wishlist);
-        
+
         toast.success('Item settings updated');
         return { success: true };
       }
@@ -500,19 +549,19 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
   const markAsViewed = async (itemId: string) => {
     try {
       await apiRequest(`/wishlist/items/${itemId}/viewed`, { method: 'POST' });
-      
+
       // Update local state
-      setItems(prev => 
-        prev.map(item => 
-          item.id === itemId 
+      setItems(prev =>
+        prev.map(item =>
+          item.id === itemId
             ? { ...item, viewedAt: new Date().toISOString() }
             : item
         )
       );
-      
+
       // Track interaction
       trackInteraction('view', itemId);
-      
+
       return { success: true };
     } catch (error) {
       console.error('Mark as viewed error:', error);
@@ -543,17 +592,17 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
   const addToComparison = useCallback((itemId: string) => {
     const item = items.find(i => i.id === itemId);
     if (!item) return;
-    
+
     if (comparisonItems.length >= MAX_COMPARISON_ITEMS) {
       toast.error(`You can only compare up to ${MAX_COMPARISON_ITEMS} items`);
       return;
     }
-    
+
     if (comparisonItems.some(i => i.id === itemId)) {
       toast.error('Item is already in comparison');
       return;
     }
-    
+
     setComparisonItems(prev => [...prev, item]);
     comparisonStorage.setValue([...comparisonStorage.value, itemId]);
     toast.success('Item added to comparison');
@@ -580,13 +629,13 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
 
       if (result.success) {
         const { shareUrl } = result.data as { shareUrl: string };
-        
+
         // Copy to clipboard
         if (navigator.clipboard) {
           await navigator.clipboard.writeText(shareUrl);
           toast.success('Share link copied to clipboard');
         }
-        
+
         return { success: true, shareUrl };
       }
 
@@ -639,7 +688,7 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
       itemId,
       timestamp: Date.now()
     });
-    
+
     // Send analytics in batches
     if (analyticsQueue.current.length >= 10) {
       // Send to analytics service
@@ -652,7 +701,7 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
     try {
       if (isAuthenticated) {
         const result = await apiRequest('/wishlist');
-        
+
         if (result.success) {
           const { wishlist, collections: userCollections } = result.data as {
             wishlist: WishlistItem[];
@@ -674,7 +723,7 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
 
   const syncWithServer = useCallback(async () => {
     if (!isAuthenticated) return;
-    
+
     try {
       const result = await apiRequest('/wishlist/sync', {
         method: 'POST',
@@ -698,7 +747,7 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
     if (syncTimeout.current) {
       clearTimeout(syncTimeout.current);
     }
-    
+
     syncTimeout.current = setTimeout(() => {
       if (isAuthenticated) {
         syncWithServer();
@@ -708,10 +757,10 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
 
   const mergeGuestWishlist = useCallback(async () => {
     if (!isAuthenticated) return;
-    
+
     const guestWishlist = guestWishlistStorage.value;
     if (!guestWishlist || guestWishlist.length === 0) return;
-    
+
     try {
       const result = await apiRequest('/wishlist/merge', {
         method: 'POST',
@@ -725,10 +774,10 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
         };
         setItems(wishlist);
         setCollections(mergedCollections);
-        
+
         // Clear guest wishlist after merge
         guestWishlistStorage.remove();
-        
+
         if (wishlist.length > guestWishlist.length) {
           toast.success('Guest wishlist merged with your account');
         }
@@ -761,7 +810,7 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
   const addAllToCart = async (collectionId?: string) => {
     try {
       const itemsToAdd = collectionId ? getItemsByCollection(collectionId) : getAvailableItems();
-      
+
       const result = await apiRequest('/cart/add-multiple-from-wishlist', {
         method: 'POST',
         data: { itemIds: itemsToAdd.map(item => item.id) }
@@ -793,7 +842,7 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
       setIsLoading(true);
       try {
         await refreshWishlist();
-        
+
         // Merge guest wishlist if user just logged in
         if (isAuthenticated && guestWishlistStorage.value && guestWishlistStorage.value.length > 0) {
           await mergeGuestWishlist();
@@ -815,7 +864,7 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
       }
     };
   }, []);
-  
+
   // Use debouncedSync when items change
   useEffect(() => {
     if (items.length > 0 && isAuthenticated) {
@@ -823,13 +872,13 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items, isAuthenticated]);
-  
+
   // Use user data for analytics and personalization
   useEffect(() => {
     if (userId && items.length > 0) {
       // Track user wishlist behavior
       console.log(`User ${userId} (${userEmail}) has ${items.length} items in wishlist`);
-      
+
       // Example: Send analytics data
       const wishlistAnalytics = {
         userId,
@@ -850,51 +899,51 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
     isLoading,
     isUpdating,
     totalItems: items.length,
-    
+
     // Item Actions
     addToWishlist,
     removeFromWishlist,
     isInWishlist,
-    
+
     // Bulk Operations
     addMultipleToWishlist,
     removeMultipleFromWishlist,
     moveItemsToCollection,
-    
+
     // Collection Management
     createCollection,
     updateCollection,
     deleteCollection,
-    
+
     // Item Updates
     updateItemSettings,
     markAsViewed,
-    
+
     // Filtering & Sorting
     getItemsByCollection,
     getAvailableItems,
     getUnavailableItems,
     getDiscountedItems,
-    
+
     // Comparison
     addToComparison,
     removeFromComparison,
     clearComparison,
     comparisonItems,
-    
+
     // Sharing
     shareCollection,
     getSharedCollection,
-    
+
     // Analytics
     getRecommendations,
     trackInteraction,
-    
+
     // Sync & Persistence
     refreshWishlist,
     syncWithServer,
     mergeGuestWishlist,
-    
+
     // Cart Integration
     addToCart,
     addAllToCart,

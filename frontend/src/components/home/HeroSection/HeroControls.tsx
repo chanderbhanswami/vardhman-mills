@@ -36,7 +36,6 @@ import {
 } from '@heroicons/react/24/outline';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
-import { Tooltip } from '@/components/ui/Tooltip';
 import { Progress } from '@/components/ui/Progress';
 import { cn } from '@/lib/utils/utils';
 
@@ -121,29 +120,34 @@ export const HeroControls: React.FC<HeroControlsProps> = ({
   // COMPUTED
   // ============================================================================
 
-  const canGoPrevious = useMemo(() => currentSlide > 0, [currentSlide]);
-  const canGoNext = useMemo(() => currentSlide < totalSlides - 1, [currentSlide, totalSlides]);
+  const canGoPrevious = useMemo(() => totalSlides > 1, [totalSlides]);
+  const canGoNext = useMemo(() => totalSlides > 1, [totalSlides]);
 
   const progressPercentage = useMemo(() => {
     if (progress > 0) return progress;
     return ((currentSlide + 1) / totalSlides) * 100;
   }, [progress, currentSlide, totalSlides]);
 
+  // Calculate remaining time for timer display
+  const remainingTime = useMemo(() => {
+    const totalSeconds = autoPlayInterval / 1000;
+    const remaining = totalSeconds - (progress / 100) * totalSeconds;
+    return Math.max(0, Math.ceil(remaining));
+  }, [progress, autoPlayInterval]);
+
   // ============================================================================
   // HANDLERS
   // ============================================================================
 
   const handlePrevious = useCallback(() => {
-    if (!canGoPrevious) return;
     onPrevious?.();
-    console.log('Previous slide');
-  }, [canGoPrevious, onPrevious]);
+    console.log('Previous slide clicked');
+  }, [onPrevious]);
 
   const handleNext = useCallback(() => {
-    if (!canGoNext) return;
     onNext?.();
-    console.log('Next slide');
-  }, [canGoNext, onNext]);
+    console.log('Next slide clicked');
+  }, [onNext]);
 
   const handleGoToSlide = useCallback(
     (index: number) => {
@@ -190,55 +194,44 @@ export const HeroControls: React.FC<HeroControlsProps> = ({
 
   const renderNavigationButtons = () => (
     <div className="flex items-center gap-2">
-      <Tooltip content="Previous slide (←)">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handlePrevious}
-          disabled={!canGoPrevious}
-          className="bg-background/90 backdrop-blur-sm hover:bg-background"
-          aria-label="Previous slide"
-        >
-          <ChevronLeftIcon className="h-5 w-5" />
-        </Button>
-      </Tooltip>
-      <Tooltip content="Next slide (→)">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleNext}
-          disabled={!canGoNext}
-          className="bg-background/90 backdrop-blur-sm hover:bg-background"
-          aria-label="Next slide"
-        >
-          <ChevronRightIcon className="h-5 w-5" />
-        </Button>
-      </Tooltip>
+      <button
+        onClick={handlePrevious}
+        disabled={!canGoPrevious}
+        className="p-2.5 rounded-xl bg-white/80 hover:bg-white text-gray-700 hover:text-gray-900 shadow-sm border border-gray-200/50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+        aria-label="Previous slide"
+      >
+        <ChevronLeftIcon className="h-5 w-5" />
+      </button>
+      <button
+        onClick={handleNext}
+        disabled={!canGoNext}
+        className="p-2.5 rounded-xl bg-white/80 hover:bg-white text-gray-700 hover:text-gray-900 shadow-sm border border-gray-200/50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+        aria-label="Next slide"
+      >
+        <ChevronRightIcon className="h-5 w-5" />
+      </button>
     </div>
   );
+
 
   const renderDotIndicators = () => (
     <div className="flex items-center gap-2">
       {Array.from({ length: totalSlides }).map((_, index) => (
-        <Tooltip
+        <button
           key={index}
-          content={slides[index]?.title || `Slide ${index + 1}`}
-        >
-          <button
-            onClick={() => handleGoToSlide(index)}
-            onMouseEnter={() => setHoveredSlide(index)}
-            onMouseLeave={() => setHoveredSlide(null)}
-            className={cn(
-              'transition-all duration-300 rounded-full',
-              index === currentSlide
-                ? 'w-8 h-2 bg-white'
-                : 'w-2 h-2 bg-white/50 hover:bg-white/70',
-              hoveredSlide === index && index !== currentSlide && 'w-4'
-            )}
-            aria-label={`Go to slide ${index + 1}`}
-            aria-current={index === currentSlide ? 'true' : 'false'}
-          />
-        </Tooltip>
+          onClick={() => handleGoToSlide(index)}
+          onMouseEnter={() => setHoveredSlide(index)}
+          onMouseLeave={() => setHoveredSlide(null)}
+          className={cn(
+            'transition-all duration-300 rounded-full',
+            index === currentSlide
+              ? 'w-8 h-2.5 bg-blue-600 shadow-md'
+              : 'w-2.5 h-2.5 bg-gray-400 hover:bg-gray-600',
+            hoveredSlide === index && index !== currentSlide && 'w-4 bg-gray-500'
+          )}
+          aria-label={`Go to slide ${index + 1}`}
+          aria-current={index === currentSlide ? 'true' : 'false'}
+        />
       ))}
     </div>
   );
@@ -246,38 +239,37 @@ export const HeroControls: React.FC<HeroControlsProps> = ({
   const renderThumbnails = () => (
     <div className="flex gap-2 overflow-x-auto py-2 px-1 scrollbar-thin scrollbar-thumb-white/30 scrollbar-track-transparent">
       {slides.map((slide, index) => (
-        <Tooltip key={slide.id} content={slide.title}>
-          <button
-            onClick={() => handleGoToSlide(index)}
-            onMouseEnter={() => setHoveredSlide(index)}
-            onMouseLeave={() => setHoveredSlide(null)}
-            className={cn(
-              'relative flex-shrink-0 w-20 h-12 rounded-lg overflow-hidden transition-all duration-300',
-              index === currentSlide
-                ? 'ring-2 ring-white ring-offset-2 ring-offset-gray-900 scale-110'
-                : 'opacity-60 hover:opacity-100 hover:scale-105',
-              hoveredSlide === index && 'scale-105'
-            )}
-            aria-label={`Go to ${slide.title}`}
-            aria-current={index === currentSlide ? 'true' : 'false'}
-          >
-            {slide.thumbnail ? (
-              <Image
-                src={slide.thumbnail}
-                alt={slide.title}
-                fill
-                className="object-cover"
-              />
-            ) : (
-              <div className="w-full h-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
-                <span className="text-white text-xs font-bold">{index + 1}</span>
-              </div>
-            )}
-            {index === currentSlide && (
-              <div className="absolute inset-0 bg-white/20 backdrop-blur-[1px]" />
-            )}
-          </button>
-        </Tooltip>
+        <button
+          key={slide.id}
+          onClick={() => handleGoToSlide(index)}
+          onMouseEnter={() => setHoveredSlide(index)}
+          onMouseLeave={() => setHoveredSlide(null)}
+          className={cn(
+            'relative flex-shrink-0 w-20 h-12 rounded-lg overflow-hidden transition-all duration-300',
+            index === currentSlide
+              ? 'ring-2 ring-white ring-offset-2 ring-offset-gray-900 scale-110'
+              : 'opacity-60 hover:opacity-100 hover:scale-105',
+            hoveredSlide === index && 'scale-105'
+          )}
+          aria-label={`Go to ${slide.title}`}
+          aria-current={index === currentSlide ? 'true' : 'false'}
+        >
+          {slide.thumbnail ? (
+            <Image
+              src={slide.thumbnail}
+              alt={slide.title}
+              fill
+              className="object-cover"
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
+              <span className="text-white text-xs font-bold">{index + 1}</span>
+            </div>
+          )}
+          {index === currentSlide && (
+            <div className="absolute inset-0 bg-white/20 backdrop-blur-[1px]" />
+          )}
+        </button>
       ))}
     </div>
   );
@@ -285,51 +277,39 @@ export const HeroControls: React.FC<HeroControlsProps> = ({
   const renderControls = () => (
     <div className="flex items-center gap-2">
       {/* Autoplay Toggle */}
-      <Tooltip content={isPlaying ? 'Pause (Space)' : 'Play (Space)'}>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleToggleAutoplay}
-          className="bg-background/90 backdrop-blur-sm hover:bg-background"
-          aria-label={isPlaying ? 'Pause autoplay' : 'Play autoplay'}
-        >
-          {isPlaying ? (
-            <PauseIcon className="h-4 w-4" />
-          ) : (
-            <PlayIcon className="h-4 w-4" />
-          )}
-        </Button>
-      </Tooltip>
+      <button
+        onClick={handleToggleAutoplay}
+        className="p-2.5 rounded-xl bg-white/80 hover:bg-white text-gray-700 hover:text-gray-900 shadow-sm border border-gray-200/50 transition-all duration-200"
+        aria-label={isPlaying ? 'Pause autoplay' : 'Play autoplay'}
+      >
+        {isPlaying ? (
+          <PauseIcon className="h-4 w-4" />
+        ) : (
+          <PlayIcon className="h-4 w-4" />
+        )}
+      </button>
 
       {/* Fullscreen Toggle */}
-      <Tooltip content={isFullscreen ? 'Exit fullscreen (Esc)' : 'Fullscreen (F)'}>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleToggleFullscreen}
-          className="bg-background/90 backdrop-blur-sm hover:bg-background"
-          aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
-        >
-          {isFullscreen ? (
-            <ArrowsPointingInIcon className="h-4 w-4" />
-          ) : (
-            <ArrowsPointingOutIcon className="h-4 w-4" />
-          )}
-        </Button>
-      </Tooltip>
+      <button
+        onClick={handleToggleFullscreen}
+        className="p-2.5 rounded-xl bg-white/80 hover:bg-white text-gray-700 hover:text-gray-900 shadow-sm border border-gray-200/50 transition-all duration-200"
+        aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+      >
+        {isFullscreen ? (
+          <ArrowsPointingInIcon className="h-4 w-4" />
+        ) : (
+          <ArrowsPointingOutIcon className="h-4 w-4" />
+        )}
+      </button>
 
       {/* Keyboard Shortcuts Info */}
-      <Tooltip content="Keyboard shortcuts">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleToggleShortcuts}
-          className="bg-background/90 backdrop-blur-sm hover:bg-background"
-          aria-label="Show keyboard shortcuts"
-        >
-          <InformationCircleIcon className="h-4 w-4" />
-        </Button>
-      </Tooltip>
+      <button
+        onClick={handleToggleShortcuts}
+        className="p-2.5 rounded-xl bg-white/80 hover:bg-white text-gray-700 hover:text-gray-900 shadow-sm border border-gray-200/50 transition-all duration-200"
+        aria-label="Show keyboard shortcuts"
+      >
+        <InformationCircleIcon className="h-4 w-4" />
+      </button>
     </div>
   );
 
@@ -342,7 +322,7 @@ export const HeroControls: React.FC<HeroControlsProps> = ({
       {/* Main Controls Container */}
       <div
         className={cn(
-          'absolute z-20',
+          'absolute z-40',
           position === 'bottom' && 'bottom-6 left-0 right-0 px-4 sm:px-6 lg:px-8',
           position === 'side' && 'right-6 top-1/2 -translate-y-1/2',
           className
@@ -363,20 +343,24 @@ export const HeroControls: React.FC<HeroControlsProps> = ({
               transition={{ duration: 0.3 }}
               className="w-full"
             >
-              <Progress
-                value={progressPercentage}
-                className="h-1 bg-white/20"
-              />
+              <div className="h-1 bg-gray-300/50 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 transition-all duration-300 ease-out"
+                  style={{ width: `${progressPercentage}%` }}
+                />
+              </div>
             </motion.div>
           )}
 
-          {/* Main Control Bar */}
+          {/* Main Control Bar - Light Glassmorphism */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: 0.1 }}
             className={cn(
-              'flex items-center justify-between gap-4 p-4 rounded-xl bg-gray-900/50 backdrop-blur-md border border-white/10',
+              'flex items-center justify-between gap-4 p-3 rounded-2xl',
+              'bg-white/70 backdrop-blur-xl',
+              'border border-white/40 shadow-lg shadow-black/5',
               position === 'side' && 'flex-col'
             )}
           >
@@ -388,13 +372,13 @@ export const HeroControls: React.FC<HeroControlsProps> = ({
               {/* Counter */}
               {showCounter && (
                 <div className="flex items-center gap-2">
-                  <Badge variant="secondary" className="bg-white/10 text-white border-white/20">
+                  <span className="px-3 py-1 rounded-lg bg-gray-100 text-gray-700 font-medium text-sm border border-gray-200/50">
                     {currentSlide + 1} / {totalSlides}
-                  </Badge>
+                  </span>
                   {isPlaying && (
-                    <Badge variant="secondary" className="bg-green-500/20 text-green-300 border-green-400/30 text-xs">
-                      {autoPlayInterval / 1000}s
-                    </Badge>
+                    <span className="px-2 py-1 rounded-lg bg-green-100 text-green-700 text-xs font-medium border border-green-200/50 tabular-nums">
+                      {remainingTime}s
+                    </span>
                   )}
                 </div>
               )}
@@ -413,7 +397,7 @@ export const HeroControls: React.FC<HeroControlsProps> = ({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.2 }}
-              className="p-2 rounded-xl bg-gray-900/50 backdrop-blur-md border border-white/10"
+              className="p-2 rounded-2xl bg-white/70 backdrop-blur-xl border border-white/40 shadow-lg shadow-black/5"
             >
               {renderThumbnails()}
             </motion.div>
@@ -436,10 +420,10 @@ export const HeroControls: React.FC<HeroControlsProps> = ({
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-background rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl"
+              className="bg-white rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl border border-gray-200"
             >
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                <h3 className="text-xl font-bold text-gray-900">
                   Keyboard Shortcuts
                 </h3>
                 <Button
@@ -447,6 +431,7 @@ export const HeroControls: React.FC<HeroControlsProps> = ({
                   size="sm"
                   onClick={handleToggleShortcuts}
                   aria-label="Close shortcuts"
+                  className="text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                 >
                   <XMarkIcon className="h-5 w-5" />
                 </Button>
@@ -455,12 +440,12 @@ export const HeroControls: React.FC<HeroControlsProps> = ({
                 {keyboardShortcuts.map((shortcut, index) => (
                   <div
                     key={index}
-                    className="flex items-center justify-between py-2 border-b border-gray-200 dark:border-gray-700 last:border-b-0"
+                    className="flex items-center justify-between py-2 border-b border-gray-200 last:border-b-0"
                   >
-                    <span className="text-gray-700 dark:text-gray-300">
+                    <span className="text-gray-700">
                       {shortcut.description}
                     </span>
-                    <Badge variant="outline" className="font-mono">
+                    <Badge variant="outline" className="font-mono bg-gray-100 text-gray-900 border-gray-300">
                       {shortcut.key}
                     </Badge>
                   </div>

@@ -70,13 +70,13 @@ const Logo: React.FC<LogoProps> = ({
         className="flex items-center space-x-3"
       >
         {/* Logo Image */}
-        <div className={`relative ${imageClassName}`}>
+        <div className={`relative overflow-hidden rounded-lg ${imageClassName}`}>
           <Image
-            src="/images/logo/logo.svg"
+            src="/images/logo.png"
             alt="Vardhman Mills"
             width={width}
             height={height}
-            className="object-contain"
+            className="object-cover"
             priority
           />
         </div>
@@ -85,29 +85,27 @@ const Logo: React.FC<LogoProps> = ({
         {showText && !compact && (
           <motion.div
             variants={textVariants}
-            initial="hidden"
-            animate="visible"
             className={`flex flex-col ${textClassName}`}
           >
-            <span className="text-xl font-bold text-gray-900 dark:text-white leading-tight">
+            <span className="text-xl font-bold tracking-tight text-gray-900 leading-none">
               Vardhman
             </span>
-            <span className="text-sm font-medium text-primary-600 dark:text-primary-400 leading-tight">
+            <span className="text-sm font-medium tracking-widest text-gray-600 uppercase">
               Mills
             </span>
           </motion.div>
         )}
 
-        {/* Compact Text */}
+        {/* Compact Text (optional) */}
         {showText && compact && (
-          <motion.span
+          <motion.div
             variants={textVariants}
-            initial="hidden"
-            animate="visible"
-            className={`text-lg font-bold text-gray-900 dark:text-white ${textClassName}`}
+            className={`flex flex-col ${textClassName}`}
           >
-            VM
-          </motion.span>
+            <span className="text-lg font-bold tracking-tight text-gray-900 leading-none">
+              VM
+            </span>
+          </motion.div>
         )}
       </motion.div>
     </Link>

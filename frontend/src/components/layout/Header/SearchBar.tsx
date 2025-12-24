@@ -92,7 +92,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
           { id: '5', text: 'Premium Fabrics', type: 'search', count: 45 },
           { id: '6', text: 'Vardhman Brand', type: 'brand', count: 123 },
         ];
-        
+
         const filtered = mockSuggestions.filter(suggestion =>
           suggestion.text.toLowerCase().includes(query.toLowerCase())
         );
@@ -187,13 +187,13 @@ const SearchBar: React.FC<SearchBarProps> = ({
             onChange={handleInputChange}
             onFocus={() => setIsOpen(true)}
             placeholder={placeholder}
-            className="w-full pl-10 pr-10 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+            className="w-full pl-10 pr-10 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-500"
           />
           {query && (
             <button
               type="button"
               onClick={clearSearch}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
               aria-label="Clear search"
             >
               <XMarkIcon className="w-5 h-5" />
@@ -210,10 +210,10 @@ const SearchBar: React.FC<SearchBarProps> = ({
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-900 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 z-50 max-h-96 overflow-y-auto"
+            className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 z-50 max-h-96 overflow-y-auto"
           >
             {isLoading ? (
-              <div className="p-4 text-center text-gray-500 dark:text-gray-400">
+              <div className="p-4 text-center text-gray-500">
                 <motion.div
                   animate={{ rotate: 360 }}
                   transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
@@ -226,7 +226,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
                 {/* Search Suggestions */}
                 {suggestions.length > 0 && (
                   <div className="p-2">
-                    <p className="px-3 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                    <p className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">
                       Suggestions
                     </p>
                     {suggestions.map((suggestion) => (
@@ -234,15 +234,15 @@ const SearchBar: React.FC<SearchBarProps> = ({
                         key={suggestion.id}
                         variants={itemVariants}
                         onClick={() => handleSearch(suggestion.text)}
-                        className="w-full flex items-center space-x-3 px-3 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
+                        className="w-full flex items-center space-x-3 px-3 py-2 text-left hover:bg-gray-100 rounded-md transition-colors"
                       >
                         <span className="text-lg">{getTypeIcon(suggestion.type)}</span>
                         <div className="flex-1">
-                          <p className="text-sm font-medium text-gray-900 dark:text-white">
+                          <p className="text-sm font-medium text-gray-900">
                             {suggestion.text}
                           </p>
                           {suggestion.count && (
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                            <p className="text-xs text-gray-500">
                               {suggestion.count} results
                             </p>
                           )}
@@ -254,8 +254,8 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
                 {/* Recent Searches */}
                 {query === '' && recentSearches.length > 0 && (
-                  <div className="p-2 border-t border-gray-200 dark:border-gray-700">
-                    <p className="px-3 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center">
+                  <div className="p-2 border-t border-gray-200">
+                    <p className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide flex items-center">
                       <ClockIcon className="w-3 h-3 mr-1" />
                       Recent
                     </p>
@@ -264,10 +264,10 @@ const SearchBar: React.FC<SearchBarProps> = ({
                         key={index}
                         variants={itemVariants}
                         onClick={() => handleSearch(search)}
-                        className="w-full flex items-center space-x-3 px-3 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors group"
+                        className="w-full flex items-center space-x-3 px-3 py-2 text-left hover:bg-gray-100 rounded-md transition-colors group"
                       >
                         <ClockIcon className="w-4 h-4 text-gray-400" />
-                        <span className="text-sm text-gray-700 dark:text-gray-300 flex-1">
+                        <span className="text-sm text-gray-700 flex-1">
                           {search}
                         </span>
                         <span
@@ -287,7 +287,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
                               localStorage.setItem('recentSearches', JSON.stringify(newRecent));
                             }
                           }}
-                          className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-pointer"
+                          className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-gray-600 cursor-pointer"
                           aria-label="Remove from recent searches"
                         >
                           <XMarkIcon className="w-4 h-4" />
@@ -299,8 +299,8 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
                 {/* Trending Searches */}
                 {query === '' && (
-                  <div className="p-2 border-t border-gray-200 dark:border-gray-700">
-                    <p className="px-3 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center">
+                  <div className="p-2 border-t border-gray-200">
+                    <p className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide flex items-center">
                       <ArrowTrendingUpIcon className="w-3 h-3 mr-1" />
                       Trending
                     </p>
@@ -309,10 +309,10 @@ const SearchBar: React.FC<SearchBarProps> = ({
                         key={index}
                         variants={itemVariants}
                         onClick={() => handleSearch(search)}
-                        className="w-full flex items-center space-x-3 px-3 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
+                        className="w-full flex items-center space-x-3 px-3 py-2 text-left hover:bg-gray-100 rounded-md transition-colors"
                       >
                         <ArrowTrendingUpIcon className="w-4 h-4 text-orange-500" />
-                        <span className="text-sm text-gray-700 dark:text-gray-300">
+                        <span className="text-sm text-gray-700">
                           {search}
                         </span>
                       </motion.button>
@@ -322,11 +322,11 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
                 {/* No results */}
                 {query !== '' && suggestions.length === 0 && !isLoading && (
-                  <div className="p-4 text-center text-gray-500 dark:text-gray-400">
+                  <div className="p-4 text-center text-gray-500">
                     <p>No suggestions found for &ldquo;{query}&rdquo;</p>
                     <button
                       onClick={() => handleSearch(query)}
-                      className="mt-2 text-blue-600 dark:text-blue-400 hover:underline"
+                      className="mt-2 text-blue-600 hover:underline"
                     >
                       Search anyway
                     </button>

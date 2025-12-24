@@ -86,156 +86,6 @@ const TIME_FILTERS = [
 
 const ITEMS_PER_PAGE = 12;
 
-// Mock new arrivals products
-const MOCK_NEW_ARRIVALS: Product[] = Array.from({ length: 36 }, (_, i) => {
-  const daysAgo = i * 2;
-  const createdDate = new Date();
-  createdDate.setDate(createdDate.getDate() - daysAgo);
-
-  return {
-    id: `new-product-${i + 1}`,
-    name: `New Fabric ${i + 1}`,
-    slug: `new-fabric-${i + 1}`,
-    sku: `NF-${String(i + 1).padStart(4, '0')}`,
-    description: `Brand new premium quality fabric with innovative design and exceptional quality.`,
-    shortDescription: `Brand new premium quality fabric`,
-    
-    // Categorization
-    categoryId: `cat-${(i % 5) + 1}`,
-    category: {
-      id: `cat-${(i % 5) + 1}`,
-      name: `Category ${(i % 5) + 1}`,
-      slug: `category-${(i % 5) + 1}`,
-      description: `Category description ${(i % 5) + 1}`,
-      children: [],
-      level: 1,
-      path: `/category-${(i % 5) + 1}`,
-      status: 'active' as const,
-      isVisible: true,
-      isFeatured: false,
-      productCount: 10,
-      activeProductCount: 10,
-      sortOrder: (i % 5) + 1,
-      attributeGroups: [],
-      seo: {
-        title: `Category ${(i % 5) + 1}`,
-        description: `Category description`,
-      },
-      createdBy: 'admin-1',
-      updatedBy: 'admin-1',
-      createdAt: new Date(2024, 0, 1),
-      updatedAt: new Date(2024, 10, 20),
-    },
-    collectionIds: [],
-    collections: [],
-    
-    // Pricing
-    pricing: {
-      basePrice: {
-        amount: 600 + (i * 30),
-        currency: 'INR',
-        formatted: `₹${(600 + (i * 30)).toLocaleString('en-IN')}`,
-      },
-      salePrice: i % 4 === 0 ? {
-        amount: 500 + (i * 25),
-        currency: 'INR',
-        formatted: `₹${(500 + (i * 25)).toLocaleString('en-IN')}`,
-      } : undefined,
-      isDynamicPricing: false,
-      taxable: true,
-    },
-    
-    // Media
-    media: {
-      images: [
-        {
-          id: `new-product-img-${i}`,
-          url: `/images/products/new-fabric-${(i % 10) + 1}.jpg`,
-          alt: `New Fabric ${i + 1}`,
-          width: 800,
-          height: 800,
-          isPrimary: true,
-        },
-      ],
-      videos: [],
-      documents: [],
-    },
-    
-    // Product Details
-    specifications: [],
-    features: ['New Arrival', 'Premium Quality', 'Innovative Design'],
-    materials: [],
-    colors: [],
-    sizes: [],
-    dimensions: {
-      length: 100,
-      width: 150,
-      height: 0.5,
-      unit: 'cm' as const,
-    },
-    weight: {
-      value: 250,
-      unit: 'g' as const,
-    },
-    
-    // Inventory
-    inventory: {
-      quantity: 50 + i,
-      isInStock: true,
-      isLowStock: false,
-      lowStockThreshold: 10,
-      availableQuantity: 50 + i,
-      backorderAllowed: false,
-    },
-    stock: 50 + i,
-    
-    // Marketing
-    tags: ['new-arrival', 'premium', 'latest'],
-    keywords: ['fabric', 'new', 'textile', 'premium'],
-    seo: {
-      title: `New Fabric ${i + 1}`,
-      description: `New arrival fabric`,
-    },
-    
-    // Status and Visibility
-    status: 'active' as const,
-    isPublished: true,
-    isFeatured: i < 6,
-    isNewArrival: true,
-    isBestseller: false,
-    isOnSale: i % 4 === 0,
-    
-    // Reviews and Ratings
-    rating: {
-      average: 4.0 + (i % 10) * 0.1,
-      count: 10 + i,
-      distribution: {
-        1: 0,
-        2: 1,
-        3: 2,
-        4: 3,
-        5: 4 + i,
-      },
-    },
-    reviewCount: 10 + i,
-    
-    // Variants
-    variants: [],
-    variantOptions: [],
-    
-    // Related Products
-    relatedProductIds: [],
-    crossSellProductIds: [],
-    upsellProductIds: [],
-    
-    // Admin Fields
-    createdBy: 'admin-1',
-    updatedBy: 'admin-1',
-    createdAt: createdDate,
-    updatedAt: createdDate,
-  };
-});
-
 // ============================================================================
 // MAIN COMPONENT
 // ============================================================================
@@ -248,9 +98,9 @@ export default function NewArrivalsPage() {
   // STATE
   // ============================================================================
 
-  const [products] = useState<Product[]>(MOCK_NEW_ARRIVALS);
+  const [products, setProducts] = useState<Product[]>([]);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
 
@@ -259,6 +109,106 @@ export default function NewArrivalsPage() {
     sortBy: (searchParams?.get('sort') as SortOption) || 'newest',
     timeFilter: (searchParams?.get('time') as TimeFilter) || 'all',
   });
+
+  // ============================================================================
+  // FETCH DATA FROM API
+  // ============================================================================
+
+  useEffect(() => {
+    async function fetchNewArrivals() {
+      try {
+        setIsLoading(true);
+
+        // Try the new-arrivals endpoint first
+        let fetchedProducts: any[] = [];
+
+        const response = await fetch('/api/new-arrivals?limit=50', {
+          cache: 'no-store',
+          headers: { 'Content-Type': 'application/json' },
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          fetchedProducts = result.data?.products || result.products || [];
+        }
+
+        // Fallback to products API if new-arrivals is empty
+        if (fetchedProducts.length === 0) {
+          console.log('New arrivals empty, falling back to products API');
+          const fallbackResponse = await fetch('/api/products?limit=50&isNewArrival=true', {
+            cache: 'no-store',
+            headers: { 'Content-Type': 'application/json' },
+          });
+
+          if (fallbackResponse.ok) {
+            const fallbackResult = await fallbackResponse.json();
+            fetchedProducts = fallbackResult.data?.products || fallbackResult.products || fallbackResult.data || [];
+          }
+        }
+
+        // If still empty, try getting all products
+        if (fetchedProducts.length === 0) {
+          console.log('Fallback also empty, getting all products');
+          const allProductsResponse = await fetch('/api/products?limit=50', {
+            cache: 'no-store',
+            headers: { 'Content-Type': 'application/json' },
+          });
+
+          if (allProductsResponse.ok) {
+            const allProductsResult = await allProductsResponse.json();
+            fetchedProducts = allProductsResult.data?.products || allProductsResult.products || allProductsResult.data || [];
+          }
+        }
+
+        // Transform the data to match Product type if needed
+        const transformedProducts = fetchedProducts.map((p: any) => {
+          // Get proper pricing - preserve existing structure if available
+          const basePrice = p.pricing?.basePrice?.amount || p.price || p.variants?.[0]?.comparePrice || p.variants?.[0]?.price || 0;
+          const salePrice = p.pricing?.salePrice?.amount || p.salePrice || p.variants?.[0]?.price || null;
+          const hasDiscount = salePrice && salePrice < basePrice;
+
+          return {
+            ...p,
+            id: p.id || p._id,
+            category: p.category || { id: '', name: '', slug: '' },
+            // Only set pricing if it doesn't already exist in proper format
+            pricing: p.pricing?.basePrice ? p.pricing : {
+              basePrice: { amount: basePrice, currency: 'INR', formatted: `₹${basePrice.toLocaleString('en-IN')}` },
+              salePrice: hasDiscount ? { amount: salePrice, currency: 'INR', formatted: `₹${salePrice.toLocaleString('en-IN')}` } : undefined,
+            },
+            media: p.media?.images ? p.media : {
+              images: p.images?.map((img: any, idx: number) => ({
+                id: `img-${idx}`,
+                url: typeof img === 'string' ? img : img.url,
+                alt: p.name,
+                isPrimary: idx === 0,
+              })) || [{ id: 'default', url: p.thumbnail || '', alt: p.name, isPrimary: true }],
+            },
+            // Ensure inventory defaults to in-stock if no data is provided
+            inventory: p.inventory || {
+              quantity: p.stockQuantity ?? p.stock ?? 100, // Default to 100 if not specified
+              isInStock: p.inStock !== false && p.outOfStock !== true,
+              lowStockThreshold: 10
+            },
+            createdAt: p.createdAt || p.arrivalInfo?.arrivedAt || new Date(),
+            isNewArrival: p.isNewArrival !== false,
+            isFeatured: p.isFeatured || false,
+            // Ensure isOnSale is set when there's a discount
+            isOnSale: p.isOnSale || hasDiscount || false,
+          };
+        });
+
+        setProducts(transformedProducts);
+      } catch (error) {
+        console.error('Error fetching new arrivals:', error);
+        setProducts([]);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchNewArrivals();
+  }, []);
 
   // ============================================================================
   // COMPUTED VALUES
@@ -408,14 +358,8 @@ export default function NewArrivalsPage() {
   }, []);
 
   // ============================================================================
-  // EFFECTS
+  // EFFECTS - Loading is now handled by the data fetch
   // ============================================================================
-
-  useEffect(() => {
-    setIsLoading(true);
-    const timer = setTimeout(() => setIsLoading(false), 500);
-    return () => clearTimeout(timer);
-  }, [filters]);
 
   // ============================================================================
   // RENDER HELPERS
@@ -746,14 +690,6 @@ export default function NewArrivalsPage() {
 
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Breadcrumbs */}
-          <Breadcrumbs
-            items={[
-              { label: 'Home', href: '/' },
-              { label: 'New Arrivals', href: '/new-arrivals' },
-            ]}
-            className="mb-6"
-          />
 
           {/* Hero Section */}
           {renderHero()}

@@ -1,0 +1,45 @@
+/**
+ * FORCE LIGHT MODE - AGGRESSIVE OVERRIDE
+ * This completely disables all dark mode styles by overriding prefers-color-scheme media queries
+ */
+
+/* Override ALL prefers-color-scheme: dark with light mode styles */
+@media (prefers-color-scheme: dark) {
+  /* Force the entire document to use light color scheme */
+  :root,
+  html {
+    color-scheme: light only !important;
+  }
+  
+  /* Override Tailwind's dark mode utilities */
+  .dark\:bg-gray-900,
+  .dark\:bg-gray-800,
+  .dark\:bg-neutral-900,
+  .dark\:text-white,
+  .dark\:text-gray-100 {
+    /* These should not apply when prefers-color-scheme is dark */
+    background-color: inherit !important;
+    color: inherit !important;
+  }
+  
+  /* Force body to use light mode colors */
+  body {
+    background-color: white !important;
+    color: #1a202c !important;
+  }
+}
+
+/* Additional safeguard: Completely disable dark class effects when browser prefers dark */
+@media (prefers-color-scheme: dark) {
+  html.dark,
+  html[data-theme="dark"],
+  .dark {
+    /* Nullify all dark mode styles */
+    filter: none !important;
+  }
+  
+  /* Force html to not have dark class */
+  html {
+    background: white !important;
+  }
+}

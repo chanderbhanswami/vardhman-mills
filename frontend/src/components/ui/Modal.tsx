@@ -1,6 +1,7 @@
 'use client';
 
-import React, { forwardRef, useEffect, useCallback, useId } from 'react';
+import React, { forwardRef, useEffect, useCallback, useId, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { cva, type VariantProps } from 'class-variance-authority';
@@ -60,9 +61,9 @@ const overlayVariants = cva(
 );
 
 // Base Modal Props
-export interface ModalProps 
+export interface ModalProps
   extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof modalVariants> {
+  VariantProps<typeof modalVariants> {
   open: boolean;
   onClose?: () => void;
   children: React.ReactNode;
@@ -93,9 +94,9 @@ export const useModal = () => {
 };
 
 // Modal Overlay Component
-export interface ModalOverlayProps 
+export interface ModalOverlayProps
   extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof overlayVariants> {
+  VariantProps<typeof overlayVariants> {
   onClose?: () => void;
   closeOnClick?: boolean;
 }
@@ -126,9 +127,9 @@ export const ModalOverlay = forwardRef<HTMLDivElement, ModalOverlayProps>(
 ModalOverlay.displayName = 'ModalOverlay';
 
 // Modal Content Component
-export interface ModalContentProps 
+export interface ModalContentProps
   extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof modalVariants> {
+  VariantProps<typeof modalVariants> {
   forceMount?: boolean;
 }
 
@@ -140,16 +141,16 @@ export const ModalContent = forwardRef<HTMLDivElement, ModalContentProps>(
       initial: { opacity: 0, scale: 0.95, y: 20 },
       animate: { opacity: 1, scale: 1, y: 0 },
       exit: { opacity: 0, scale: 0.95, y: 20 },
-      transition: { 
-        type: 'spring' as const, 
-        duration: 0.3, 
-        stiffness: 300, 
-        damping: 30 
+      transition: {
+        type: 'spring' as const,
+        duration: 0.3,
+        stiffness: 300,
+        damping: 30
       },
       role: "dialog" as const,
       "aria-modal": "true" as const
     };
-    
+
     return (
       <motion.div {...motionProps}>
         {children}
@@ -264,7 +265,7 @@ ModalFooter.displayName = 'ModalFooter';
 
 // Main Modal Component
 export const Modal = forwardRef<HTMLDivElement, ModalProps>(
-  ({ 
+  ({
     open,
     onClose,
     children,
@@ -279,12 +280,18 @@ export const Modal = forwardRef<HTMLDivElement, ModalProps>(
     initialFocus,
     restoreFocus = true,
     className,
-    ...props 
+    ...props
   }, ref) => {
     const modalId = useId();
     const previousActiveElement = React.useRef<Element | null>(null);
     const modalRef = React.useRef<HTMLDivElement>(null);
-    
+    const [mounted, setMounted] = useState(false);
+
+    // Handle SSR - only render portal after component mounts
+    useEffect(() => {
+      setMounted(true);
+    }, []);
+
     React.useImperativeHandle(ref, () => modalRef.current!);
 
     // Handle escape key
@@ -303,7 +310,7 @@ export const Modal = forwardRef<HTMLDivElement, ModalProps>(
         const focusableElements = modalRef.current.querySelectorAll(
           'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
         );
-        
+
         const firstElement = focusableElements[0] as HTMLElement;
         const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
 
@@ -326,7 +333,7 @@ export const Modal = forwardRef<HTMLDivElement, ModalProps>(
       if (open && lockScroll) {
         const originalStyle = window.getComputedStyle(document.body).overflow;
         document.body.style.overflow = 'hidden';
-        
+
         return () => {
           document.body.style.overflow = originalStyle;
         };
@@ -337,7 +344,7 @@ export const Modal = forwardRef<HTMLDivElement, ModalProps>(
     useEffect(() => {
       if (open) {
         previousActiveElement.current = document.activeElement;
-        
+
         // Set initial focus
         setTimeout(() => {
           if (initialFocus?.current) {
@@ -359,7 +366,7 @@ export const Modal = forwardRef<HTMLDivElement, ModalProps>(
       if (open) {
         document.addEventListener('keydown', handleEscape);
         document.addEventListener('keydown', handleKeyDown);
-        
+
         return () => {
           document.removeEventListener('keydown', handleEscape);
           document.removeEventListener('keydown', handleKeyDown);
@@ -367,11 +374,16 @@ export const Modal = forwardRef<HTMLDivElement, ModalProps>(
       }
     }, [open, handleEscape, handleKeyDown]);
 
-    return (
+    // Don't render on server or before mount
+    if (!mounted) {
+      return null;
+    }
+
+    const modalContent = (
       <ModalContext.Provider value={{ onClose, modalId }}>
         <AnimatePresence>
           {open && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div className="fixed inset-0 z-[9999] flex items-center justify-center">
               <ModalOverlay
                 blur={blur}
                 onClose={closeOnOverlayClick ? onClose : undefined}
@@ -406,6 +418,9 @@ export const Modal = forwardRef<HTMLDivElement, ModalProps>(
         </AnimatePresence>
       </ModalContext.Provider>
     );
+
+    // Use portal to render at document.body level, escaping any stacking context
+    return createPortal(modalContent, document.body);
   }
 );
 
@@ -423,16 +438,16 @@ export interface AlertModalProps extends Omit<ModalProps, 'children'> {
 }
 
 export const AlertModal = forwardRef<HTMLDivElement, AlertModalProps>(
-  ({ 
-    title, 
-    description, 
+  ({
+    title,
+    description,
     confirmText = 'Confirm',
     cancelText = 'Cancel',
     onConfirm,
     onCancel,
     variant = 'default',
     onClose,
-    ...props 
+    ...props
   }, ref) => {
     const handleConfirm = useCallback(() => {
       onConfirm?.();
@@ -444,11 +459,11 @@ export const AlertModal = forwardRef<HTMLDivElement, AlertModalProps>(
       onClose?.();
     }, [onCancel, onClose]);
 
-    const confirmButtonClass = variant === 'destructive' 
+    const confirmButtonClass = variant === 'destructive'
       ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90'
       : variant === 'warning'
-      ? 'bg-yellow-500 text-white hover:bg-yellow-600'
-      : 'bg-primary text-primary-foreground hover:bg-primary/90';
+        ? 'bg-yellow-500 text-white hover:bg-yellow-600'
+        : 'bg-primary text-primary-foreground hover:bg-primary/90';
 
     return (
       <Modal ref={ref} onClose={onClose} {...props}>

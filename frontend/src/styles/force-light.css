@@ -1,0 +1,11 @@
+/* 
+ * FORCE LIGHT MODE
+ * This tells the browser to always use light color scheme,
+ * which disables prefers-color-scheme: dark media queries
+ */
+
+:root,
+html,
+body {
+  color-scheme: light !important;
+}

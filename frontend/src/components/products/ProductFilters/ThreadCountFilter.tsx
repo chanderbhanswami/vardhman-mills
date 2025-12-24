@@ -92,7 +92,7 @@ const ThreadCountFilter: React.FC<ThreadCountFilterProps> = ({
   return (
     <div className={cn('space-y-4', className)}>
       <div className="flex items-center justify-between">
-        <h3 className="font-semibold text-gray-900">Thread Count</h3>
+        <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">Thread Count</h3>
         {isFiltered && (
           <button
             onClick={handleReset}

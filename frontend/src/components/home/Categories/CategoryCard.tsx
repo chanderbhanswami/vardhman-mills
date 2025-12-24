@@ -313,7 +313,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
           </Link>
         ))}
         {(category.subcategories?.length || category.children?.length || 0) > 3 && (
-          <div className="text-center text-xs text-white/80">
+          <div className="text-center text-xs text-white">
             +{(category.subcategories?.length || category.children?.length || 0) - 3} more
           </div>
         )}
@@ -322,7 +322,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
   };
 
   const renderContent = () => (
-    <div className="absolute bottom-0 left-0 right-0 z-20 p-4">
+    <div className="absolute bottom-0 left-0 right-0 z-20 p-3">
       {/* Product Count */}
       {showCount && (
         <motion.div
@@ -331,8 +331,8 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
           transition={{ delay: 0.1 }}
           className="flex items-center gap-2 mb-2"
         >
-          <ShoppingBagIcon className="w-4 h-4 text-white/80" />
-          <span className={cn('text-white/80 font-medium', sizeClasses.count)}>
+          <ShoppingBagIcon className="w-4 h-4 text-gray-700 group-hover:text-white transition-colors duration-300" />
+          <span className={cn('text-gray-700 group-hover:text-white font-medium transition-colors duration-300', sizeClasses.count)}>
             {(category.productCount || 0).toLocaleString()} products
           </span>
         </motion.div>
@@ -344,7 +344,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
         className={cn(
-          'font-bold text-white mb-2 line-clamp-2',
+          'font-bold text-gray-900 group-hover:text-white mb-2 line-clamp-2 transition-colors duration-300',
           sizeClasses.title
         )}
       >
@@ -355,8 +355,8 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
       {category.description && (
         <motion.p
           initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: isHovered ? 1 : 0, y: isHovered ? 0 : 20 }}
-          className="text-sm text-white/80 line-clamp-2 mb-3"
+          animate={{ opacity: 1, y: 0 }}
+          className="text-sm text-gray-600 group-hover:text-white line-clamp-2 mb-3 transition-colors duration-300"
         >
           {category.description}
         </motion.p>
@@ -365,7 +365,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
       {/* CTA Button */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: isHovered ? 1 : 0, y: isHovered ? 0 : 20 }}
+        animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
       >
         <Button
@@ -392,13 +392,13 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
         onMouseLeave={() => setIsHovered(false)}
         className={cn('group cursor-pointer', className)}
       >
-        <Card className="overflow-hidden border-2 hover:border-primary hover:shadow-xl transition-all duration-300">
+        <Card className="overflow-hidden border-2 hover:border-primary hover:shadow-lg transition-all duration-300">
           <CardContent className="p-0">
             <Link
               href={`/categories/${category.slug}`}
               onClick={handleCategoryClick}
             >
-              <div className="flex items-center gap-4 p-4">
+              <div className="flex items-center gap-4 p-3">
                 {/* Image */}
                 <div className="relative w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
                   <Image
@@ -453,7 +453,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
       onMouseLeave={() => setIsHovered(false)}
       className={cn('group cursor-pointer', className)}
     >
-      <Card className="overflow-hidden border-2 hover:border-primary hover:shadow-2xl transition-all duration-300">
+      <Card className="overflow-hidden border-2 hover:border-primary hover:shadow-lg transition-all duration-300">
         <CardContent className="p-0">
           <Link
             href={`/categories/${category.slug}`}

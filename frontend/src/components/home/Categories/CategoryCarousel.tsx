@@ -23,7 +23,7 @@
 
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import type { ImageAsset } from '@/types/product.types';
-import { motion } from 'framer-motion';
+import { motion, PanInfo } from 'framer-motion';
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -130,6 +130,8 @@ export const CategoryCarousel: React.FC<CategoryCarouselProps> = ({
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(autoScroll);
+  const [isPausedByUser, setIsPausedByUser] = useState(!autoScroll);
+  const [isHovered, setIsHovered] = useState(false);
   const [itemsPerView, setItemsPerView] = useState(1);
   const [gap, setGap] = useState(16);
   const [isDragging, setIsDragging] = useState(false);
@@ -159,6 +161,13 @@ export const CategoryCarousel: React.FC<CategoryCarouselProps> = ({
     window.addEventListener('resize', updateBreakpoint);
     return () => window.removeEventListener('resize', updateBreakpoint);
   }, [breakpoints]);
+
+  // Update playing state based on user pause and hover
+  useEffect(() => {
+    if (autoScroll) {
+      setIsPlaying(!isPausedByUser && !isHovered && !isDragging);
+    }
+  }, [autoScroll, isPausedByUser, isHovered, isDragging]);
 
   // ============================================================================
   // COMPUTED VALUES
@@ -222,9 +231,9 @@ export const CategoryCarousel: React.FC<CategoryCarouselProps> = ({
   }, [canGoPrev, currentIndex, goToSlide]);
 
   const togglePlayPause = useCallback(() => {
-    setIsPlaying((prev) => !prev);
-    console.log('Auto-scroll:', !isPlaying ? 'playing' : 'paused');
-  }, [isPlaying]);
+    setIsPausedByUser((prev) => !prev);
+    console.log('Auto-scroll:', isPausedByUser ? 'resumed' : 'paused');
+  }, [isPausedByUser]);
 
   // ============================================================================
   // TOUCH HANDLERS
@@ -275,6 +284,32 @@ export const CategoryCarousel: React.FC<CategoryCarouselProps> = ({
   }, [isDragging, dragOffset, goPrev, goNext, enableTouch]);
 
   // ============================================================================
+  // DRAG HANDLERS
+  // ============================================================================
+
+  const handleDragStart = useCallback(() => {
+    setIsDragging(true);
+  }, []);
+
+  const handleDragEnd = useCallback(
+    (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+      setIsDragging(false);
+      const offset = info.offset.x;
+      const velocity = info.velocity.x;
+      const threshold = 50;
+
+      if (Math.abs(offset) > threshold || Math.abs(velocity) > 500) {
+        if (offset > 0) {
+          goPrev();
+        } else {
+          goNext();
+        }
+      }
+    },
+    [goNext, goPrev]
+  );
+
+  // ============================================================================
   // KEYBOARD NAVIGATION
   // ============================================================================
 
@@ -304,154 +339,154 @@ export const CategoryCarousel: React.FC<CategoryCarouselProps> = ({
   console.log('Item width:', `${100 / itemsPerView}%`);
 
   return (
-    <div className={cn('relative', className)}>
-      {/* Carousel Container */}
-      <div
-        ref={carouselRef}
-        className="relative overflow-hidden"
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        onMouseDown={handleTouchStart}
-        onMouseMove={handleTouchMove}
-        onMouseUp={handleTouchEnd}
-        onMouseLeave={handleTouchEnd}
-      >
-        <motion.div
-          className="flex"
-          animate={{
-            x: `${translateX}%`,
-          }}
-          transition={{
-            type: 'spring',
-            stiffness: 300,
-            damping: 30,
-          }}
-          drag={enableTouch ? 'x' : false}
-          dragConstraints={{ left: 0, right: 0 }}
-          dragElastic={0.1}
-          style={{
-            cursor: isDragging ? 'grabbing' : enableTouch ? 'grab' : 'default',
-          }}
+    <div
+      className={cn('relative', className)}
+    >
+      {/* Main Carousel Wrapper with Navigation */}
+      {/* Main Carousel Wrapper */}
+      <div className="overflow-hidden py-4">
+        <div
+          ref={carouselRef}
+          className="flex-1 overflow-hidden py-4"
         >
-          {categories.map((category) => {
-            const widthPercent = 100 / itemsPerView;
-            const gapHalf = gap / 2;
-            const itemStyle = {
-              width: `${widthPercent}%`,
-              paddingLeft: `${gapHalf}px`,
-              paddingRight: `${gapHalf}px`,
-            };
-            return (
-              <div
-                key={category.id}
-                className="flex-shrink-0"
-                {...{style: itemStyle}}
-              >
-              <CategoryCard
-                category={category}
-                size="md"
-                showSubcategories={false}
-                onCategoryClick={() => {
-                  onCategoryClick?.(category);
-                  console.log('Category clicked:', category.name);
-                }}
-              />
-            </div>
-            );
-          })}
-        </motion.div>
+          <motion.div
+            className="flex"
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.9}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            animate={{
+              x: `${translateX}%`,
+            }}
+            transition={{
+              type: 'tween',
+              ease: [0.25, 0.1, 0.25, 1],
+              duration: 0.5,
+            }}
+            style={{
+              cursor: isDragging ? 'grabbing' : enableTouch ? 'grab' : 'default',
+            }}
+          >
+            {categories.map((category) => {
+              const widthPercent = 100 / itemsPerView;
+              const gapHalf = gap / 2;
+              const itemStyle = {
+                width: `${widthPercent}%`,
+                paddingLeft: `${gapHalf}px`,
+                paddingRight: `${gapHalf}px`,
+              };
+              return (
+                <div
+                  key={category.id}
+                  className="flex-shrink-0"
+                  {...{ style: itemStyle }}
+                  onMouseEnter={() => autoScroll && setIsHovered(true)}
+                  onMouseLeave={() => autoScroll && setIsHovered(false)}
+                >
+                  <CategoryCard
+                    category={category}
+                    size="md"
+                    showSubcategories={false}
+                    onCategoryClick={() => {
+                      onCategoryClick?.(category);
+                      console.log('Category clicked:', category.name);
+                    }}
+                  />
+                </div>
+              );
+            })}
+          </motion.div>
+        </div>
+
       </div>
 
-      {/* Navigation Arrows */}
-      {showNavigation && categories.length > itemsPerView && (
-        <>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={goPrev}
-            disabled={!canGoPrev}
-            className={cn(
-              'absolute left-4 top-1/2 -translate-y-1/2 z-10',
-              'w-10 h-10 p-0 rounded-full',
-              'bg-white/90 backdrop-blur-sm shadow-lg',
-              'hover:bg-white hover:scale-110',
-              'transition-all duration-200',
-              !canGoPrev && 'opacity-50 cursor-not-allowed'
-            )}
-            aria-label="Previous slide"
-          >
-            <ChevronLeftIcon className="w-5 h-5" />
-          </Button>
+      {/* Controls Bar - Bottom Right */}
+      {(showNavigation || showPagination || autoScroll) && categories.length > itemsPerView && (
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={goNext}
-            disabled={!canGoNext}
-            className={cn(
-              'absolute right-4 top-1/2 -translate-y-1/2 z-10',
-              'w-10 h-10 p-0 rounded-full',
-              'bg-white/90 backdrop-blur-sm shadow-lg',
-              'hover:bg-white hover:scale-110',
-              'transition-all duration-200',
-              !canGoNext && 'opacity-50 cursor-not-allowed'
-            )}
-            aria-label="Next slide"
-          >
-            <ChevronRightIcon className="w-5 h-5" />
-          </Button>
-        </>
-      )}
+        <div className="relative flex items-center justify-end gap-6 mt-6">
 
-      {/* Controls Bar */}
-      {(showPagination || autoScroll) && categories.length > itemsPerView && (
-        <div className="flex items-center justify-center gap-4 mt-6">
-          {/* Pagination Dots */}
-          {showPagination && (
-            <div className="flex items-center gap-2">
-              {Array.from({ length: totalPages }).map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => goToSlide(index)}
-                  className={cn(
-                    'transition-all duration-200',
-                    'rounded-full',
-                    currentIndex === index
-                      ? 'w-8 h-2 bg-primary-600'
-                      : 'w-2 h-2 bg-gray-300 hover:bg-gray-400'
-                  )}
-                  aria-label={`Go to slide ${index + 1}`}
-                />
-              ))}
+          {/* Pagination Dots & Play/Pause (Grouped) */}
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-4">
+            {/* Play/Pause Button */}
+            {autoScroll && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={togglePlayPause}
+                className="w-8 h-8 p-0 rounded-full"
+                aria-label={isPlaying ? 'Pause auto-scroll' : 'Play auto-scroll'}
+              >
+                {isPlaying ? (
+                  <PauseIcon className="w-4 h-4" />
+                ) : (
+                  <PlayIcon className="w-4 h-4" />
+                )}
+              </Button>
+            )}
+
+            {/* Dots */}
+            {showPagination && (
+              <div className="flex items-center gap-2">
+                {Array.from({ length: totalPages }).map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => goToSlide(index)}
+                    className={cn(
+                      'transition-all duration-200',
+                      'rounded-full',
+                      currentIndex === index
+                        ? 'w-8 h-2 bg-primary-600'
+                        : 'w-2 h-2 bg-gray-300 hover:bg-gray-400'
+                    )}
+                    aria-label={`Go to slide ${index + 1}`}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Navigation Arrows */}
+          {showNavigation && (
+            <div className="flex items-center gap-3 z-10">
+              <button
+                onClick={goPrev}
+                disabled={!canGoPrev}
+                className={cn(
+                  'w-10 h-10 rounded-full flex items-center justify-center',
+                  'border border-gray-200 shadow-sm',
+                  'hover:border-primary-500 hover:text-primary-600 hover:shadow-md',
+                  'transition-all duration-200',
+                  canGoPrev
+                    ? 'text-gray-700 cursor-pointer'
+                    : 'text-gray-300 cursor-not-allowed opacity-50'
+                )}
+                aria-label="Previous slide"
+              >
+                <ChevronLeftIcon className="w-5 h-5" />
+              </button>
+              <button
+                onClick={goNext}
+                disabled={!canGoNext}
+                className={cn(
+                  'w-10 h-10 rounded-full flex items-center justify-center',
+                  'border border-gray-200 shadow-sm',
+                  'hover:border-primary-500 hover:text-primary-600 hover:shadow-md',
+                  'transition-all duration-200',
+                  canGoNext
+                    ? 'text-gray-700 cursor-pointer'
+                    : 'text-gray-300 cursor-not-allowed opacity-50'
+                )}
+                aria-label="Next slide"
+              >
+                <ChevronRightIcon className="w-5 h-5" />
+              </button>
             </div>
           )}
-
-          {/* Play/Pause Button */}
-          {autoScroll && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={togglePlayPause}
-              className="w-8 h-8 p-0 rounded-full"
-              aria-label={isPlaying ? 'Pause auto-scroll' : 'Play auto-scroll'}
-            >
-              {isPlaying ? (
-                <PauseIcon className="w-4 h-4" />
-              ) : (
-                <PlayIcon className="w-4 h-4" />
-              )}
-            </Button>
-          )}
         </div>
       )}
 
-      {/* Progress Indicator */}
-      {categories.length > itemsPerView && (
-        <div className="mt-4 text-center text-sm text-gray-600">
-          {currentIndex + 1} / {totalPages}
-        </div>
-      )}
+
     </div>
   );
 };

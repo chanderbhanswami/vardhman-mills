@@ -19,7 +19,7 @@
 
 'use client';
 
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { motion, useMotionValue, useAnimation, PanInfo } from 'framer-motion';
 import {
   ChevronLeftIcon,
@@ -53,6 +53,8 @@ export interface CollectionCarouselProps {
   showDots?: boolean;
   /** Show play/pause button */
   showPlayPause?: boolean;
+  /** Enable drag/swipe */
+  enableDrag?: boolean;
   /** Items per view at different breakpoints */
   itemsPerView?: {
     mobile: number;
@@ -90,6 +92,7 @@ const BREAKPOINTS = {
 // COMPONENT
 // ============================================================================
 
+
 export const CollectionCarousel: React.FC<CollectionCarouselProps> = ({
   collections,
   cardVariant = 'default',
@@ -99,257 +102,234 @@ export const CollectionCarousel: React.FC<CollectionCarouselProps> = ({
   showArrows = true,
   showDots = true,
   showPlayPause = true,
+  enableDrag = true,
   itemsPerView = DEFAULT_ITEMS_PER_VIEW,
   gap = 24,
   className,
   onCollectionClick,
 }) => {
   // ============================================================================
+  // TYPES
+  // ============================================================================
+
+  interface CarouselState {
+    currentIndex: number;
+    isPlaying: boolean;
+    isPausedByUser: boolean;
+    isHovered: boolean;
+    isDragging: boolean;
+    direction: 'left' | 'right';
+  }
+
+  // ============================================================================
   // STATE & REFS
   // ============================================================================
 
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isAutoPlaying, setIsAutoPlaying] = useState(autoPlay);
-  const [isPaused, setIsPaused] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
-  const [itemsVisible, setItemsVisible] = useState(itemsPerView.desktop);
+  const [state, setState] = useState<CarouselState>({
+    currentIndex: 0,
+    isPlaying: autoPlay,
+    isPausedByUser: false,
+    isHovered: false,
+    isDragging: false,
+    direction: 'right',
+  });
+
+  const [currentItemsPerView, setCurrentItemsPerView] = useState(itemsPerView.desktop);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const autoPlayTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const x = useMotionValue(0);
-  const controls = useAnimation();
+  // ============================================================================
+  // CONSTANTS
+  // ============================================================================
 
-  // Log motion values for debugging
-  console.log('Motion values:', { x: x.get(), controls });
+  const DRAG_THRESHOLD = 50;
+  const SWIPE_VELOCITY_THRESHOLD = 500;
 
   // ============================================================================
   // COMPUTED VALUES
   // ============================================================================
 
-  const totalSlides = collections.length;
-  const maxIndex = Math.max(0, totalSlides - itemsVisible);
+  const totalSlides = useMemo(() => {
+    return Math.ceil(collections.length / currentItemsPerView);
+  }, [collections.length, currentItemsPerView]);
+
+  const canGoNext = useMemo(() => {
+    return loop || state.currentIndex < totalSlides - 1;
+  }, [loop, state.currentIndex, totalSlides]);
+
+  const canGoPrev = useMemo(() => {
+    return loop || state.currentIndex > 0;
+  }, [loop, state.currentIndex]);
 
   // ============================================================================
-  // HANDLERS
+  // RESPONSIVE BREAKPOINTS
   // ============================================================================
 
-  const handlePrev = useCallback(() => {
-    setCurrentIndex(prev => {
-      if (prev === 0) {
-        return loop ? maxIndex : 0;
+  useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+      if (width < 640) {
+        setCurrentItemsPerView(itemsPerView.mobile);
+      } else if (width < 1024) {
+        setCurrentItemsPerView(itemsPerView.tablet);
+      } else if (width < 1280) {
+        setCurrentItemsPerView(itemsPerView.desktop);
+      } else {
+        setCurrentItemsPerView(itemsPerView.large);
       }
-      return prev - 1;
-    });
-  }, [loop, maxIndex]);
+    };
 
-  const handleNext = useCallback(() => {
-    setCurrentIndex(prev => {
-      if (prev >= maxIndex) {
-        return loop ? 0 : maxIndex;
-      }
-      return prev + 1;
-    });
-  }, [loop, maxIndex]);
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [itemsPerView]);
 
-  const handleDotClick = useCallback((index: number) => {
-    setCurrentIndex(index);
-    setIsPaused(true);
-    setTimeout(() => setIsPaused(false), 3000);
+  // ============================================================================
+  // AUTO PLAY
+  // ============================================================================
+
+  const startAutoPlay = useCallback(() => {
+    if (!autoPlay) return;
+
+    if (autoPlayTimerRef.current) {
+      clearInterval(autoPlayTimerRef.current);
+    }
+
+    autoPlayTimerRef.current = setInterval(() => {
+      setState((prev) => {
+        if (!prev.isPlaying) return prev;
+
+        const nextIndex = prev.currentIndex + 1;
+        if (nextIndex >= totalSlides) {
+          if (loop) {
+            return { ...prev, currentIndex: 0, direction: 'right' };
+          } else {
+            return { ...prev, isPlaying: false };
+          }
+        }
+        return { ...prev, currentIndex: nextIndex, direction: 'right' };
+      });
+    }, autoPlayInterval);
+  }, [autoPlay, autoPlayInterval, totalSlides, loop]);
+
+  const stopAutoPlay = useCallback(() => {
+    if (autoPlayTimerRef.current) {
+      clearInterval(autoPlayTimerRef.current);
+      autoPlayTimerRef.current = null;
+    }
   }, []);
 
+  useEffect(() => {
+    if (state.isPlaying) {
+      startAutoPlay();
+    } else {
+      stopAutoPlay();
+    }
+
+    return () => stopAutoPlay();
+  }, [state.isPlaying, startAutoPlay, stopAutoPlay]);
+
+  // ============================================================================
+  // NAVIGATION HANDLERS
+  // ============================================================================
+
+  const goToSlide = useCallback(
+    (index: number) => {
+      const normalizedIndex = Math.max(0, Math.min(index, totalSlides - 1));
+
+      setState((prev) => ({
+        ...prev,
+        currentIndex: normalizedIndex,
+        direction: normalizedIndex > prev.currentIndex ? 'right' : 'left',
+      }));
+    },
+    [totalSlides]
+  );
+
+  const goToNext = useCallback(() => {
+    if (!canGoNext) return;
+
+    setState((prev) => {
+      const nextIndex = prev.currentIndex + 1;
+      if (nextIndex >= totalSlides) {
+        return loop
+          ? { ...prev, currentIndex: 0, direction: 'right' }
+          : prev;
+      }
+      return { ...prev, currentIndex: nextIndex, direction: 'right' };
+    });
+  }, [canGoNext, totalSlides, loop]);
+
+  const goToPrev = useCallback(() => {
+    if (!canGoPrev) return;
+
+    setState((prev) => {
+      const prevIndex = prev.currentIndex - 1;
+      if (prevIndex < 0) {
+        return loop
+          ? { ...prev, currentIndex: totalSlides - 1, direction: 'left' }
+          : prev;
+      }
+      return { ...prev, currentIndex: prevIndex, direction: 'left' };
+    });
+  }, [canGoPrev, totalSlides, loop]);
+
+  const togglePlayPause = useCallback(() => {
+    setState((prev) => ({
+      ...prev,
+      isPlaying: !prev.isPlaying,
+      isPausedByUser: !prev.isPausedByUser,
+    }));
+  }, []);
+
+  // ============================================================================
+  // DRAG HANDLERS
+  // ============================================================================
+
   const handleDragStart = useCallback(() => {
-    setIsDragging(true);
+    setState((prev) => ({ ...prev, isDragging: true }));
   }, []);
 
   const handleDragEnd = useCallback(
-    (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-      setIsDragging(false);
+    (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+      setState((prev) => ({ ...prev, isDragging: false }));
 
-      const threshold = 50;
-      const velocity = info.velocity.x;
       const offset = info.offset.x;
+      const velocity = info.velocity.x;
 
-      if (Math.abs(offset) > threshold || Math.abs(velocity) > 500) {
+      if (Math.abs(offset) > DRAG_THRESHOLD || Math.abs(velocity) > SWIPE_VELOCITY_THRESHOLD) {
         if (offset > 0 || velocity > 0) {
-          handlePrev();
+          goToPrev();
         } else {
-          handleNext();
+          goToNext();
         }
       }
     },
-    [handlePrev, handleNext]
+    [goToPrev, goToNext, DRAG_THRESHOLD, SWIPE_VELOCITY_THRESHOLD]
   );
 
-  const toggleAutoPlay = useCallback(() => {
-    setIsAutoPlaying(prev => !prev);
-  }, []);
-
-  const handleMouseEnter = useCallback(() => {
-    setIsPaused(true);
-  }, []);
-
-  const handleMouseLeave = useCallback(() => {
-    setIsPaused(false);
-  }, []);
-
   // ============================================================================
-  // EFFECTS
+  // KEYBOARD NAVIGATION
   // ============================================================================
 
-  // Handle responsive breakpoints
-  useEffect(() => {
-    const updateItemsPerView = () => {
-      const width = window.innerWidth;
-      if (width >= BREAKPOINTS.large) {
-        setItemsVisible(itemsPerView.large);
-      } else if (width >= BREAKPOINTS.desktop) {
-        setItemsVisible(itemsPerView.desktop);
-      } else if (width >= BREAKPOINTS.tablet) {
-        setItemsVisible(itemsPerView.tablet);
-      } else {
-        setItemsVisible(itemsPerView.mobile);
-      }
-    };
-
-    updateItemsPerView();
-    window.addEventListener('resize', updateItemsPerView);
-    return () => window.removeEventListener('resize', updateItemsPerView);
-  }, [itemsPerView]);
-
-  // Auto-play functionality
-  useEffect(() => {
-    if (isAutoPlaying && !isPaused && !isDragging && totalSlides > itemsVisible) {
-      autoPlayTimerRef.current = setInterval(() => {
-        handleNext();
-      }, autoPlayInterval);
-    }
-
-    return () => {
-      if (autoPlayTimerRef.current) {
-        clearInterval(autoPlayTimerRef.current);
-      }
-    };
-  }, [isAutoPlaying, isPaused, isDragging, currentIndex, totalSlides, itemsVisible, autoPlayInterval, handleNext]);
-
-  // Keyboard navigation
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
       if (e.key === 'ArrowLeft') {
-        handlePrev();
+        goToPrev();
       } else if (e.key === 'ArrowRight') {
-        handleNext();
+        goToNext();
       }
     };
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [handlePrev, handleNext]);
-
-  // ============================================================================
-  // RENDER HELPERS
-  // ============================================================================
-
-  const renderArrows = useCallback(() => {
-    if (!showArrows) return null;
-
-    return (
-      <>
-        {/* Previous Arrow */}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handlePrev}
-          disabled={!loop && currentIndex === 0}
-          className={cn(
-            'absolute left-2 top-1/2 -translate-y-1/2 z-10',
-            'w-10 h-10 rounded-full',
-            'bg-white dark:bg-gray-800',
-            'shadow-lg hover:shadow-xl',
-            'opacity-0 group-hover:opacity-100 transition-opacity',
-            (!loop && currentIndex === 0) && 'opacity-50 cursor-not-allowed'
-          )}
-          aria-label="Previous slide"
-        >
-          <ChevronLeftIcon className="w-6 h-6" />
-        </Button>
-
-        {/* Next Arrow */}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleNext}
-          disabled={!loop && currentIndex >= maxIndex}
-          className={cn(
-            'absolute right-2 top-1/2 -translate-y-1/2 z-10',
-            'w-10 h-10 rounded-full',
-            'bg-white dark:bg-gray-800',
-            'shadow-lg hover:shadow-xl',
-            'opacity-0 group-hover:opacity-100 transition-opacity',
-            (!loop && currentIndex >= maxIndex) && 'opacity-50 cursor-not-allowed'
-          )}
-          aria-label="Next slide"
-        >
-          <ChevronRightIcon className="w-6 h-6" />
-        </Button>
-      </>
-    );
-  }, [showArrows, handlePrev, handleNext, loop, currentIndex, maxIndex]);
-
-  const renderDots = useCallback(() => {
-    if (!showDots || totalSlides <= itemsVisible) return null;
-
-    const dotsCount = Math.ceil(totalSlides / itemsVisible);
-
-    return (
-      <div className="flex items-center justify-center gap-2 mt-6">
-        {Array.from({ length: dotsCount }).map((_, index) => (
-          <button
-            key={index}
-            onClick={() => handleDotClick(index)}
-            className={cn(
-              'w-2 h-2 rounded-full transition-all',
-              index === currentIndex
-                ? 'bg-blue-600 w-8'
-                : 'bg-gray-300 dark:bg-gray-600 hover:bg-gray-400'
-            )}
-            aria-label={`Go to slide ${index + 1}`}
-            aria-current={index === currentIndex ? 'true' : 'false'}
-          />
-        ))}
-      </div>
-    );
-  }, [showDots, totalSlides, itemsVisible, currentIndex, handleDotClick]);
-
-  const renderPlayPause = useCallback(() => {
-    if (!showPlayPause || totalSlides <= itemsVisible) return null;
-
-    return (
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={toggleAutoPlay}
-        className={cn(
-          'absolute bottom-4 right-4 z-10',
-          'w-10 h-10 rounded-full',
-          'bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm',
-          'shadow-lg hover:shadow-xl',
-          'opacity-0 group-hover:opacity-100 transition-opacity'
-        )}
-        aria-label={isAutoPlaying ? 'Pause auto-play' : 'Start auto-play'}
-      >
-        {isAutoPlaying ? (
-          <PauseIcon className="w-5 h-5" />
-        ) : (
-          <PlayIcon className="w-5 h-5" />
-        )}
-      </Button>
-    );
-  }, [showPlayPause, totalSlides, itemsVisible, isAutoPlaying, toggleAutoPlay]);
+  }, [goToPrev, goToNext]);
 
   // ============================================================================
   // MAIN RENDER
   // ============================================================================
+
 
   if (collections.length === 0) {
     return (
@@ -359,76 +339,146 @@ export const CollectionCarousel: React.FC<CollectionCarouselProps> = ({
     );
   }
 
-  const itemWidth = containerRef.current
-    ? (containerRef.current.offsetWidth - gap * (itemsVisible - 1)) / itemsVisible
-    : 300;
-
-  const slideOffset = -(currentIndex * (itemWidth + gap));
+  // Calculate translateX based on currentIndex and currentItemsPerView
+  const translateX = -state.currentIndex * 100;
 
   return (
-    <div className={cn('relative', className)}>
-      {/* Carousel Container */}
-      <div
-        ref={containerRef}
-        className="group relative overflow-hidden"
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-      >
-        {/* Slides */}
+    <div className={cn('relative w-full', className)}>
+      {/* Main Carousel Wrapper */}
+      <div className="overflow-hidden py-4">
         <motion.div
-          drag="x"
+          className="flex"
+          drag={enableDrag ? 'x' : false}
           dragConstraints={{ left: 0, right: 0 }}
-          dragElastic={0.1}
+          dragElastic={0.9}
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
-          animate={{ x: slideOffset }}
-          transition={{
-            type: 'spring' as const,
-            stiffness: 300,
-            damping: 30,
+          animate={{
+            x: `${translateX}%`,
           }}
-          className={cn(
-            'flex gap-6',
-            isDragging ? 'cursor-grabbing' : 'cursor-grab'
-          )}
-          style={{ gap: `${gap}px` }}
+          transition={{
+            type: 'tween',
+            ease: [0.25, 0.1, 0.25, 1],
+            duration: 0.5,
+          }}
+          style={{
+            cursor: state.isDragging ? 'grabbing' : enableDrag ? 'grab' : 'default',
+          }}
         >
-          {collections.map((collection, index) => (
-            <motion.div
-              key={collection.id}
-              className="flex-shrink-0"
-              style={{ width: `${itemWidth}px` }}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{
-                delay: index * 0.1,
-                type: 'spring' as const,
-                stiffness: 100,
-              }}
-            >
-              <CollectionCard
-                collection={collection}
-                variant={cardVariant}
-                onClick={onCollectionClick}
-                animated={false}
-              />
-            </motion.div>
-          ))}
+          {collections.map((collection) => {
+            if (!collection) return null;
+            const widthPercent = 100 / currentItemsPerView;
+            const gapHalf = gap / 2;
+            const itemStyle = {
+              width: `${widthPercent}%`,
+              paddingLeft: `${gapHalf}px`,
+              paddingRight: `${gapHalf}px`,
+            };
+            return (
+              <div
+                key={collection.id || `collection-${Math.random()}`}
+                className="flex-shrink-0"
+                style={itemStyle}
+                onMouseEnter={() => setState(prev => ({ ...prev, isHovered: true, isPlaying: false }))}
+                onMouseLeave={() => setState(prev => ({ ...prev, isHovered: false, isPlaying: !prev.isPausedByUser }))}
+              >
+                <CollectionCard
+                  collection={collection}
+                  variant={cardVariant}
+                  onClick={onCollectionClick}
+                  animated={false}
+                />
+              </div>
+            );
+          })}
         </motion.div>
-
-        {/* Navigation Arrows */}
-        {renderArrows()}
-
-        {/* Play/Pause Button */}
-        {renderPlayPause()}
       </div>
 
-      {/* Dot Indicators */}
-      {renderDots()}
+      {/* Controls Bar - Bottom Center + Right */}
+      {(showDots || showArrows) && collections.length > 1 && (
+        <div className="relative flex items-center justify-end gap-6 mt-6">
+
+          {/* Pagination Dots & Play/Pause (Grouped, Centered) */}
+          {showDots && (
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-4">
+              {/* Play/Pause Button */}
+              {showPlayPause && (
+                <button
+                  onClick={togglePlayPause}
+                  className="w-8 h-8 p-0 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors"
+                  aria-label={!state.isPlaying ? 'Play auto-scroll' : 'Pause auto-scroll'}
+                >
+                  {!state.isPlaying ? (
+                    <PlayIcon className="w-4 h-4" />
+                  ) : (
+                    <PauseIcon className="w-4 h-4" />
+                  )}
+                </button>
+              )}
+
+              {/* Dots */}
+              <div className="flex items-center gap-2">
+                {[...Array(totalSlides || 0)].map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => goToSlide(index)}
+                    className={cn(
+                      'transition-all duration-200',
+                      'rounded-full',
+                      state.currentIndex === index
+                        ? 'w-8 h-2 bg-primary-600'
+                        : 'w-2 h-2 bg-gray-300 hover:bg-gray-400'
+                    )}
+                    aria-label={`Go to slide ${index + 1}`}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Navigation Arrows */}
+          {showArrows && (
+            <div className="flex items-center gap-3 z-10">
+              <button
+                onClick={goToPrev}
+                disabled={!canGoPrev}
+                className={cn(
+                  'w-10 h-10 rounded-full flex items-center justify-center',
+                  'border border-gray-200 shadow-sm',
+                  'hover:border-primary-500 hover:text-primary-600 hover:shadow-md',
+                  'transition-all duration-200',
+                  canGoPrev
+                    ? 'text-gray-700 cursor-pointer'
+                    : 'text-gray-300 cursor-not-allowed opacity-50'
+                )}
+                aria-label="Previous slide"
+              >
+                <ChevronLeftIcon className="w-5 h-5" />
+              </button>
+              <button
+                onClick={goToNext}
+                disabled={!canGoNext}
+                className={cn(
+                  'w-10 h-10 rounded-full flex items-center justify-center',
+                  'border border-gray-200 shadow-sm',
+                  'hover:border-primary-500 hover:text-primary-600 hover:shadow-md',
+                  'transition-all duration-200',
+                  canGoNext
+                    ? 'text-gray-700 cursor-pointer'
+                    : 'text-gray-300 cursor-not-allowed opacity-50'
+                )}
+                aria-label="Next slide"
+              >
+                <ChevronRightIcon className="w-5 h-5" />
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Accessibility */}
       <div className="sr-only" aria-live="polite" aria-atomic="true">
-        Slide {currentIndex + 1} of {Math.ceil(totalSlides / itemsVisible)}
+        Slide {state.currentIndex + 1} of {totalSlides}
       </div>
     </div>
   );

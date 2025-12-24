@@ -24,7 +24,7 @@ import {
   SparklesIcon,
 } from '@heroicons/react/24/outline';
 import { ShoppingCartIcon as ShoppingCartSolidIcon } from '@heroicons/react/24/solid';
-import { useCart } from '@/contexts/CartContext';
+import { useCart } from '@/components/providers/CartProvider';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Spinner } from '@/components/ui/Spinner';

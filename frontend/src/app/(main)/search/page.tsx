@@ -104,12 +104,12 @@ const MOCK_SEARCH_RESULTS: Product[] = [
     sku: 'BED-001',
     status: 'active' as const,
     categoryId: 'cat-1',
-    category: { 
-      id: 'cat-1', 
-      name: 'Bedsheets', 
-      slug: 'bedsheets', 
-      description: '', 
-      parentId: undefined, 
+    category: {
+      id: 'cat-1',
+      name: 'Bedsheets',
+      slug: 'bedsheets',
+      description: '',
+      parentId: undefined,
       parent: undefined,
       children: [],
       level: 0,
@@ -137,15 +137,15 @@ const MOCK_SEARCH_RESULTS: Product[] = [
       taxable: true,
     },
     inventory: { isInStock: true, quantity: 50, lowStockThreshold: 10, isLowStock: false, availableQuantity: 50, backorderAllowed: false },
-    media: { 
-      images: [{ 
+    media: {
+      images: [{
         id: 'img-bed-1',
-        url: '/images/products/bedsheet-1.jpg', 
-        alt: 'Bedsheet', 
-        width: 800, 
+        url: '/images/products/bedsheet-1.jpg',
+        alt: 'Bedsheet',
+        width: 800,
         height: 800,
-      }], 
-      videos: [], 
+      }],
+      videos: [],
       documents: [],
     },
     rating: { average: 4.5, count: 128, distribution: { 1: 2, 2: 5, 3: 15, 4: 36, 5: 70 } },
@@ -184,12 +184,12 @@ const MOCK_SEARCH_RESULTS: Product[] = [
     sku: 'TWL-002',
     status: 'active' as const,
     categoryId: 'cat-2',
-    category: { 
-      id: 'cat-2', 
-      name: 'Towels', 
-      slug: 'towels', 
-      description: '', 
-      parentId: undefined, 
+    category: {
+      id: 'cat-2',
+      name: 'Towels',
+      slug: 'towels',
+      description: '',
+      parentId: undefined,
       parent: undefined,
       children: [],
       level: 0,
@@ -217,15 +217,15 @@ const MOCK_SEARCH_RESULTS: Product[] = [
       taxable: true,
     },
     inventory: { isInStock: true, quantity: 30, lowStockThreshold: 10, isLowStock: false, availableQuantity: 30, backorderAllowed: false },
-    media: { 
-      images: [{ 
+    media: {
+      images: [{
         id: 'img-towel-1',
-        url: '/images/products/towel-1.jpg', 
-        alt: 'Towel', 
-        width: 800, 
+        url: '/images/products/towel-1.jpg',
+        alt: 'Towel',
+        width: 800,
         height: 800,
-      }], 
-      videos: [], 
+      }],
+      videos: [],
       documents: [],
     },
     rating: { average: 4.7, count: 95, distribution: { 1: 1, 2: 3, 3: 10, 4: 30, 5: 51 } },
@@ -264,12 +264,12 @@ const MOCK_SEARCH_RESULTS: Product[] = [
     sku: 'TBL-003',
     status: 'active' as const,
     categoryId: 'cat-3',
-    category: { 
-      id: 'cat-3', 
-      name: 'Table Linen', 
-      slug: 'table-linen', 
-      description: '', 
-      parentId: undefined, 
+    category: {
+      id: 'cat-3',
+      name: 'Table Linen',
+      slug: 'table-linen',
+      description: '',
+      parentId: undefined,
       parent: undefined,
       children: [],
       level: 0,
@@ -297,15 +297,15 @@ const MOCK_SEARCH_RESULTS: Product[] = [
       taxable: true,
     },
     inventory: { isInStock: true, quantity: 25, lowStockThreshold: 10, isLowStock: false, availableQuantity: 25, backorderAllowed: false },
-    media: { 
-      images: [{ 
+    media: {
+      images: [{
         id: 'img-runner-1',
-        url: '/images/products/runner-1.jpg', 
-        alt: 'Table Runner', 
-        width: 800, 
+        url: '/images/products/runner-1.jpg',
+        alt: 'Table Runner',
+        width: 800,
         height: 800,
-      }], 
-      videos: [], 
+      }],
+      videos: [],
       documents: [],
     },
     rating: { average: 4.8, count: 67, distribution: { 1: 1, 2: 2, 3: 5, 4: 19, 5: 40 } },
@@ -344,7 +344,7 @@ function SearchPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
-  
+
   const initialQuery = searchParams?.get('q') || '';
 
   // State
@@ -379,15 +379,15 @@ function SearchPageContent() {
 
     // Apply category filter
     if (searchState.filters.categories.length > 0) {
-      filtered = filtered.filter(product => 
+      filtered = filtered.filter(product =>
         searchState.filters.categories.includes(typeof product.category === 'string' ? product.category : product.category.name)
       );
     }
 
     // Apply brand filter
     if (searchState.filters.brands.length > 0) {
-      filtered = filtered.filter(product => 
-        searchState.filters.brands.some(brand => 
+      filtered = filtered.filter(product =>
+        searchState.filters.brands.some(brand =>
           product.name.toLowerCase().includes(brand.toLowerCase())
         )
       );
@@ -396,8 +396,8 @@ function SearchPageContent() {
     // Apply price filter
     filtered = filtered.filter(product => {
       const price = product.pricing.salePrice?.amount || product.pricing.basePrice.amount;
-      return price >= searchState.filters.priceRange.min && 
-             price <= searchState.filters.priceRange.max;
+      return price >= searchState.filters.priceRange.min &&
+        price <= searchState.filters.priceRange.max;
     });
 
     // Apply rating filter
@@ -468,7 +468,7 @@ function SearchPageContent() {
     searchState.page * searchState.perPage
   );
 
-  const activeFilterCount = 
+  const activeFilterCount =
     searchState.filters.categories.length +
     searchState.filters.brands.length +
     searchState.filters.ratings.length +
@@ -537,7 +537,7 @@ function SearchPageContent() {
 
   const handleSaveSearch = useCallback(() => {
     if (!searchState.query.trim()) return;
-    
+
     setSavedSearches(prev => {
       if (prev.includes(searchState.query)) return prev;
       return [searchState.query, ...prev].slice(0, 10);
@@ -877,7 +877,7 @@ function SearchPageContent() {
         </div>
       );
     }
-    
+
     if (filteredResults.length === 0) {
       return (
         <EmptyState
@@ -906,7 +906,7 @@ function SearchPageContent() {
             >
               Previous
             </Button>
-            
+
             <div className="flex items-center gap-2">
               {[...Array(totalPages)].map((_, i) => (
                 <Button
@@ -937,15 +937,6 @@ function SearchPageContent() {
     <>
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Breadcrumbs */}
-          <Breadcrumbs
-            items={[
-              { label: 'Home', href: '/' },
-              { label: 'Search', href: '/search' },
-              { label: searchState.query || 'Results', href: '#' },
-            ]}
-            className="mb-6"
-          />
 
           {/* Header */}
           <div className="mb-8">
@@ -1011,7 +1002,7 @@ function SearchPageContent() {
                     </Badge>
                   )}
                 </Button>
-                
+
                 {/* Advanced Filters Toggle with unused icons */}
                 <Tooltip content="Advanced search options">
                   <Button
@@ -1041,7 +1032,7 @@ function SearchPageContent() {
                     </motion.div>
                   </AnimatePresence>
                 )}
-                
+
                 <Tooltip content="View mode">
                   <div className="flex items-center gap-1 border border-gray-300 rounded-lg p-1">
                     <button

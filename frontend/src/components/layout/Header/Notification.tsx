@@ -28,16 +28,16 @@ export interface NotificationProps {
   refreshInterval?: number;
 }
 
-export type NotificationType = 
-  | 'order' 
-  | 'shipping' 
-  | 'promotion' 
-  | 'account' 
-  | 'system' 
-  | 'wishlist' 
-  | 'review' 
-  | 'payment' 
-  | 'social' 
+export type NotificationType =
+  | 'order'
+  | 'shipping'
+  | 'promotion'
+  | 'account'
+  | 'system'
+  | 'wishlist'
+  | 'review'
+  | 'payment'
+  | 'social'
   | 'announcement';
 
 export type NotificationPriority = 'low' | 'medium' | 'high' | 'urgent';
@@ -175,12 +175,11 @@ const Notification: React.FC<NotificationProps> = ({
   };
 
   const getNotificationIcon = (type: NotificationType, priority: NotificationPriority) => {
-    const iconClass = `w-5 h-5 ${
-      priority === 'urgent' ? 'text-red-500' :
-      priority === 'high' ? 'text-orange-500' :
-      priority === 'medium' ? 'text-blue-500' :
-      'text-gray-500'
-    }`;
+    const iconClass = `w-5 h-5 ${priority === 'urgent' ? 'text-red-500' :
+        priority === 'high' ? 'text-orange-500' :
+          priority === 'medium' ? 'text-blue-500' :
+            'text-gray-500'
+      }`;
 
     const icons = {
       order: <ShoppingBagIcon className={iconClass} />,
@@ -257,7 +256,7 @@ const Notification: React.FC<NotificationProps> = ({
       {/* Notification Bell Button */}
       <motion.button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors duration-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        className="relative p-2 text-gray-900 hover:text-primary transition-colors duration-200 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
         variants={bellVariants}
         animate={animateBell ? 'ring' : 'idle'}
         whileHover={{ scale: 1.05 }}
@@ -266,7 +265,7 @@ const Notification: React.FC<NotificationProps> = ({
         aria-expanded={isOpen}
       >
         {notificationState.unreadCount > 0 ? (
-          <BellSolidIcon className="w-6 h-6 text-blue-500" />
+          <BellSolidIcon className="w-6 h-6 text-primary" />
         ) : (
           <BellIcon className="w-6 h-6" />
         )}
@@ -308,27 +307,27 @@ const Notification: React.FC<NotificationProps> = ({
               initial="hidden"
               animate="visible"
               exit="hidden"
-              className="absolute right-0 top-full mt-2 w-96 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 z-50"
+              className="absolute right-0 top-full mt-2 w-96 bg-white rounded-lg shadow-xl border border-gray-200 z-50"
             >
               {/* Header */}
-              <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+              <div className="p-4 border-b border-gray-200">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
-                    <BellIcon className="w-5 h-5 text-blue-500 mr-2" />
+                  <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                    <BellIcon className="w-5 h-5 text-primary mr-2" />
                     Notifications
                   </h3>
                   <div className="flex items-center space-x-2">
                     {notificationState.unreadCount > 0 && (
                       <button
                         onClick={markAllAsRead}
-                        className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+                        className="text-xs text-primary hover:text-primary-700 transition-colors"
                       >
                         Mark all read
                       </button>
                     )}
                     <button
                       onClick={() => setIsOpen(false)}
-                      className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                      className="text-gray-400 hover:text-gray-600 transition-colors"
                       aria-label="Close notifications"
                     >
                       <XMarkIcon className="w-5 h-5" />
@@ -336,7 +335,7 @@ const Notification: React.FC<NotificationProps> = ({
                   </div>
                 </div>
                 {notificationState.unreadCount > 0 && (
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  <p className="text-sm text-gray-600 mt-1">
                     {notificationState.unreadCount} unread notification{notificationState.unreadCount === 1 ? '' : 's'}
                   </p>
                 )}
@@ -346,9 +345,9 @@ const Notification: React.FC<NotificationProps> = ({
               <div className="max-h-96 overflow-y-auto">
                 {notificationState.items.length === 0 ? (
                   <div className="p-8 text-center">
-                    <BellIcon className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-                    <p className="text-gray-600 dark:text-gray-400 mb-2">No notifications</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-500">
+                    <BellIcon className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                    <p className="text-gray-600 mb-2">No notifications</p>
+                    <p className="text-sm text-gray-500">
                       You&apos;re all caught up! We&apos;ll notify you when something new happens.
                     </p>
                   </div>
@@ -364,9 +363,9 @@ const Notification: React.FC<NotificationProps> = ({
                           exit="exit"
                           className={`
                             relative p-3 rounded-lg border mb-2 transition-all duration-200 cursor-pointer
-                            ${!notification.isRead 
-                              ? 'border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20' 
-                              : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                            ${!notification.isRead
+                              ? 'border-primary-200 bg-primary-50'
+                              : 'border-gray-200 hover:bg-gray-50'
                             }
                             ${getPriorityColor(notification.priority)}
                           `}
@@ -374,7 +373,7 @@ const Notification: React.FC<NotificationProps> = ({
                         >
                           {/* New indicator */}
                           {notification.isNew && (
-                            <div className="absolute top-2 right-2 w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                            <div className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full animate-pulse" />
                           )}
 
                           <div className="flex items-start space-x-3">
@@ -386,11 +385,11 @@ const Notification: React.FC<NotificationProps> = ({
                             {/* Notification Content */}
                             <div className="flex-1 min-w-0">
                               <div className="flex items-start justify-between">
-                                <h4 className="text-sm font-medium text-gray-900 dark:text-white">
+                                <h4 className="text-sm font-medium text-gray-900">
                                   {notification.title}
                                 </h4>
                                 <div className="flex items-center space-x-1 ml-2">
-                                  <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center">
+                                  <span className="text-xs text-gray-500 flex items-center">
                                     <ClockIcon className="w-3 h-3 mr-1" />
                                     {formatTimeAgo(notification.timestamp)}
                                   </span>
@@ -407,7 +406,7 @@ const Notification: React.FC<NotificationProps> = ({
                                 </div>
                               </div>
 
-                              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                              <p className="text-sm text-gray-600 mt-1">
                                 {notification.message}
                               </p>
 
@@ -416,7 +415,7 @@ const Notification: React.FC<NotificationProps> = ({
                                 <div className="mt-2">
                                   <Link
                                     href={notification.actionUrl}
-                                    className="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+                                    className="inline-flex items-center text-sm font-medium text-primary hover:text-primary-700 transition-colors"
                                     onClick={() => setIsOpen(false)}
                                   >
                                     {notification.actionText}
@@ -429,7 +428,7 @@ const Notification: React.FC<NotificationProps> = ({
 
                               {/* Metadata */}
                               {notification.metadata && (
-                                <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                                <div className="mt-2 text-xs text-gray-500">
                                   {notification.type === 'order' && notification.metadata.orderId && (
                                     <span>Order #{notification.metadata.orderId}</span>
                                   )}
@@ -452,14 +451,14 @@ const Notification: React.FC<NotificationProps> = ({
 
               {/* Footer */}
               {notificationState.items.length > 0 && (
-                <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
+                <div className="p-4 border-t border-gray-200 bg-gray-50">
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                    <span className="text-sm text-gray-600">
                       Last updated {formatTimeAgo(notificationState.lastUpdated)}
                     </span>
                     <button
                       onClick={clearAllNotifications}
-                      className="text-xs text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors"
+                      className="text-xs text-red-600 hover:text-red-700 transition-colors"
                     >
                       Clear all
                     </button>
@@ -468,14 +467,14 @@ const Notification: React.FC<NotificationProps> = ({
                   <div className="space-y-2">
                     <Link
                       href="/account/notifications"
-                      className="w-full bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-center block"
+                      className="w-full bg-gray-200 text-gray-900 py-2 px-4 rounded-lg text-sm font-medium hover:bg-gray-300 transition-colors text-center block"
                       onClick={() => setIsOpen(false)}
                     >
                       View All Notifications
                     </Link>
                     <Link
                       href="/account/notifications"
-                      className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors text-center block"
+                      className="w-full bg-primary hover:bg-primary-600 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors text-center block"
                       onClick={() => setIsOpen(false)}
                     >
                       Notification Settings

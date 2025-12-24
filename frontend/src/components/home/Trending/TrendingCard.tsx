@@ -59,7 +59,7 @@ export interface TrendingProduct {
   price: number;
   originalPrice?: number;
   image: string;
-  category: string;
+  category: string | { _id: string; name: string; slug: string };
   rating?: number;
   reviewCount?: number;
   stock: number;
@@ -417,7 +417,11 @@ export const TrendingCard: React.FC<TrendingCardProps> = ({
           <div className={cn('p-4', compact && 'p-3')}>
             {/* Category */}
             <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">
-              {product.category}
+              {typeof product.category === 'object' && product.category?.name
+                ? product.category.name
+                : typeof product.category === 'string'
+                  ? product.category
+                  : 'Product'}
             </div>
 
             {/* Product Name */}
@@ -460,7 +464,7 @@ export const TrendingCard: React.FC<TrendingCardProps> = ({
                   compact ? 'text-lg' : 'text-xl'
                 )}
               >
-                ₹{product.price.toLocaleString()}
+                ₹{(product.price || 0).toLocaleString()}
               </span>
               {hasDiscount && (
                 <span className="text-sm text-gray-500 line-through">

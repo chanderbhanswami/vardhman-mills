@@ -109,7 +109,7 @@ const Footer: React.FC<FooterProps> = ({
 
   if (variant === 'minimal') {
     return (
-      <footer className={`bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 ${className}`}>
+      <footer className={`bg-gray-900 text-white border-t border-gray-800 ${className}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
             <Logo variant="minimal" />
@@ -126,7 +126,7 @@ const Footer: React.FC<FooterProps> = ({
       <motion.footer
         id="main-footer"
         className={`
-          bg-background border-t border-border
+          bg-gray-900 text-white
           ${className}
         `}
         variants={containerVariants}
@@ -136,7 +136,7 @@ const Footer: React.FC<FooterProps> = ({
         {/* Newsletter Section */}
         <motion.div
           variants={itemVariants}
-          className="bg-muted/30 border-b border-border"
+          className="bg-gray-50 border-b border-gray-200"
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <NewsletterSignup />
@@ -144,29 +144,29 @@ const Footer: React.FC<FooterProps> = ({
         </motion.div>
 
         {/* Main Footer Content */}
-        <div className="bg-background">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
-              {/* Company Information */}
-              <motion.div variants={itemVariants} className="lg:col-span-1 space-y-6">
+        <div className="bg-gray-900">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-8">
+              {/* Company Information - Wider column */}
+              <motion.div variants={itemVariants} className="lg:col-span-4 space-y-6 pr-0 lg:pr-8">
                 <CompanyInfo />
                 <ContactInfo variant="compact" />
               </motion.div>
 
-              {/* Quick Links */}
-              <motion.div variants={itemVariants} className="space-y-6">
+              {/* Quick Links - Narrower column */}
+              <motion.div variants={itemVariants} className="lg:col-span-2 space-y-6">
                 <QuickLinks />
               </motion.div>
 
-              {/* Customer Service */}
-              <motion.div variants={itemVariants} className="space-y-6">
+              {/* Customer Service - Medium column */}
+              <motion.div variants={itemVariants} className="lg:col-span-3 space-y-6">
                 <CustomerService />
               </motion.div>
 
-              {/* Social & Certifications */}
-              <motion.div variants={itemVariants} className="space-y-8">
-                <SocialLinks />
-                <CertificationBadges />
+              {/* Social & Certifications - Medium column */}
+              <motion.div variants={itemVariants} className="lg:col-span-3 space-y-6">
+                <SocialLinks variant="horizontal" />
+                <CertificationBadges variant="minimal" />
               </motion.div>
             </div>
           </div>
@@ -175,7 +175,7 @@ const Footer: React.FC<FooterProps> = ({
         {/* Bottom Footer */}
         <motion.div
           variants={itemVariants}
-          className="bg-muted/20 border-t border-border"
+          className="bg-gray-950 border-t border-gray-800"
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="flex flex-col md:flex-row items-center justify-between gap-6">
@@ -186,12 +186,12 @@ const Footer: React.FC<FooterProps> = ({
 
               {/* Payment Methods */}
               <div className="w-full md:w-auto flex justify-center md:justify-end">
-                <PaymentMethods />
+                <PaymentMethods variant="icons-only" />
               </div>
             </div>
 
             {/* Copyright */}
-            <div className="mt-8 pt-8 border-t border-border text-center">
+            <div className="mt-8 pt-8 border-t border-gray-800 text-center">
               <Copyright />
             </div>
           </div>
@@ -210,7 +210,7 @@ const Footer: React.FC<FooterProps> = ({
             onClick={scrollToTop}
             className="
               fixed bottom-6 right-6 z-50 
-              w-12 h-12 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600
+              w-12 h-12 bg-blue-600 hover:bg-blue-700
               text-white rounded-full shadow-lg hover:shadow-xl
               transition-all duration-200 ease-in-out
               focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2

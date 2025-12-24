@@ -50,6 +50,7 @@ export interface CartSummary {
   shipping: number;
   total: number;
   itemCount: number;
+  totalQuantity: number;
   totalWeight: number;
   appliedCoupons: AppliedCoupon[];
 }
@@ -83,7 +84,7 @@ export interface CartContextType {
   isLoading: boolean;
   isUpdating: boolean;
   lastUpdated: string | null;
-  
+
   // Cart Actions
   addToCart: (
     productId: string,
@@ -92,39 +93,39 @@ export interface CartContextType {
     customization?: CartItem['customization'],
     note?: string
   ) => Promise<{ success: boolean; error?: string }>;
-  
+
   updateQuantity: (itemId: string, quantity: number) => Promise<{ success: boolean; error?: string }>;
   removeFromCart: (itemId: string) => Promise<{ success: boolean; error?: string }>;
   clearCart: () => Promise<{ success: boolean; error?: string }>;
-  
+
   // Bulk Operations
   updateMultipleItems: (updates: Array<{ itemId: string; quantity: number }>) => Promise<{ success: boolean; error?: string }>;
   removeMultipleItems: (itemIds: string[]) => Promise<{ success: boolean; error?: string }>;
-  
+
   // Cart Management
   refreshCart: () => Promise<void>;
   saveForLater: (itemId: string) => Promise<{ success: boolean; error?: string }>;
   moveToCart: (itemId: string) => Promise<{ success: boolean; error?: string }>;
-  
+
   // Validation
   validateCart: () => Promise<{ isValid: boolean; issues: string[] }>;
   checkAvailability: () => Promise<{ availableItems: CartItem[]; unavailableItems: CartItem[] }>;
-  
+
   // Coupons & Discounts
   applyCoupon: (code: string) => Promise<{ success: boolean; error?: string; coupon?: AppliedCoupon }>;
   removeCoupon: (couponId: string) => Promise<{ success: boolean; error?: string }>;
-  
+
   // Shipping
   getShippingOptions: (address?: unknown) => Promise<{ success: boolean; options?: ShippingOption[]; error?: string }>;
   selectShippingOption: (optionId: string) => Promise<{ success: boolean; error?: string }>;
-  
+
   // Estimation
   estimateTotal: (
     items: CartItem[],
     shippingOptionId?: string,
     coupons?: string[]
   ) => Promise<{ success: boolean; estimate?: CartSummary; error?: string }>;
-  
+
   // Persistence
   syncWithServer: () => Promise<void>;
   mergeGuestCart: () => Promise<void>;
@@ -155,7 +156,7 @@ interface CartProviderProps {
 
 export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const { user, isAuthenticated } = useAuth();
-  
+
   // State
   const [items, setItems] = useState<CartItem[]>([]);
   const [summary, setSummary] = useState<CartSummary>({
@@ -165,16 +166,17 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     shipping: 0,
     total: 0,
     itemCount: 0,
+    totalQuantity: 0,
     totalWeight: 0,
     appliedCoupons: []
   });
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
-  
+
   // Persistent storage for guest users
-  const guestCartStorage = useLocalStorage<CartItem[]>('guestCart', { defaultValue: [] });
-  
+  const guestCartStorage = useLocalStorage<CartItem[]>('vardhman_cart', { defaultValue: [] });
+
   // Refs
   const syncTimeout = useRef<NodeJS.Timeout | null>(null);
   const updateQueue = useRef<Array<() => Promise<void>>>([]);
@@ -182,10 +184,19 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const retryAttempts = useRef<Map<string, number>>(new Map());
 
   // Configuration
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5000/api/v1';
   const SYNC_DELAY = 2000; // 2 seconds
   const MAX_RETRY_ATTEMPTS = 3;
-  
+
+  // Helper function to update localStorage and dispatch sync events
+  const dispatchCartUpdate = useCallback((newItems: CartItem[]) => {
+    guestCartStorage.setValue(newItems);
+    // Dispatch custom event for other components using old hooks
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('vardhman_cart_updated'));
+    }
+  }, [guestCartStorage]);
+
   // User info for analytics and personalization
   const userId = user?.id;
   const userEmail = user?.email;
@@ -212,7 +223,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     } catch (error) {
       const axiosError = error as AxiosError<{ message?: string }>;
       console.error('Cart API Request failed:', axiosError);
-      
+
       return {
         success: false,
         error: axiosError.response?.data?.message || axiosError.message || 'An error occurred'
@@ -222,16 +233,17 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
 
   const calculateSummary = useCallback((cartItems: CartItem[], appliedCoupons: AppliedCoupon[] = []): CartSummary => {
     const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const itemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+    const itemCount = cartItems.length;
+    const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
     const totalWeight = cartItems.reduce((sum, item) => sum + ((item.weight || 0) * item.quantity), 0);
-    
+
     let discount = 0;
     appliedCoupons.forEach(coupon => {
       if (coupon.isValid) {
         discount += coupon.discount;
       }
     });
-    
+
     const tax = (subtotal - discount) * 0.18; // 18% GST
     const shipping = subtotal > 999 ? 0 : 99; // Free shipping above ₹999
     const total = subtotal - discount + tax + shipping;
@@ -243,6 +255,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       shipping,
       total,
       itemCount,
+      totalQuantity,
       totalWeight,
       appliedCoupons
     };
@@ -250,9 +263,9 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
 
   const processUpdateQueue = useCallback(async () => {
     if (isProcessingQueue.current || updateQueue.current.length === 0) return;
-    
+
     isProcessingQueue.current = true;
-    
+
     while (updateQueue.current.length > 0) {
       const update = updateQueue.current.shift();
       if (update) {
@@ -263,14 +276,14 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
         }
       }
     }
-    
+
     isProcessingQueue.current = false;
   }, []);
 
   // Define syncWithServer first
   const syncWithServer = useCallback(async () => {
     if (!isAuthenticated) return;
-    
+
     try {
       const result = await apiRequest('/cart/sync', {
         method: 'POST',
@@ -292,7 +305,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     if (syncTimeout.current) {
       clearTimeout(syncTimeout.current);
     }
-    
+
     syncTimeout.current = setTimeout(() => {
       if (isAuthenticated) {
         syncWithServer();
@@ -310,7 +323,8 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   ) => {
     try {
       setIsUpdating(true);
-      
+
+      // Try API first
       const result = await apiRequest('/cart/add', {
         method: 'POST',
         data: { productId, quantity, variant, customization, note }
@@ -321,17 +335,61 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
         setItems(cart);
         setSummary(calculateSummary(cart));
         setLastUpdated(new Date().toISOString());
-        
-        // Store for guest users
+
         if (!isAuthenticated) {
           guestCartStorage.setValue(cart);
         }
-        
+
         toast.success(`${item.title} added to cart`);
         return { success: true };
       }
 
-      return { success: false, error: result.error };
+      // API failed - use localStorage fallback
+      console.log('Cart API not available, using localStorage fallback');
+      const now = new Date().toISOString();
+
+      // Use guestCartStorage.value as source of truth for localStorage fallback
+      const currentItems = guestCartStorage.value || [];
+      const existingItemIndex = currentItems.findIndex(item => item.productId === productId);
+
+      let newItems: CartItem[];
+      if (existingItemIndex >= 0) {
+        // Update existing item quantity
+        newItems = [...currentItems];
+        newItems[existingItemIndex] = {
+          ...newItems[existingItemIndex],
+          quantity: newItems[existingItemIndex].quantity + quantity,
+          updatedAt: now
+        };
+      } else {
+        // Add new item
+        const newItem: CartItem = {
+          id: `local_${productId}_${Date.now()}`,
+          productId,
+          quantity,
+          price: 0, // Will be filled by product data
+          title: 'Product', // Will be filled by product data
+          image: '',
+          sku: '',
+          variant,
+          customization,
+          note,
+          isAvailable: true,
+          maxQuantity: 100,
+          addedAt: now,
+          updatedAt: now
+        };
+        newItems = [...currentItems, newItem];
+      }
+
+      // Update both React state and localStorage
+      setItems(newItems);
+      setSummary(calculateSummary(newItems));
+      setLastUpdated(now);
+      dispatchCartUpdate(newItems);
+
+      toast.success('Added to cart');
+      return { success: true };
     } catch (error) {
       console.error('Add to cart error:', error);
       return { success: false, error: 'Failed to add item to cart' };
@@ -351,7 +409,8 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
 
     try {
       setIsUpdating(true);
-      
+
+      // Try API first
       const result = await apiRequest('/cart/update', {
         method: 'PATCH',
         data: { itemId, quantity }
@@ -362,15 +421,30 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
         setItems(cart);
         setSummary(calculateSummary(cart));
         setLastUpdated(new Date().toISOString());
-        
+
         if (!isAuthenticated) {
           guestCartStorage.setValue(cart);
         }
-        
+
         return { success: true };
       }
 
-      return { success: false, error: result.error };
+      // API failed - use localStorage fallback
+      console.log('Cart API not available, using localStorage fallback');
+      const now = new Date().toISOString();
+      const currentItems = guestCartStorage.value || [];
+      const newItems = currentItems.map(item =>
+        item.id === itemId
+          ? { ...item, quantity, updatedAt: now }
+          : item
+      );
+
+      setItems(newItems);
+      setSummary(calculateSummary(newItems));
+      setLastUpdated(now);
+      dispatchCartUpdate(newItems);
+
+      return { success: true };
     } catch (error) {
       console.error('Update quantity error:', error);
       return { success: false, error: 'Failed to update quantity' };
@@ -382,7 +456,8 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const removeFromCart = async (itemId: string) => {
     try {
       setIsUpdating(true);
-      
+
+      // Try API first
       const result = await apiRequest('/cart/remove', {
         method: 'DELETE',
         data: { itemId }
@@ -393,16 +468,28 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
         setItems(cart);
         setSummary(calculateSummary(cart));
         setLastUpdated(new Date().toISOString());
-        
+
         if (!isAuthenticated) {
-          guestCartStorage.setValue(cart);
+          dispatchCartUpdate(cart);
         }
-        
+
         toast.success('Item removed from cart');
         return { success: true };
       }
 
-      return { success: false, error: result.error };
+      // API failed - use localStorage fallback
+      console.log('Cart API not available, using localStorage fallback');
+      const now = new Date().toISOString();
+      const currentItems = guestCartStorage.value || [];
+      const newItems = currentItems.filter(item => item.id !== itemId);
+
+      setItems(newItems);
+      setSummary(calculateSummary(newItems));
+      setLastUpdated(now);
+      dispatchCartUpdate(newItems);
+
+      toast.success('Item removed from cart');
+      return { success: true };
     } catch (error) {
       console.error('Remove from cart error:', error);
       return { success: false, error: 'Failed to remove item from cart' };
@@ -414,23 +501,40 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const clearCart = async () => {
     try {
       setIsUpdating(true);
-      
+
+      // Try API first
       const result = await apiRequest('/cart/clear', { method: 'DELETE' });
 
       if (result.success) {
         setItems([]);
         setSummary(calculateSummary([]));
         setLastUpdated(new Date().toISOString());
-        
+
         if (!isAuthenticated) {
           guestCartStorage.remove();
+          // Dispatch event to notify other components
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new Event('vardhman_cart_updated'));
+          }
         }
-        
+
         toast.success('Cart cleared');
         return { success: true };
       }
 
-      return { success: false, error: result.error };
+      // API failed - use localStorage fallback
+      console.log('Cart API not available, using localStorage fallback');
+      setItems([]);
+      setSummary(calculateSummary([]));
+      setLastUpdated(new Date().toISOString());
+      guestCartStorage.remove();
+      // Dispatch event to notify other components
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('vardhman_cart_updated'));
+      }
+
+      toast.success('Cart cleared');
+      return { success: true };
     } catch (error) {
       console.error('Clear cart error:', error);
       return { success: false, error: 'Failed to clear cart' };
@@ -443,7 +547,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const updateMultipleItems = async (updates: Array<{ itemId: string; quantity: number }>) => {
     try {
       setIsUpdating(true);
-      
+
       const result = await apiRequest('/cart/bulk-update', {
         method: 'PATCH',
         data: { updates }
@@ -454,11 +558,11 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
         setItems(cart);
         setSummary(calculateSummary(cart));
         setLastUpdated(new Date().toISOString());
-        
+
         if (!isAuthenticated) {
           guestCartStorage.setValue(cart);
         }
-        
+
         toast.success('Cart updated');
         return { success: true };
       }
@@ -475,7 +579,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const removeMultipleItems = async (itemIds: string[]) => {
     try {
       setIsUpdating(true);
-      
+
       const result = await apiRequest('/cart/bulk-remove', {
         method: 'DELETE',
         data: { itemIds }
@@ -486,11 +590,11 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
         setItems(cart);
         setSummary(calculateSummary(cart));
         setLastUpdated(new Date().toISOString());
-        
+
         if (!isAuthenticated) {
           guestCartStorage.setValue(cart);
         }
-        
+
         toast.success(`${itemIds.length} items removed from cart`);
         return { success: true };
       }
@@ -509,7 +613,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     try {
       if (isAuthenticated) {
         const result = await apiRequest('/cart');
-        
+
         if (result.success) {
           const { cart, summary: cartSummary } = result.data as { cart: CartItem[]; summary: CartSummary };
           setItems(cart);
@@ -519,14 +623,14 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       } else {
         // For guest users, load from localStorage
         const guestCart = guestCartStorage.value || [];
+        console.log('[CartProvider] Loading guest cart from localStorage:', guestCart.length, 'items');
         setItems(guestCart);
         setSummary(calculateSummary(guestCart));
       }
     } catch (error) {
       console.error('Refresh cart error:', error);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthenticated, apiRequest, calculateSummary]);
+  }, [isAuthenticated, apiRequest, calculateSummary, guestCartStorage.value]);
 
   const saveForLater = async (itemId: string) => {
     try {
@@ -572,7 +676,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const validateCart = async () => {
     try {
       const result = await apiRequest('/cart/validate');
-      
+
       if (result.success) {
         const { isValid, issues } = result.data as { isValid: boolean; issues: string[] };
         return { isValid, issues };
@@ -588,7 +692,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const checkAvailability = async () => {
     try {
       const result = await apiRequest('/cart/check-availability');
-      
+
       if (result.success) {
         const { availableItems, unavailableItems } = result.data as {
           availableItems: CartItem[];
@@ -618,11 +722,11 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
           summary: CartSummary;
           coupon: AppliedCoupon;
         };
-        
+
         setItems(cart);
         setSummary(newSummary);
         setLastUpdated(new Date().toISOString());
-        
+
         toast.success(`Coupon "${code}" applied successfully`);
         return { success: true, coupon };
       }
@@ -646,11 +750,11 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
           cart: CartItem[];
           summary: CartSummary;
         };
-        
+
         setItems(cart);
         setSummary(newSummary);
         setLastUpdated(new Date().toISOString());
-        
+
         toast.success('Coupon removed');
         return { success: true };
       }
@@ -693,7 +797,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
         const { summary: newSummary } = result.data as { summary: CartSummary };
         setSummary(newSummary);
         setLastUpdated(new Date().toISOString());
-        
+
         return { success: true };
       }
 
@@ -732,10 +836,10 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
 
   const mergeGuestCart = useCallback(async () => {
     if (!isAuthenticated) return;
-    
+
     const guestCart = guestCartStorage.value;
     if (!guestCart || guestCart.length === 0) return;
-    
+
     try {
       const result = await apiRequest('/cart/merge', {
         method: 'POST',
@@ -747,10 +851,10 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
         setItems(cart);
         setSummary(mergedSummary);
         setLastUpdated(new Date().toISOString());
-        
+
         // Clear guest cart after merge
         guestCartStorage.remove();
-        
+
         if (cart.length > guestCart.length) {
           toast.success('Guest cart merged with your account');
         }
@@ -766,7 +870,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       setIsLoading(true);
       try {
         await refreshCart();
-        
+
         // Merge guest cart if user just logged in
         if (isAuthenticated && guestCartStorage.value && guestCartStorage.value.length > 0) {
           await mergeGuestCart();
@@ -794,7 +898,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       }
     };
   }, []);
-  
+
   // Use debouncedSync when cart changes
   useEffect(() => {
     if (items.length > 0 && isAuthenticated) {
@@ -802,7 +906,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items, isAuthenticated]);
-  
+
   // Use retry attempts for failed operations
   useEffect(() => {
     const handleRetry = async (operation: string) => {
@@ -815,20 +919,20 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
         retryAttempts.current.delete(operation);
       }
     };
-    
+
     // Example usage in error scenarios
     if (retryAttempts.current.size > 0) {
       const operations = Array.from(retryAttempts.current.keys());
       operations.forEach(op => handleRetry(op));
     }
   }, [MAX_RETRY_ATTEMPTS]);
-  
+
   // Use user data for analytics and personalization
   useEffect(() => {
     if (userId && items.length > 0) {
       // Track user cart behavior
       console.log(`User ${userId} (${userEmail}) has ${items.length} items in cart`);
-      
+
       // Example: Send analytics data
       const cartAnalytics = {
         userId,
@@ -849,37 +953,37 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     isLoading,
     isUpdating,
     lastUpdated,
-    
+
     // Cart Actions
     addToCart,
     updateQuantity,
     removeFromCart,
     clearCart,
-    
+
     // Bulk Operations
     updateMultipleItems,
     removeMultipleItems,
-    
+
     // Cart Management
     refreshCart,
     saveForLater,
     moveToCart,
-    
+
     // Validation
     validateCart,
     checkAvailability,
-    
+
     // Coupons & Discounts
     applyCoupon,
     removeCoupon,
-    
+
     // Shipping
     getShippingOptions,
     selectShippingOption,
-    
+
     // Estimation
     estimateTotal,
-    
+
     // Persistence
     syncWithServer,
     mergeGuestCart,

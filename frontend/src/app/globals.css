@@ -82,3 +82,23 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Global cursor-pointer fixes for interactive elements */
+@layer components {
+  button,
+  [role="button"],
+  input[type="submit"],
+  input[type="button"],
+  input[type="reset"],
+  a[href],
+  select,
+  summary,
+  [tabindex]:not([tabindex="-1"]) {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [role="button"]:disabled {
+    cursor: not-allowed;
+  }
+}

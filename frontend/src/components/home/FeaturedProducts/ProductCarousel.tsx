@@ -17,6 +17,7 @@
  * - Multiple items per view
  * - Gap between items
  * - Smooth transitions
+ * - Cart and wishlist integration
  * 
  * @component
  */
@@ -24,20 +25,20 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
+import { motion, PanInfo } from 'framer-motion';
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
   PlayIcon,
   PauseIcon,
-  ArrowPathIcon,
 } from '@heroicons/react/24/outline';
-import { Button } from '@/components/ui/Button';
-import { Tooltip } from '@/components/ui/Tooltip';
-import { Badge } from '@/components/ui/Badge';
 import { cn } from '@/lib/utils/utils';
 import { FeaturedCard } from './FeaturedCard';
+import { useCart } from '@/components/providers/CartProvider';
+import { useWishlist } from '@/components/providers/WishlistProvider';
+import { toast } from 'react-hot-toast';
 import type { Product } from '@/types/product.types';
+import { QuickView } from '@/components/products/QuickView';
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -88,6 +89,8 @@ export interface ProductCarouselProps {
 interface CarouselState {
   currentIndex: number;
   isPlaying: boolean;
+  isPausedByUser: boolean;
+  isHovered: boolean;
   isDragging: boolean;
   direction: 'left' | 'right';
 }
@@ -129,6 +132,108 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
   onSlideChange,
   onProductClick,
 }) => {
+  // Helper to get product ID (handles both id and _id from MongoDB)
+  const getProductId = (product: Product): string => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return product.id || (product as any)._id || '';
+  };
+
+  // ============================================================================
+  // HOOKS - Cart and Wishlist (using global providers)
+  // ============================================================================
+
+  const {
+    items: cartItems,
+    addToCart,
+    updateQuantity,
+    removeFromCart,
+  } = useCart();
+
+  const { isInWishlist, addToWishlist, removeFromWishlist, items: wishlistItems } = useWishlist();
+
+  // QuickView state
+  const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
+  const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+
+  // Helper functions for cart state
+  const hasCartItem = useCallback((productId: string): boolean => {
+    return cartItems.some(item => item.productId === productId);
+  }, [cartItems]);
+
+  const getItemQuantity = useCallback((productId: string): number => {
+    const item = cartItems.find(item => item.productId === productId);
+    return item?.quantity || 0;
+  }, [cartItems]);
+
+  const getCartItemId = useCallback((productId: string): string | undefined => {
+    const item = cartItems.find(item => item.productId === productId);
+    return item?.id;
+  }, [cartItems]);
+
+  // Helper for wishlist
+  const getWishlistItemId = useCallback((productId: string): string | undefined => {
+    const item = wishlistItems.find(item => item.productId === productId);
+    return item?.id;
+  }, [wishlistItems]);
+
+  // ============================================================================
+  // CART HANDLERS (using provider)
+  // ============================================================================
+
+  const handleAddToCart = useCallback(async (product: Product, quantity: number) => {
+    try {
+      const productId = getProductId(product);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const variant = (product as any).variants?.[0];
+
+      const result = await addToCart(productId, quantity, variant ? {
+        color: variant.color,
+        size: variant.size,
+        material: variant.material,
+      } : undefined);
+
+      if (!result.success) {
+        toast.error(result.error || 'Failed to add to cart');
+      }
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      toast.error('Failed to add to cart');
+    }
+  }, [addToCart, getProductId]);
+
+  const handleUpdateCartQuantity = useCallback(async (product: Product, quantity: number) => {
+    const productId = getProductId(product);
+    const itemId = getCartItemId(productId);
+    if (itemId) {
+      await updateQuantity(itemId, quantity);
+    }
+  }, [updateQuantity, getProductId, getCartItemId]);
+
+  const handleRemoveFromCart = useCallback(async (product: Product) => {
+    const productId = getProductId(product);
+    const itemId = getCartItemId(productId);
+    if (itemId) {
+      await removeFromCart(itemId);
+    }
+  }, [removeFromCart, getProductId, getCartItemId]);
+
+  // ============================================================================
+  // WISHLIST HANDLERS (using provider)
+  // ============================================================================
+
+  const handleAddToWishlist = useCallback(async (product: Product) => {
+    const productId = getProductId(product);
+    await addToWishlist(productId);
+  }, [addToWishlist, getProductId]);
+
+  const handleRemoveFromWishlist = useCallback(async (product: Product) => {
+    const productId = getProductId(product);
+    const itemId = getWishlistItemId(productId);
+    if (itemId) {
+      await removeFromWishlist(itemId);
+    }
+  }, [removeFromWishlist, getProductId, getWishlistItemId]);
+
   // ============================================================================
   // STATE
   // ============================================================================
@@ -136,18 +241,15 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
   const [state, setState] = useState<CarouselState>({
     currentIndex: 0,
     isPlaying: autoPlay,
+    isPausedByUser: !autoPlay,
+    isHovered: false,
     isDragging: false,
     direction: 'right',
   });
 
   const [currentItemsPerView, setCurrentItemsPerView] = useState(itemsPerView.desktop);
-  const [hoveredDot, setHoveredDot] = useState<number | null>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
   const autoPlayTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const dragX = useMotionValue(0);
-
-  // Transform drag value for smooth animations
-  const dragOpacity = useTransform(dragX, [-100, 0, 100], [0.5, 1, 0.5]);
 
   // ============================================================================
   // RESPONSIVE ITEMS PER VIEW
@@ -188,14 +290,7 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
     return infiniteLoop || state.currentIndex > 0;
   }, [infiniteLoop, state.currentIndex]);
 
-  const visibleProducts = useMemo(() => {
-    const startIndex = state.currentIndex * currentItemsPerView;
-    return products.slice(startIndex, startIndex + currentItemsPerView);
-  }, [products, state.currentIndex, currentItemsPerView]);
 
-  const progress = useMemo(() => {
-    return ((state.currentIndex + 1) / totalSlides) * 100;
-  }, [state.currentIndex, totalSlides]);
 
   // ============================================================================
   // AUTO PLAY
@@ -256,7 +351,6 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
         direction: normalizedIndex > prev.currentIndex ? 'right' : 'left',
       }));
 
-      console.log('Going to slide:', normalizedIndex);
       onSlideChange?.(normalizedIndex);
     },
     [totalSlides, onSlideChange]
@@ -269,7 +363,6 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
       const nextIndex = prev.currentIndex + 1;
       const newIndex = nextIndex >= totalSlides ? 0 : nextIndex;
 
-      console.log('Next slide:', newIndex);
       onSlideChange?.(newIndex);
 
       return {
@@ -287,7 +380,6 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
       const prevIndex = prev.currentIndex - 1;
       const newIndex = prevIndex < 0 ? totalSlides - 1 : prevIndex;
 
-      console.log('Previous slide:', newIndex);
       onSlideChange?.(newIndex);
 
       return {
@@ -299,18 +391,15 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
   }, [canGoPrev, totalSlides, onSlideChange]);
 
   const togglePlayPause = useCallback(() => {
-    setState((prev) => ({
-      ...prev,
-      isPlaying: !prev.isPlaying,
-    }));
-    console.log('Auto-play toggled:', !state.isPlaying);
-  }, [state.isPlaying]);
-
-  const handleReset = useCallback(() => {
-    goToSlide(0);
-    setState((prev) => ({ ...prev, isPlaying: true }));
-    console.log('Carousel reset to beginning');
-  }, [goToSlide]);
+    setState((prev) => {
+      const newPausedByUser = !prev.isPausedByUser;
+      return {
+        ...prev,
+        isPausedByUser: newPausedByUser,
+        isPlaying: !newPausedByUser && !prev.isHovered,
+      };
+    });
+  }, []);
 
   // ============================================================================
   // DRAG HANDLERS
@@ -337,13 +426,11 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
         }
       }
 
-      dragX.set(0);
-
       if (state.isPlaying) {
         startAutoPlay();
       }
     },
-    [goToNext, goToPrev, dragX, state.isPlaying, startAutoPlay]
+    [goToNext, goToPrev, state.isPlaying, startAutoPlay]
   );
 
   // ============================================================================
@@ -372,15 +459,12 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
   // RENDER
   // ============================================================================
 
-  if (loading || products.length === 0) {
+  // Calculate translateX for carousel sliding
+  const translateX = -(state.currentIndex * 100);
+
+  if (loading) {
     return (
-      <div className={cn('w-full', className)}>
-        {title && (
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{title}</h2>
-            {subtitle && <p className="text-gray-600 dark:text-gray-400 mt-1">{subtitle}</p>}
-          </div>
-        )}
+      <div className={cn('relative', className)}>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {[...Array(currentItemsPerView)].map((_, index) => (
             <FeaturedCard key={index} product={{} as Product} loading={true} />
@@ -390,179 +474,189 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
     );
   }
 
+  if (products.length === 0) {
+    return (
+      <div className={cn('relative text-center py-12', className)}>
+        <p className="text-gray-500">No products to display</p>
+      </div>
+    );
+  }
+
   return (
-    <div className={cn('w-full', className)} ref={carouselRef}>
-      {/* Header */}
-      {(title || subtitle) && (
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            {title && (
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{title}</h2>
-            )}
-            {subtitle && (
-              <p className="text-gray-600 dark:text-gray-400 mt-1">{subtitle}</p>
-            )}
-          </div>
-
-          {/* Controls */}
-          <div className="flex items-center gap-2">
-            <Badge variant="default" className="text-xs">
-              {state.currentIndex + 1} / {totalSlides}
-            </Badge>
-
-            {autoPlay && (
-              <Tooltip content={state.isPlaying ? 'Pause' : 'Play'}>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={togglePlayPause}
-                  aria-label={state.isPlaying ? 'Pause carousel' : 'Play carousel'}
-                >
-                  {state.isPlaying ? (
-                    <PauseIcon className="h-4 w-4" />
-                  ) : (
-                    <PlayIcon className="h-4 w-4" />
-                  )}
-                </Button>
-              </Tooltip>
-            )}
-
-            <Tooltip content="Reset to beginning">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleReset}
-                aria-label="Reset carousel"
+    <div
+      className={cn('relative', className)}
+      ref={carouselRef}
+    >
+      {/* Main Carousel Wrapper */}
+      <div className="overflow-hidden py-4">
+        <motion.div
+          className="flex"
+          drag={enableDrag ? 'x' : false}
+          dragConstraints={{ left: 0, right: 0 }}
+          dragElastic={0.9}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+          animate={{
+            x: `${translateX}%`,
+          }}
+          transition={{
+            type: 'tween',
+            ease: [0.25, 0.1, 0.25, 1],
+            duration: 0.5,
+          }}
+          style={{
+            cursor: state.isDragging ? 'grabbing' : enableDrag ? 'grab' : 'default',
+          }}
+        >
+          {products.map((product) => {
+            if (!product) return null;
+            const widthPercent = 100 / currentItemsPerView;
+            const gapHalf = gap / 2;
+            const itemStyle = {
+              width: `${widthPercent}%`,
+              paddingLeft: `${gapHalf}px`,
+              paddingRight: `${gapHalf}px`,
+            };
+            return (
+              <div
+                key={getProductId(product) || `product-${Math.random()}`}
+                className="flex-shrink-0"
+                style={itemStyle}
+                onMouseEnter={() => setState(prev => ({ ...prev, isHovered: true, isPlaying: false }))}
+                onMouseLeave={() => setState(prev => ({ ...prev, isHovered: false, isPlaying: !prev.isPausedByUser }))}
               >
-                <ArrowPathIcon className="h-4 w-4" />
-              </Button>
-            </Tooltip>
-          </div>
+                <FeaturedCard
+                  product={product}
+                  isInCart={hasCartItem(getProductId(product))}
+                  cartQuantity={getItemQuantity(getProductId(product))}
+                  isInWishlist={isInWishlist(getProductId(product))}
+                  onAddToCart={handleAddToCart}
+                  onUpdateCartQuantity={handleUpdateCartQuantity}
+                  onRemoveFromCart={handleRemoveFromCart}
+                  onAddToWishlist={handleAddToWishlist}
+                  onRemoveFromWishlist={handleRemoveFromWishlist}
+                  onQuickView={(p) => {
+                    console.log('🔍 ProductCarousel: QuickView clicked for:', p.name);
+                    setQuickViewProduct(p);
+                    setIsQuickViewOpen(true);
+                    onProductClick?.(p);
+                  }}
+                  onShare={(p) => {
+                    const url = `${window.location.origin}/products/${p.slug}`;
+                    navigator.clipboard.writeText(url);
+                    toast.success('Product link copied!');
+                  }}
+                  onCompare={(p) => {
+                    toast.success(`${p.name} added to compare list`);
+                  }}
+                />
+              </div>
+            );
+          })}
+        </motion.div>
+      </div>
+
+      {/* Controls Bar - Bottom Right */}
+      {products.length > currentItemsPerView && (
+        <div className="relative flex items-center justify-end gap-6 mt-6">
+
+          {/* Pagination Dots & Play/Pause (Grouped) */}
+          {showDots && (
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-4">
+              {/* Play/Pause Button */}
+              {autoPlay && (
+                <button
+                  onClick={togglePlayPause}
+                  className="w-8 h-8 p-0 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors"
+                  aria-label={!state.isPlaying ? 'Play auto-scroll' : 'Pause auto-scroll'}
+                >
+                  {!state.isPlaying ? (
+                    <PlayIcon className="w-4 h-4" />
+                  ) : (
+                    <PauseIcon className="w-4 h-4" />
+                  )}
+                </button>
+              )}
+
+              {/* Dots */}
+              <div className="flex items-center gap-2">
+                {[...Array(totalSlides)].map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => goToSlide(index)}
+                    className={cn(
+                      'transition-all duration-200',
+                      'rounded-full',
+                      state.currentIndex === index
+                        ? 'w-8 h-2 bg-primary-600'
+                        : 'w-2 h-2 bg-gray-300 hover:bg-gray-400'
+                    )}
+                    aria-label={`Go to slide ${index + 1}`}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Navigation Arrows */}
+          {showArrows && (
+            <div className="flex items-center gap-3 z-10">
+              <button
+                onClick={goToPrev}
+                disabled={!canGoPrev}
+                className={cn(
+                  'w-10 h-10 rounded-full flex items-center justify-center',
+                  'border border-gray-200 shadow-sm',
+                  'hover:border-primary-500 hover:text-primary-600 hover:shadow-md',
+                  'transition-all duration-200',
+                  canGoPrev
+                    ? 'text-gray-700 cursor-pointer'
+                    : 'text-gray-300 cursor-not-allowed opacity-50'
+                )}
+                aria-label="Previous slide"
+              >
+                <ChevronLeftIcon className="w-5 h-5" />
+              </button>
+              <button
+                onClick={goToNext}
+                disabled={!canGoNext}
+                className={cn(
+                  'w-10 h-10 rounded-full flex items-center justify-center',
+                  'border border-gray-200 shadow-sm',
+                  'hover:border-primary-500 hover:text-primary-600 hover:shadow-md',
+                  'transition-all duration-200',
+                  canGoNext
+                    ? 'text-gray-700 cursor-pointer'
+                    : 'text-gray-300 cursor-not-allowed opacity-50'
+                )}
+                aria-label="Next slide"
+              >
+                <ChevronRightIcon className="w-5 h-5" />
+              </button>
+            </div>
+          )}
         </div>
       )}
 
-      {/* Carousel Container */}
-      <div className="relative">
-        {/* Navigation Arrows */}
-        {showArrows && (
-          <>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={goToPrev}
-              disabled={!canGoPrev}
-              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-background/90 backdrop-blur-sm shadow-lg hover:bg-background disabled:opacity-50 disabled:cursor-not-allowed"
-              aria-label="Previous slide"
-            >
-              <ChevronLeftIcon className="h-5 w-5" />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={goToNext}
-              disabled={!canGoNext}
-              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-background/90 backdrop-blur-sm shadow-lg hover:bg-background disabled:opacity-50 disabled:cursor-not-allowed"
-              aria-label="Next slide"
-            >
-              <ChevronRightIcon className="h-5 w-5" />
-            </Button>
-          </>
-        )}
 
-        {/* Products Grid */}
-        <div className="overflow-hidden px-12">
-          <motion.div
-            drag={enableDrag ? 'x' : false}
-            dragConstraints={{ left: 0, right: 0 }}
-            dragElastic={0.2}
-            onDragStart={handleDragStart}
-            onDragEnd={handleDragEnd}
-            style={{ x: dragX, gap: `${gap}px`, opacity: dragOpacity }}
-            className={cn(
-              'grid transition-all duration-500',
-              currentItemsPerView === 1 && 'grid-cols-1',
-              currentItemsPerView === 2 && 'grid-cols-2',
-              currentItemsPerView === 3 && 'grid-cols-3',
-              currentItemsPerView === 4 && 'grid-cols-4',
-              state.isDragging && 'cursor-grabbing',
-              enableDrag && 'cursor-grab'
-            )}
-            animate={{
-              opacity: state.isDragging ? 0.7 : 1,
-            }}
-          >
-            <AnimatePresence mode="wait">
-              {visibleProducts.map((product, index) => (
-                <motion.div
-                  key={`${product.id}-${state.currentIndex}-${index}`}
-                  initial={{ opacity: 0, x: state.direction === 'right' ? 100 : -100 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: state.direction === 'right' ? -100 : 100 }}
-                  transition={{ duration: transitionDuration, delay: index * 0.1 }}
-                >
-                  <FeaturedCard
-                    product={product}
-                    onAddToCart={(p) => console.log('Add to cart:', p.name)}
-                    onAddToWishlist={(p) => console.log('Add to wishlist:', p.name)}
-                    onQuickView={(p) => {
-                      console.log('Quick view:', p.name);
-                      onProductClick?.(p);
-                    }}
-                  />
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </motion.div>
-        </div>
-
-        {/* Progress Bar */}
-        <div className="mt-4 h-1 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-          <motion.div
-            className="h-full bg-blue-600"
-            initial={{ width: 0 }}
-            animate={{ width: `${progress}%` }}
-            transition={{ duration: 0.3 }}
-          />
-        </div>
-
-        {/* Dot Indicators */}
-        {showDots && (
-          <div className="flex items-center justify-center gap-2 mt-6">
-            {[...Array(totalSlides)].map((_, index) => (
-              <Tooltip
-                key={index}
-                content={
-                  showThumbnails && products[index * currentItemsPerView]
-                    ? products[index * currentItemsPerView].name
-                    : `Slide ${index + 1}`
-                }
-              >
-                <button
-                  onClick={() => goToSlide(index)}
-                  onMouseEnter={() => setHoveredDot(index)}
-                  onMouseLeave={() => setHoveredDot(null)}
-                  className={cn(
-                    'transition-all duration-300',
-                    index === state.currentIndex
-                      ? 'w-8 h-2 bg-blue-600 rounded-full'
-                      : 'w-2 h-2 bg-gray-300 dark:bg-gray-600 rounded-full hover:bg-gray-400 dark:hover:bg-gray-500',
-                    hoveredDot === index && index !== state.currentIndex && 'w-4'
-                  )}
-                  aria-label={`Go to slide ${index + 1}`}
-                  aria-current={index === state.currentIndex ? 'true' : 'false'}
-                />
-              </Tooltip>
-            ))}
-          </div>
-        )}
-      </div>
 
       {/* Accessibility */}
       <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">
         Showing slide {state.currentIndex + 1} of {totalSlides}
       </div>
+
+      {/* QuickView Modal */}
+      <QuickView
+        product={quickViewProduct}
+        isOpen={isQuickViewOpen}
+        onClose={() => {
+          setIsQuickViewOpen(false);
+          setQuickViewProduct(null);
+        }}
+      />
     </div>
   );
 };
 
 export default ProductCarousel;
+

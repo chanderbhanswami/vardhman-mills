@@ -31,9 +31,29 @@ export const useRemoveFromWishlist = (options: UseRemoveFromWishlistOptions = {}
   // Remove from wishlist mutation
   const removeFromWishlistMutation = useMutation({
     mutationFn: async (data: RemoveFromWishlistData): Promise<{ success: boolean; message: string }> => {
+      // GUEST MODE: Use localStorage
       if (!isAuthenticated || !user) {
-        throw new Error('You must be logged in to remove items from wishlist');
+        const { removeFromGuestWishlist, isInGuestWishlist } = await import('@/lib/wishlist/guestWishlist');
+
+        // Check if in wishlist
+        if (!isInGuestWishlist(data.productId)) {
+          throw new Error('Product is not in your wishlist');
+        }
+
+        // Remove from localStorage
+        const success = removeFromGuestWishlist(data.productId);
+
+        if (!success) {
+          throw new Error('Failed to remove from wishlist');
+        }
+
+        return {
+          success: true,
+          message: 'Product removed from wishlist successfully',
+        };
       }
+
+      // AUTHENTICATED MODE: Use API
 
       // Show confirmation if required
       if (confirmRemoval && typeof window !== 'undefined') {
@@ -73,7 +93,7 @@ export const useRemoveFromWishlist = (options: UseRemoveFromWishlistOptions = {}
 
       // Optimistically remove the item
       queryClient.setQueryData(['wishlist', user?.id], (old: Array<Record<string, unknown>> = []) => {
-        return old.filter(item => 
+        return old.filter(item =>
           !(item.productId === data.productId && item.variantId === data.variantId)
         );
       });
@@ -100,8 +120,8 @@ export const useRemoveFromWishlist = (options: UseRemoveFromWishlistOptions = {}
       onError?.(error instanceof Error ? error : new Error('Failed to remove from wishlist'), variables.productId);
     },
     onSuccess: (result, variables) => {
-      // Invalidate and refetch wishlist to ensure accuracy
-      queryClient.invalidateQueries({ queryKey: ['wishlist', user?.id] });
+      // Invalidate ALL wishlist queries to refetch (works for both guest and authenticated)
+      queryClient.invalidateQueries({ queryKey: ['wishlist'] });
 
       // Also invalidate product queries to update wishlist status
       queryClient.invalidateQueries({ queryKey: ['product', variables.productId] });
@@ -114,8 +134,8 @@ export const useRemoveFromWishlist = (options: UseRemoveFromWishlistOptions = {}
     },
     retry: (failureCount, error) => {
       // Don't retry if user cancelled or item not found
-      if (error instanceof Error && 
-          (error.message.includes('cancelled by user') || error.message.includes('not found'))) {
+      if (error instanceof Error &&
+        (error.message.includes('cancelled by user') || error.message.includes('not found'))) {
         return false;
       }
       // Retry up to 2 times for other errors
@@ -318,30 +338,30 @@ export const useRemoveFromWishlist = (options: UseRemoveFromWishlistOptions = {}
     // Primary actions
     removeFromWishlist: removeFromWishlistMutation.mutate,
     removeFromWishlistAsync: removeFromWishlistMutation.mutateAsync,
-    
+
     // Helper functions
     quickRemove,
     removeMultiple,
     clearWishlist,
     removeById,
     isInWishlist,
-    
+
     // State
     isRemoving: removeFromWishlistMutation.isPending,
     isRemovingMultiple: removeMultipleFromWishlistMutation.isPending,
     isClearing: clearWishlistMutation.isPending,
     error: removeFromWishlistMutation.error,
-    
+
     // Status helpers
-    isLoading: removeFromWishlistMutation.isPending || 
-               removeMultipleFromWishlistMutation.isPending || 
-               clearWishlistMutation.isPending,
+    isLoading: removeFromWishlistMutation.isPending ||
+      removeMultipleFromWishlistMutation.isPending ||
+      clearWishlistMutation.isPending,
     isSuccess: removeFromWishlistMutation.isSuccess,
     isError: removeFromWishlistMutation.isError,
-    
+
     // Reset function
     reset: removeFromWishlistMutation.reset,
-    
+
     // Mutation objects for advanced usage
     removeMutation: removeFromWishlistMutation,
     removeMultipleMutation: removeMultipleFromWishlistMutation,

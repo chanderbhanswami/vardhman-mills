@@ -50,6 +50,7 @@ import { LoadingScreen } from '@/components/common';
 import { cn } from '@/lib/utils';
 
 // Import global styles
+import '@/styles/force-light.css'; // Force light mode
 import '@/styles/globals.css';
 
 /**
@@ -92,14 +93,14 @@ const poppins = Poppins({
  */
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://vardhmantextiles.com'),
-  
+
   title: {
     default: 'Vardhman Textiles - Premium Quality Textiles & Home Decor',
     template: '%s | Vardhman Textiles',
   },
-  
+
   description: 'Discover premium quality textiles, bedsheets, towels, curtains, and home decor products. Shop from India\'s leading textile manufacturer with 50+ years of excellence.',
-  
+
   keywords: [
     'textiles',
     'bedsheets',
@@ -115,23 +116,23 @@ export const metadata: Metadata = {
     'premium textiles',
     'Indian textiles',
   ],
-  
+
   authors: [
     {
       name: 'Vardhman Textiles',
       url: 'https://vardhmantextiles.com',
     },
   ],
-  
+
   creator: 'Vardhman Textiles',
   publisher: 'Vardhman Textiles',
-  
+
   formatDetection: {
     email: true,
     address: true,
     telephone: true,
   },
-  
+
   openGraph: {
     type: 'website',
     locale: 'en_IN',
@@ -148,7 +149,7 @@ export const metadata: Metadata = {
       },
     ],
   },
-  
+
   twitter: {
     card: 'summary_large_image',
     site: '@vardhmantextiles',
@@ -157,7 +158,7 @@ export const metadata: Metadata = {
     description: 'Shop premium textiles, bedsheets, towels, and home decor from India\'s leading manufacturer.',
     images: ['/images/twitter-image.jpg'],
   },
-  
+
   robots: {
     index: true,
     follow: true,
@@ -169,7 +170,7 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
-  
+
   verification: {
     google: process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION || '',
     yandex: process.env.NEXT_PUBLIC_YANDEX_VERIFICATION || '',
@@ -177,7 +178,7 @@ export const metadata: Metadata = {
       'msvalidate.01': process.env.NEXT_PUBLIC_BING_VERIFICATION || '',
     },
   },
-  
+
   alternates: {
     canonical: 'https://vardhmantextiles.com',
     languages: {
@@ -185,11 +186,11 @@ export const metadata: Metadata = {
       'hi-IN': 'https://vardhmantextiles.com/hi-IN',
     },
   },
-  
+
   category: 'E-commerce',
-  
+
   manifest: '/manifest.json',
-  
+
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: 'any' },
@@ -203,15 +204,15 @@ export const metadata: Metadata = {
       { rel: 'mask-icon', url: '/safari-pinned-tab.svg', color: '#0066cc' },
     ],
   },
-  
+
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
     title: 'Vardhman Textiles',
   },
-  
+
   applicationName: 'Vardhman Textiles',
-  
+
   other: {
     'mobile-web-app-capable': 'yes',
     'apple-mobile-web-app-capable': 'yes',
@@ -253,11 +254,11 @@ export default async function RootLayout({ children }: RootLayoutProps) {
   // Get headers for user agent detection (if needed)
   const headersList = await headers();
   const userAgent = headersList.get('user-agent') || '';
-  
+
   // Detect device type
   const isMobile = /Mobile|Android|iPhone/i.test(userAgent);
   const isTablet = /Tablet|iPad/i.test(userAgent);
-  
+
   // Environment variables
   const gaId = process.env.NEXT_PUBLIC_GA_ID;
   const gtagId = process.env.NEXT_PUBLIC_GTAG_ID;
@@ -271,6 +272,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
       lang="en"
       suppressHydrationWarning
       data-scroll-behavior="smooth"
+      style={{ colorScheme: 'light' }}
       className={cn(
         'scroll-smooth',
         inter.variable,
@@ -295,12 +297,12 @@ export default async function RootLayout({ children }: RootLayoutProps) {
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://www.google-analytics.com" />
-        
+
         {/* DNS Prefetch for faster resource loading */}
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
         <link rel="dns-prefetch" href="https://connect.facebook.net" />
         <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
-        
+
         {/* Structured Data - Organization */}
         <script
           type="application/ld+json"
@@ -333,7 +335,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
             }),
           }}
         />
-        
+
         {/* Structured Data - WebSite */}
         <script
           type="application/ld+json"
@@ -352,11 +354,11 @@ export default async function RootLayout({ children }: RootLayoutProps) {
           }}
         />
       </head>
-      
+
       <body
         className={cn(
           'min-h-screen bg-background font-sans antialiased',
-          'text-gray-900 dark:text-gray-100',
+          'text-gray-900',
           'selection:bg-blue-600 selection:text-white',
           isMobile && 'mobile-device',
           isTablet && 'tablet-device'
@@ -375,7 +377,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
             />
           </noscript>
         )}
-        
+
         {/* Skip to Main Content Link (Accessibility) */}
         <a
           href="#main-content"
@@ -383,13 +385,13 @@ export default async function RootLayout({ children }: RootLayoutProps) {
         >
           Skip to main content
         </a>
-        
+
         {/* Global Providers Wrapper - Contains all providers: QueryProvider, ThemeProvider, AuthProvider, NotificationProvider, ModalProvider, CartProvider, WishlistProvider */}
         <GlobalProvider
           themeProps={{
             attribute: "class",
-            defaultTheme: "system",
-            enableSystem: true
+            defaultTheme: "light",
+            enableSystem: false
           }}
         >
           {/* Main Content with Loading Boundary */}
@@ -402,11 +404,11 @@ export default async function RootLayout({ children }: RootLayoutProps) {
           >
             {children}
           </Suspense>
-          
+
           {/* Back to Top Button */}
           <BackToTop />
         </GlobalProvider>
-        
+
         {/* Google Analytics */}
         {isProduction && gaId && (
           <>
@@ -427,7 +429,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
             </Script>
           </>
         )}
-        
+
         {/* Google Tag Manager */}
         {isProduction && gtagId && (
           <Script id="google-tag-manager" strategy="afterInteractive">
@@ -440,7 +442,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
             `}
           </Script>
         )}
-        
+
         {/* Facebook Pixel */}
         {isProduction && fbPixelId && (
           <Script id="facebook-pixel" strategy="afterInteractive">
@@ -458,7 +460,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
             `}
           </Script>
         )}
-        
+
         {/* Service Worker Registration (PWA) - TEMPORARILY DISABLED */}
         {/* {isProduction && (
           <Script id="service-worker" strategy="afterInteractive">
@@ -478,7 +480,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
             `}
           </Script>
         )} */}
-        
+
         {/* Web Vitals Tracking - TEMPORARILY DISABLED */}
         {/* {isProduction && (
           <Script id="web-vitals" strategy="afterInteractive">
@@ -507,7 +509,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
             `}
           </Script>
         )} */}
-        
+
         {/* Development Only: React DevTools */}
         {isDevelopment && (
           <Script id="react-devtools" strategy="lazyOnload">
@@ -517,7 +519,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
             `}
           </Script>
         )}
-        
+
         {/* Accessibility: Reduced Motion Support */}
         <Script id="reduced-motion" strategy="beforeInteractive">
           {`
@@ -537,18 +539,13 @@ export default async function RootLayout({ children }: RootLayoutProps) {
             })();
           `}
         </Script>
-        
-        {/* Color Scheme Detection */}
+
+        {/* Color Scheme Detection - FORCED LIGHT MODE */}
         <Script id="color-scheme" strategy="beforeInteractive">
           {`
             (function() {
-              const theme = localStorage.getItem('vardhman-theme') || 'system';
-              
-              if (theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                document.documentElement.classList.add('dark');
-              } else {
-                document.documentElement.classList.remove('dark');
-              }
+              // FORCE LIGHT MODE - always remove dark class
+              document.documentElement.classList.remove('dark');
             })();
           `}
         </Script>

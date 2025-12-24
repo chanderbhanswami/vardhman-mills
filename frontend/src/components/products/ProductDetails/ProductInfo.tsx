@@ -28,8 +28,8 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
   showBadges = true,
 }) => {
   const sku = selectedVariant?.sku || product.sku;
-  const inStock = selectedVariant?.inventory?.isInStock !== undefined 
-    ? selectedVariant.inventory.isInStock 
+  const inStock = selectedVariant?.inventory?.isInStock !== undefined
+    ? selectedVariant.inventory.isInStock
     : product.inventory.isInStock;
 
   // Check if product has sale price
@@ -104,7 +104,7 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
               <span className="underline">{product.brand.name}</span>
             </Link>
           )}
-          
+
           {showCategory && product.category && (
             <Link
               href={`/categories/${product.category.slug}`}
@@ -130,7 +130,7 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
             <span className="text-gray-900">{sku}</span>
           </div>
         )}
-        
+
         <div className="flex items-center gap-2">
           <span className="font-medium text-gray-600">Availability:</span>
           <Badge variant={inStock ? 'default' : 'destructive'}>
@@ -180,14 +180,15 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-sm font-medium text-gray-600">Collections:</span>
             {product.collections.map((collection, index) => (
-              <Link
-                key={collection.id}
-                href={`/collections/${collection.slug}`}
-                className="text-sm text-primary-600 hover:text-primary-700 underline"
-              >
-                {collection.name}
-                {index < product.collections.length - 1 && ','}
-              </Link>
+              <React.Fragment key={collection.id || index}>
+                <Link
+                  href={`/collections/${collection.slug}`}
+                  className="text-sm text-primary-600 hover:text-primary-700 underline"
+                >
+                  {collection.name}
+                </Link>
+                {index < product.collections.length - 1 && <span className="text-gray-400">, </span>}
+              </React.Fragment>
             ))}
           </div>
         </motion.div>

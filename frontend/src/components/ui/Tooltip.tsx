@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect, createContext, useContext } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../lib/utils';
@@ -68,7 +69,7 @@ const arrowVariants = cva(
   }
 );
 
-export type TooltipPlacement = 
+export type TooltipPlacement =
   | 'top' | 'top-start' | 'top-end'
   | 'bottom' | 'bottom-start' | 'bottom-end'
   | 'left' | 'left-start' | 'left-end'
@@ -102,6 +103,8 @@ export interface TooltipProps {
   collisionBoundary?: Element | Element[];
   collisionPadding?: number;
   sticky?: 'partial' | 'always';
+  /** Close tooltip when trigger is clicked */
+  closeOnTriggerClick?: boolean;
 }
 
 // Tooltip context for managing global tooltip behavior
@@ -121,33 +124,33 @@ export const TooltipProvider: React.FC<{
   children,
   skipDelayDuration = 300,
 }) => {
-  const [isDelayGroup, setIsDelayGroup] = useState(false);
-  const skipDelayTimerRef = useRef<NodeJS.Timeout | undefined>(undefined);
+    const [isDelayGroup, setIsDelayGroup] = useState(false);
+    const skipDelayTimerRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
-  const handleOpen = () => {
-    clearTimeout(skipDelayTimerRef.current);
-    setIsDelayGroup(false);
+    const handleOpen = () => {
+      clearTimeout(skipDelayTimerRef.current);
+      setIsDelayGroup(false);
+    };
+
+    const handleClose = () => {
+      skipDelayTimerRef.current = setTimeout(() => {
+        setIsDelayGroup(true);
+      }, skipDelayDuration);
+    };
+
+    const contextValue: TooltipContextType = {
+      skipDelayDuration: skipDelayDuration,
+      isDelayGroup,
+      onOpen: handleOpen,
+      onClose: handleClose,
+    };
+
+    return (
+      <TooltipContext.Provider value={contextValue}>
+        {children}
+      </TooltipContext.Provider>
+    );
   };
-
-  const handleClose = () => {
-    skipDelayTimerRef.current = setTimeout(() => {
-      setIsDelayGroup(true);
-    }, skipDelayDuration);
-  };
-
-  const contextValue: TooltipContextType = {
-    skipDelayDuration: skipDelayDuration,
-    isDelayGroup,
-    onOpen: handleOpen,
-    onClose: handleClose,
-  };
-
-  return (
-    <TooltipContext.Provider value={contextValue}>
-      {children}
-    </TooltipContext.Provider>
-  );
-};
 
 // Hook for using tooltip context
 const useTooltipContext = () => {
@@ -166,7 +169,8 @@ const useTooltipPosition = (
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [actualPlacement, setActualPlacement] = useState<TooltipPlacement>(placement);
 
-  const calculatePosition = () => {
+  // Memoize calculatePosition to prevent infinite loop in useEffect
+  const calculatePosition = React.useCallback(() => {
     if (!triggerRef.current || !tooltipRef.current) return;
 
     const triggerRect = triggerRef.current.getBoundingClientRect();
@@ -204,7 +208,7 @@ const useTooltipPosition = (
     if (placement.includes('-')) {
       const align = placement.split('-')[1];
       const isVertical = placement.startsWith('top') || placement.startsWith('bottom');
-      
+
       if (isVertical) {
         if (align === 'start') {
           x = triggerRect.left;
@@ -223,14 +227,14 @@ const useTooltipPosition = (
     // Collision detection and adjustment
     if (avoidCollisions) {
       const padding = 8;
-      
+
       // Check if tooltip goes outside viewport
       if (x < padding) {
         x = padding;
       } else if (x + tooltipRect.width > viewport.width - padding) {
         x = viewport.width - tooltipRect.width - padding;
       }
-      
+
       if (y < padding) {
         // If tooltip goes above viewport, try to show it below
         if (placement.startsWith('top')) {
@@ -248,7 +252,7 @@ const useTooltipPosition = (
           y = viewport.height - tooltipRect.height - padding;
         }
       }
-      
+
       // Handle left/right collisions
       if (placement.startsWith('left') && x < padding) {
         x = triggerRect.right + offset;
@@ -263,7 +267,7 @@ const useTooltipPosition = (
 
     setPosition({ x, y });
     setActualPlacement(finalPlacement);
-  };
+  }, [triggerRef, tooltipRef, placement, offset, avoidCollisions]);
 
   return { position, actualPlacement, calculatePosition };
 };
@@ -289,16 +293,17 @@ export const Tooltip: React.FC<TooltipProps> = ({
   disableHoverableContent = false,
   forceMount = false,
   avoidCollisions = true,
+  closeOnTriggerClick = false,
 }) => {
   const context = useTooltipContext();
   const [internalOpen, setInternalOpen] = useState(defaultOpen);
   const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
-  
+
   const triggerRef = useRef<HTMLElement | null>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const openTimerRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const closeTimerRef = useRef<NodeJS.Timeout | undefined>(undefined);
-  
+
   const { position, actualPlacement, calculatePosition } = useTooltipPosition(
     triggerRef,
     tooltipRef,
@@ -316,11 +321,11 @@ export const Tooltip: React.FC<TooltipProps> = ({
 
   const handleOpen = () => {
     if (disabled) return;
-    
+
     clearTimeout(closeTimerRef.current);
-    
+
     const delay = context?.isDelayGroup ? skipDelayDuration : delayDuration;
-    
+
     openTimerRef.current = setTimeout(() => {
       handleOpenChange(true);
       context?.onOpen();
@@ -329,7 +334,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
 
   const handleClose = () => {
     clearTimeout(openTimerRef.current);
-    
+
     closeTimerRef.current = setTimeout(() => {
       handleOpenChange(false);
       context?.onClose();
@@ -360,13 +365,13 @@ export const Tooltip: React.FC<TooltipProps> = ({
   useEffect(() => {
     if (isOpen) {
       calculatePosition();
-      
+
       const handleResize = () => calculatePosition();
       const handleScroll = () => calculatePosition();
-      
+
       window.addEventListener('resize', handleResize);
       window.addEventListener('scroll', handleScroll);
-      
+
       return () => {
         window.removeEventListener('resize', handleResize);
         window.removeEventListener('scroll', handleScroll);
@@ -382,48 +387,67 @@ export const Tooltip: React.FC<TooltipProps> = ({
     };
   }, []);
 
-  const triggerElement = React.cloneElement(children as React.ReactElement<React.HTMLProps<HTMLElement>>, {
-    onMouseEnter: handleTriggerEnter,
-    onMouseLeave: handleTriggerLeave,
-    onFocus: handleOpen,
-    onBlur: handleClose,
-    'aria-describedby': isOpen ? 'tooltip' : undefined,
-  });
+  // Handle trigger click to close tooltip
+  const handleTriggerClick = () => {
+    if (closeOnTriggerClick) {
+      handleOpenChange(false);
+    }
+  };
+
+  // Wrap trigger in a span to capture ref for positioning
+  const triggerWrapper = (
+    <span
+      ref={triggerRef as React.RefObject<HTMLSpanElement>}
+      onMouseEnter={handleTriggerEnter}
+      onMouseLeave={handleTriggerLeave}
+      onFocus={handleOpen}
+      onBlur={handleClose}
+      onClick={handleTriggerClick}
+      style={{ display: 'inline-flex' }}
+      aria-describedby={isOpen ? 'tooltip' : undefined}
+    >
+      {children}
+    </span>
+  );
+
+  const tooltipContent = (
+    <AnimatePresence>
+      {(isOpen || forceMount) && (
+        <motion.div
+          ref={tooltipRef}
+          role="tooltip"
+          id="tooltip"
+          className={cn(
+            'fixed z-[99999] pointer-events-none',
+            className
+          )}
+          style={{
+            left: position.x,
+            top: position.y,
+          }}
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.95 }}
+          transition={{ duration: 0.1 }}
+          onMouseEnter={handleTooltipEnter}
+          onMouseLeave={handleTooltipLeave}
+        >
+          <div className={cn(tooltipVariants({ variant, size }), contentClassName)}>
+            {content}
+          </div>
+
+          {showArrow && (
+            <div className={cn(arrowVariants({ variant, placement: actualPlacement }), arrowClassName)} />
+          )}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
 
   return (
     <>
-      {triggerElement}
-      <AnimatePresence>
-        {(isOpen || forceMount) && (
-          <motion.div
-            ref={tooltipRef}
-            role="tooltip"
-            id="tooltip"
-            className={cn(
-              'fixed z-50 pointer-events-none',
-              className
-            )}
-            style={{
-              left: position.x,
-              top: position.y,
-            }}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.1 }}
-            onMouseEnter={handleTooltipEnter}
-            onMouseLeave={handleTooltipLeave}
-          >
-            <div className={cn(tooltipVariants({ variant, size }), contentClassName)}>
-              {content}
-            </div>
-            
-            {showArrow && (
-              <div className={cn(arrowVariants({ variant, placement: actualPlacement }), arrowClassName)} />
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {triggerWrapper}
+      {typeof document !== 'undefined' && createPortal(tooltipContent, document.body)}
     </>
   );
 };
@@ -433,7 +457,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
 // Simple tooltip hook
 export const useTooltip = () => {
   const [isOpen, setIsOpen] = useState(false);
-  
+
   return {
     isOpen,
     open: () => setIsOpen(true),
@@ -454,7 +478,7 @@ export const TooltipTrigger = React.forwardRef<HTMLElement, TooltipTriggerProps>
         ...props,
       });
     }
-    
+
     return (
       <button ref={ref as React.RefObject<HTMLButtonElement>} {...props} />
     );
@@ -518,7 +542,7 @@ export const TooltipRoot: React.FC<TooltipRootProps> = ({
 }) => {
   const handleOpenChange = (open: boolean) => {
     onOpenChange?.(open);
-  };  return (
+  }; return (
     <TooltipContext.Provider value={{
       skipDelayDuration: 300,
       isDelayGroup: false,

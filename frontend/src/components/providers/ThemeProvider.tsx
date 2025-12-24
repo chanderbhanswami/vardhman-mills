@@ -31,22 +31,22 @@ export interface ThemeContextType {
   theme: Theme;
   resolvedTheme: 'light' | 'dark';
   settings: ThemeSettings;
-  
+
   // Theme actions
   setTheme: (theme: Theme) => void;
   setColorScheme: (scheme: ColorScheme) => void;
   setFontSize: (size: FontSize) => void;
   setSpacing: (spacing: Spacing) => void;
   toggleTheme: () => void;
-  
+
   // Accessibility
   setHighContrast: (enabled: boolean) => void;
   setReducedMotion: (enabled: boolean) => void;
-  
+
   // Custom styling
   setCustomColors: (colors: ThemeSettings['customColors']) => void;
   resetToDefaults: () => void;
-  
+
   // Utilities
   isDark: boolean;
   isLight: boolean;
@@ -55,9 +55,9 @@ export interface ThemeContextType {
   getCSSVariables: () => Record<string, string>;
 }
 
-// Default theme settings
+// Default theme settings - FORCED TO LIGHT MODE
 const defaultSettings: ThemeSettings = {
-  theme: 'system',
+  theme: 'light',  // FORCE LIGHT MODE (was 'system')
   colorScheme: 'default',
   fontSize: 'md',
   spacing: 'normal',
@@ -215,22 +215,23 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
 }) => {
   // Persistent storage
   const themeStorage = useLocalStorage<ThemeSettings>('theme-settings', { defaultValue: defaultSettings });
-  
-  // State
+
+  // State - FORCED TO LIGHT MODE
   const [settings, setSettings] = useState<ThemeSettings>(() => {
-    const stored = themeStorage.value || defaultSettings;
+    // ALWAYS force light mode, ignore localStorage
     return {
-      ...stored,
-      theme: stored.theme || defaultTheme
+      ...defaultSettings,
+      theme: 'light'  // FORCE LIGHT MODE
     };
   });
   const [systemTheme, setSystemTheme] = useState<'light' | 'dark'>('light');
   const [mounted, setMounted] = useState(false);
 
-  // Get resolved theme
-  const resolvedTheme = settings.theme === 'system' ? systemTheme : settings.theme;
-  const isDark = resolvedTheme === 'dark';
-  const isLight = resolvedTheme === 'light';
+  // Get resolved theme - FORCED TO LIGHT MODE FOR NOW
+  // const resolvedTheme = settings.theme === 'system' ? systemTheme : settings.theme;
+  const resolvedTheme = 'light'; // TEMPORARY: Always use light mode
+  const isDark = false; // resolvedTheme === 'dark';
+  const isLight = true; // resolvedTheme === 'light';
   const isSystemTheme = settings.theme === 'system';
 
   // Update storage when settings change
@@ -239,8 +240,12 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings]);
 
-  // Listen for system theme changes
+  // Listen for system theme changes - DISABLED FOR LIGHT MODE ONLY
   useEffect(() => {
+    // Force light mode - do not listen to system preferences
+    setSystemTheme('light');
+    // Commenting out system theme detection
+    /*
     if (!enableSystem) return;
 
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
@@ -252,12 +257,13 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
 
     mediaQuery.addEventListener('change', handleChange);
     return () => mediaQuery.removeEventListener('change', handleChange);
+    */
   }, [enableSystem]);
 
   // Listen for system motion preference changes
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    
+
     const handleChange = (e: MediaQueryListEvent) => {
       if (e.matches && !settings.reducedMotion) {
         setSettings(prev => ({ ...prev, reducedMotion: true }));
@@ -317,46 +323,46 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   // Utilities
   const getThemeClasses = useCallback((): string => {
     const classes = [];
-    
+
     // Base theme
     classes.push(resolvedTheme);
-    
+
     // Color scheme
     if (settings.colorScheme !== 'default') {
       classes.push(`scheme-${settings.colorScheme}`);
     }
-    
+
     // Font size
     if (settings.fontSize !== 'md') {
       classes.push(`text-${settings.fontSize}`);
     }
-    
+
     // Spacing
     if (settings.spacing !== 'normal') {
       classes.push(`spacing-${settings.spacing}`);
     }
-    
+
     // Accessibility
     if (settings.highContrast) {
       classes.push('high-contrast');
     }
-    
+
     if (settings.reducedMotion) {
       classes.push('reduced-motion');
     }
-    
+
     return classes.join(' ');
   }, [resolvedTheme, settings]);
 
   const getCSSVariables = useCallback((): Record<string, string> => {
     const variables: Record<string, string> = {};
-    
+
     // Color scheme variables
     const scheme = colorSchemes[settings.colorScheme];
     Object.entries(scheme).forEach(([key, value]) => {
       variables[`--color-${key}`] = value;
     });
-    
+
     // Custom colors override
     if (settings.customColors) {
       Object.entries(settings.customColors).forEach(([key, value]) => {
@@ -365,13 +371,13 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
         }
       });
     }
-    
+
     // Font size variables
     Object.assign(variables, fontSizes[settings.fontSize]);
-    
+
     // Spacing variables
     Object.assign(variables, spacingConfig[settings.spacing]);
-    
+
     // High contrast adjustments
     if (settings.highContrast) {
       variables['--contrast-ratio'] = '7:1';
@@ -380,7 +386,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
       variables['--contrast-ratio'] = '4.5:1';
       variables['--border-width'] = '1px';
     }
-    
+
     // Motion preferences
     if (settings.reducedMotion) {
       variables['--transition-duration'] = '0ms';
@@ -389,7 +395,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
       variables['--transition-duration'] = '200ms';
       variables['--animation-duration'] = '300ms';
     }
-    
+
     return variables;
   }, [settings]);
 
@@ -398,19 +404,18 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
     if (!mounted) return;
 
     const root = document.documentElement;
-    
+
     // Apply theme attribute
     root.setAttribute(attribute, value[resolvedTheme] || resolvedTheme);
-    
+
     // Apply CSS variables
     const cssVars = getCSSVariables();
     Object.entries(cssVars).forEach(([key, val]) => {
       root.style.setProperty(key, val);
     });
 
-    // Apply classes
-    const classes = getThemeClasses();
-    root.className = classes;
+    // Apply dark mode class for Tailwind (currently disabled - always light mode)
+    root.classList.remove('dark');
 
   }, [mounted, resolvedTheme, settings, attribute, value, getCSSVariables, getThemeClasses]);
 
@@ -420,22 +425,22 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
     theme: settings.theme,
     resolvedTheme,
     settings,
-    
+
     // Theme actions
     setTheme,
     setColorScheme,
     setFontSize,
     setSpacing,
     toggleTheme,
-    
+
     // Accessibility
     setHighContrast,
     setReducedMotion,
-    
+
     // Custom styling
     setCustomColors,
     resetToDefaults,
-    
+
     // Utilities
     isDark,
     isLight,
@@ -444,14 +449,9 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
     getCSSVariables,
   };
 
-  // Prevent flash of incorrect theme
-  if (!mounted) {
-    return <div className="hidden">{children}</div>;
-  }
-
   return (
     <ThemeContext.Provider value={contextValue}>
-      {children}
+      {mounted ? children : <div className="invisible">{children}</div>}
     </ThemeContext.Provider>
   );
 };

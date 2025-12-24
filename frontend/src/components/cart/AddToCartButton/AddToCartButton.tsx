@@ -33,7 +33,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { ShoppingCartIcon as ShoppingCartSolidIcon } from '@heroicons/react/24/solid';
 import toast from 'react-hot-toast';
-import { useCart } from '@/contexts/CartContext';
+import { useCart } from '@/components/providers/CartProvider';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Tooltip } from '@/components/ui/Tooltip';
@@ -210,7 +210,7 @@ export const AddToCartButton: React.FC<AddToCartButtonProps> = ({
   // HOOKS & STATE
   // ============================================================================
 
-  const { state: cartState, addItem, updateQuantity, getItem } = useCart();
+  const { items: cartItems, addToCart, updateQuantity } = useCart();
 
   const [buttonState, setButtonState] = useState<CartButtonState>({
     quantity: initialQuantity,
@@ -228,9 +228,17 @@ export const AddToCartButton: React.FC<AddToCartButtonProps> = ({
   // COMPUTED VALUES
   // ============================================================================
 
+  // Helper function to get item from cart
+  const getItemFromCart = useCallback((productId: string, variantId?: string) => {
+    return cartItems.find(item =>
+      item.productId === productId &&
+      (variantId ? item.variantId === variantId : true)
+    );
+  }, [cartItems]);
+
   const itemInCart = useMemo(() => {
-    return getItem(product.id, variant?.id);
-  }, [product.id, variant?.id, getItem]);
+    return getItemFromCart(product.id, variant?.id);
+  }, [product.id, variant?.id, getItemFromCart]);
 
   // Toggle quantity selector when needed
   useEffect(() => {
@@ -241,30 +249,30 @@ export const AddToCartButton: React.FC<AddToCartButtonProps> = ({
 
   const isOutOfStock = useMemo(() => {
     if (variant) {
-      return !variant.inventory.isInStock || variant.inventory.quantity === 0;
+      return !variant.inventory?.isInStock || (variant.inventory?.quantity ?? 0) === 0;
     }
-    return !product.inventory.isInStock || product.inventory.quantity === 0;
+    return !product.inventory?.isInStock || (product.inventory?.quantity ?? 0) === 0;
   }, [product, variant]);
 
   const maxQuantity = useMemo(() => {
     if (variant) {
-      return variant.inventory.quantity;
+      return variant.inventory?.quantity ?? 0;
     }
-    return product.inventory.quantity;
+    return product.inventory?.quantity ?? 0;
   }, [product, variant]);
 
   const isLowStock = useMemo(() => {
     if (variant) {
-      return variant.inventory.isLowStock;
+      return variant.inventory?.isLowStock ?? false;
     }
-    return product.inventory.isLowStock;
+    return product.inventory?.isLowStock ?? false;
   }, [product, variant]);
 
   const effectivePrice: Price = useMemo(() => {
     if (variant && variant.pricing) {
       return variant.pricing.salePrice || variant.pricing.basePrice;
     }
-    return product.pricing.salePrice || product.pricing.basePrice;
+    return product.pricing?.salePrice || product.pricing?.basePrice || { amount: 0, currency: 'INR' };
   }, [product, variant]);
 
   const isDisabled = useMemo(() => {
@@ -369,7 +377,7 @@ export const AddToCartButton: React.FC<AddToCartButtonProps> = ({
       interface GtagWindow extends Window {
         gtag?: (...args: unknown[]) => void;
       }
-      
+
       if (typeof window !== 'undefined' && (window as GtagWindow).gtag) {
         (window as GtagWindow).gtag?.('event', 'add_to_cart', {
           currency: effectivePrice.currency,
@@ -405,7 +413,7 @@ export const AddToCartButton: React.FC<AddToCartButtonProps> = ({
     }
 
     // If item exists in cart, update quantity instead
-    if (itemInCart && !cartState.syncing) {
+    if (itemInCart) {
       try {
         await updateQuantity(itemInCart.id, itemInCart.quantity + buttonState.quantity);
         toast.success(`Updated quantity in cart`);
@@ -420,73 +428,47 @@ export const AddToCartButton: React.FC<AddToCartButtonProps> = ({
     setButtonState(prev => ({ ...prev, isAdding: true, error: null }));
 
     try {
-      // Prepare cart item data
-      const cartItemData = {
-        id: `${product.id}-${variant?.id || 'default'}`,
-        productId: product.id,
-        variantId: variant?.id,
-        name: variant ? `${product.name} - ${variant.name}` : product.name,
-        price: effectivePrice.amount,
-        originalPrice: product.pricing.basePrice.amount,
-        discount: product.pricing.salePrice
-          ? product.pricing.basePrice.amount - product.pricing.salePrice.amount
-          : 0,
-        quantity: buttonState.quantity,
-        image: variant?.media?.images?.[0]?.url || product.media?.images?.[0]?.url || '',
-        slug: product.slug,
-        sku: variant?.sku || product.sku,
-        weight: variant?.weight?.value || product.weight?.value || 0,
-        color: variant?.options?.find(opt => opt.value.toLowerCase().includes('color'))?.value,
-        size: variant?.options?.find(opt => opt.value.toLowerCase().includes('size'))?.value,
+      // Extract variant info for the provider
+      const variantInfo = variant ? {
+        color: variant.options?.find(opt => opt.value.toLowerCase().includes('color'))?.value,
+        size: variant.options?.find(opt => opt.value.toLowerCase().includes('size'))?.value,
         material: product.materials?.[0]?.name,
-        inStock: maxQuantity,
-        maxQuantity: maxQuantity,
-      };
+      } : undefined;
 
-      // Add to cart
-      await addItem(cartItemData);
+      // Add to cart using the provider
+      const result = await addToCart(product.id, buttonState.quantity, variantInfo);
 
-      // Track analytics
-      trackAddToCart(buttonState.quantity);
+      if (result.success) {
+        // Track analytics
+        trackAddToCart(buttonState.quantity);
 
-      // Success state
-      setButtonState(prev => ({
-        ...prev,
-        isAdding: false,
-        isSuccess: showSuccessAnimation,
-        isInCart: true,
-        cartQuantity: (prev.cartQuantity || 0) + buttonState.quantity,
-      }));
+        // Success state
+        setButtonState(prev => ({
+          ...prev,
+          isAdding: false,
+          isSuccess: showSuccessAnimation,
+          isInCart: true,
+          cartQuantity: (prev.cartQuantity || 0) + buttonState.quantity,
+        }));
 
-      // Show success toast
-      toast.success(
-        <div className="flex items-center gap-2">
-          <CheckIcon className="h-5 w-5 text-green-500" />
-          <span>
-            <strong>{buttonState.quantity}x</strong> {product.name} added to cart
-          </span>
-        </div>,
-        {
-          duration: 3000,
-          position: 'top-right',
+        // Reset quantity if quick add
+        if (quickAdd) {
+          setButtonState(prev => ({ ...prev, quantity: initialQuantity }));
         }
-      );
 
-      // Reset quantity if quick add
-      if (quickAdd) {
-        setButtonState(prev => ({ ...prev, quantity: initialQuantity }));
-      }
+        // Redirect to cart if needed
+        if (redirectToCart) {
+          setTimeout(() => {
+            window.location.href = '/cart';
+          }, 500);
+        }
 
-      // Redirect to cart if needed
-      if (redirectToCart) {
-        setTimeout(() => {
-          window.location.href = '/cart';
-        }, 500);
-      }
-
-      // Custom callback
-      if (onAddSuccess) {
-        onAddSuccess(buttonState.quantity);
+        // Custom callback
+        if (onAddSuccess) {
+          onAddSuccess(buttonState.quantity);
+        }
+      } else {
+        throw new Error(result.error || 'Failed to add to cart');
       }
     } catch (error) {
       console.error('Add to cart error:', error);
@@ -514,7 +496,7 @@ export const AddToCartButton: React.FC<AddToCartButtonProps> = ({
     maxQuantity,
     isOutOfStock,
     validateQuantity,
-    addItem,
+    addToCart,
     updateQuantity,
     trackAddToCart,
     showSuccessAnimation,
@@ -524,7 +506,6 @@ export const AddToCartButton: React.FC<AddToCartButtonProps> = ({
     onAddSuccess,
     onError,
     itemInCart,
-    cartState.syncing,
   ]);
 
   const handleAddToWishlist = useCallback(async () => {
@@ -705,10 +686,10 @@ export const AddToCartButton: React.FC<AddToCartButtonProps> = ({
             buttonState.isAdding
               ? 'adding'
               : buttonState.isSuccess
-              ? 'success'
-              : buttonState.error
-              ? 'error'
-              : 'initial'
+                ? 'success'
+                : buttonState.error
+                  ? 'error'
+                  : 'initial'
           }
           transition={{ duration: 0.2 }}
           className={cn(fullWidth && 'flex-1')}

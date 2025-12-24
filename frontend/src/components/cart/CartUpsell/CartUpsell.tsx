@@ -31,7 +31,6 @@ import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { cn } from '@/lib/utils';
 import { formatCurrency } from '@/lib/format';
-import { useCart } from '@/contexts/CartContext';
 import toast from 'react-hot-toast';
 
 export interface UpsellProduct {
@@ -48,16 +47,18 @@ export interface UpsellProduct {
 export interface CartUpsellProps {
   recommendations?: UpsellProduct[];
   onAddToCart?: (productId: string) => void;
+  addItem?: (product: any, quantity?: number) => void; // Using any for flexibility with shims, or define strict type if possible
   className?: string;
 }
 
 export const CartUpsell: React.FC<CartUpsellProps> = ({
   recommendations = [],
   onAddToCart,
+  addItem,
   className,
 }) => {
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
-  const { addItem } = useCart();
+  // useCart removed, using prop instead
 
   const handleToggleItem = (productId: string) => {
     const newSelected = new Set(selectedItems);
@@ -73,17 +74,32 @@ export const CartUpsell: React.FC<CartUpsellProps> = ({
     recommendations
       .filter((item) => selectedItems.has(item.id))
       .forEach((item) => {
-        addItem({
-          id: `cart-${item.id}`,
-          productId: item.id,
-          quantity: 1,
-          name: item.name,
-          price: item.price,
-          image: item.image,
-          slug: item.slug,
-          sku: `SKU-${item.id}`,
-          inStock: item.inStock ? 999 : 0,
-        });
+        if (addItem) {
+          // Shim UpsellProduct to Product structure expected by useCart hook
+          const productShim = {
+            id: item.id,
+            name: item.name,
+            slug: item.slug,
+            price: item.price,
+            media: {
+              images: [{
+                url: item.image,
+                alt: item.name
+              }]
+            },
+            inventory: {
+              isInStock: item.inStock,
+              availableQuantity: item.inStock ? 99 : 0
+            },
+            sku: `SKU-${item.id}`,
+            pricing: {
+              salePrice: { amount: item.price },
+              basePrice: { amount: item.originalPrice || item.price }
+            }
+          };
+
+          addItem(productShim, 1);
+        }
         onAddToCart?.(item.id);
       });
     toast.success(`${selectedItems.size} items added to cart!`);

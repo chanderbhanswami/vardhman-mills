@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
+import {
   EllipsisVerticalIcon,
   ShareIcon,
   TrashIcon,
@@ -36,7 +36,7 @@ import { Select } from '@/components/ui/Select';
 import { Tooltip } from '@/components/ui/Tooltip';
 
 // Hooks and Contexts
-import { useWishlist } from '@/contexts/WishlistContext';
+import { useWishlist } from '@/components/providers/WishlistProvider';
 import { useToast } from '@/hooks/useToast';
 
 // Utils
@@ -113,7 +113,7 @@ const WishlistActions: React.FC<WishlistActionsProps> = ({
   // Hooks
   const { removeFromWishlist, moveToCart } = useWishlist();
   const { toast } = useToast();
-  
+
   // Mock missing function
   const updateWishlistItem = useCallback(async (id: string, updates: { priority?: string }) => {
     console.log('Update wishlist item:', id, updates);
@@ -178,11 +178,11 @@ const WishlistActions: React.FC<WishlistActionsProps> = ({
       new Date(item.addedAt).toLocaleDateString(),
       item.notes || ''
     ]);
-    
+
     const csvContent = [headers, ...rows]
       .map(row => row.map(field => `"${field}"`).join(','))
       .join('\n');
-    
+
     return csvContent;
   }, []);
 
@@ -201,7 +201,7 @@ const WishlistActions: React.FC<WishlistActionsProps> = ({
   const printWishlist = useCallback((itemIds: string[]) => {
     const printItems = items.filter(item => itemIds.includes(item.id));
     const printWindow = window.open('', '_blank');
-    
+
     if (printWindow) {
       printWindow.document.write(`
         <html>
@@ -248,7 +248,7 @@ const WishlistActions: React.FC<WishlistActionsProps> = ({
 
   const handleBulkAction = useCallback(async (actionId: string) => {
     setBulkActionLoading(actionId);
-    
+
     try {
       switch (actionId) {
         case 'remove':
@@ -268,7 +268,7 @@ const WishlistActions: React.FC<WishlistActionsProps> = ({
           break;
 
         case 'setPriorityHigh':
-          await Promise.all(selectedItems.map(id => 
+          await Promise.all(selectedItems.map(id =>
             updateWishlistItem(id, { priority: 'high' })
           ));
           toast({
@@ -278,7 +278,7 @@ const WishlistActions: React.FC<WishlistActionsProps> = ({
           break;
 
         case 'setPriorityMedium':
-          await Promise.all(selectedItems.map(id => 
+          await Promise.all(selectedItems.map(id =>
             updateWishlistItem(id, { priority: 'medium' })
           ));
           toast({
@@ -288,7 +288,7 @@ const WishlistActions: React.FC<WishlistActionsProps> = ({
           break;
 
         case 'setPriorityLow':
-          await Promise.all(selectedItems.map(id => 
+          await Promise.all(selectedItems.map(id =>
             updateWishlistItem(id, { priority: 'low' })
           ));
           toast({
@@ -333,7 +333,7 @@ const WishlistActions: React.FC<WishlistActionsProps> = ({
     try {
       // Mock share functionality
       const shareUrl = `${window.location.origin}/wishlist/shared/mock-id`;
-      
+
       await navigator.clipboard.writeText(shareUrl);
       toast({
         title: 'Link copied',
@@ -352,16 +352,16 @@ const WishlistActions: React.FC<WishlistActionsProps> = ({
 
   const handleCreateNewList = useCallback(async () => {
     if (!newListName.trim()) return;
-    
+
     try {
       // This would be an API call to create a new wishlist
       console.log('Creating new list:', { name: newListName, description: newListDescription });
-      
+
       toast({
         title: 'List created',
         description: `"${newListName}" has been created`
       });
-      
+
       setIsCreateListDialogOpen(false);
       setNewListName('');
       setNewListDescription('');
@@ -436,7 +436,7 @@ const WishlistActions: React.FC<WishlistActionsProps> = ({
         <Badge variant="secondary" className="bg-blue-100 text-blue-800">
           {selectedItemsCount} selected
         </Badge>
-        
+
         <div className="flex items-center gap-1">
           {bulkActions.slice(0, 3).map((action) => (
             <Tooltip key={action.id} content={action.label}>
@@ -454,7 +454,7 @@ const WishlistActions: React.FC<WishlistActionsProps> = ({
               </Button>
             </Tooltip>
           ))}
-          
+
           <DropdownMenu
             trigger={
               <Button variant="ghost" size="sm" className="p-2">
@@ -471,7 +471,7 @@ const WishlistActions: React.FC<WishlistActionsProps> = ({
             align="end"
           />
         </div>
-        
+
         <Button
           variant="ghost"
           size="sm"
@@ -503,10 +503,10 @@ const WishlistActions: React.FC<WishlistActionsProps> = ({
                 { value: 'all', label: 'All Categories' },
                 ...availableCategories.map(category => ({ value: category, label: category }))
               ]}
-              value={filters.category || 'all'} 
-              onValueChange={(value) => 
-                onFiltersChange({ 
-                  ...filters, 
+              value={filters.category || 'all'}
+              onValueChange={(value) =>
+                onFiltersChange({
+                  ...filters,
                   category: value === 'all' ? undefined : value as string
                 })
               }
@@ -517,17 +517,17 @@ const WishlistActions: React.FC<WishlistActionsProps> = ({
           {/* Priority Filter */}
           <div className="space-y-2">
             <Label>Priority</Label>
-            <Select 
+            <Select
               options={[
                 { value: 'all', label: 'All Priorities' },
                 { value: 'high', label: 'High' },
                 { value: 'medium', label: 'Medium' },
                 { value: 'low', label: 'Low' }
               ]}
-              value={filters.priority || 'all'} 
-              onValueChange={(value) => 
-                onFiltersChange({ 
-                  ...filters, 
+              value={filters.priority || 'all'}
+              onValueChange={(value) =>
+                onFiltersChange({
+                  ...filters,
                   priority: value === 'all' ? undefined : value as string
                 })
               }
@@ -542,10 +542,10 @@ const WishlistActions: React.FC<WishlistActionsProps> = ({
               <Switch
                 id="in-stock"
                 checked={filters.inStock === true}
-                onCheckedChange={(checked) => 
-                  onFiltersChange({ 
-                    ...filters, 
-                    inStock: checked ? true : undefined 
+                onCheckedChange={(checked) =>
+                  onFiltersChange({
+                    ...filters,
+                    inStock: checked ? true : undefined
                   })
                 }
               />
@@ -559,9 +559,9 @@ const WishlistActions: React.FC<WishlistActionsProps> = ({
             <div className="px-2">
               <Slider
                 value={filters.priceRange || priceRange}
-                onValueChange={(value) => 
-                  onFiltersChange({ 
-                    ...filters, 
+                onValueChange={(value) =>
+                  onFiltersChange({
+                    ...filters,
                     priceRange: value as [number, number]
                   })
                 }
@@ -664,13 +664,13 @@ const WishlistActions: React.FC<WishlistActionsProps> = ({
 
           {/* Sort */}
           <div className="flex items-center gap-1">
-            <Select 
+            <Select
               options={sortOptions}
-              value={sortBy} 
+              value={sortBy}
               onValueChange={(value) => onSortChange(value as string)}
               className="w-auto"
             />
-            
+
             <Button
               variant="outline"
               size="sm"
@@ -772,7 +772,7 @@ const WishlistActions: React.FC<WishlistActionsProps> = ({
                   <Switch
                     id="public"
                     checked={shareSettings.isPublic}
-                    onCheckedChange={(checked) => 
+                    onCheckedChange={(checked) =>
                       setShareSettings(prev => ({ ...prev, isPublic: checked }))
                     }
                   />
@@ -782,7 +782,7 @@ const WishlistActions: React.FC<WishlistActionsProps> = ({
                   <Switch
                     id="comments"
                     checked={shareSettings.allowComments}
-                    onCheckedChange={(checked) => 
+                    onCheckedChange={(checked) =>
                       setShareSettings(prev => ({ ...prev, allowComments: checked }))
                     }
                   />
@@ -792,7 +792,7 @@ const WishlistActions: React.FC<WishlistActionsProps> = ({
                   <Switch
                     id="prices"
                     checked={shareSettings.showPrices}
-                    onCheckedChange={(checked) => 
+                    onCheckedChange={(checked) =>
                       setShareSettings(prev => ({ ...prev, showPrices: checked }))
                     }
                   />
@@ -802,7 +802,7 @@ const WishlistActions: React.FC<WishlistActionsProps> = ({
                   <Switch
                     id="notes"
                     checked={shareSettings.showNotes}
-                    onCheckedChange={(checked) => 
+                    onCheckedChange={(checked) =>
                       setShareSettings(prev => ({ ...prev, showNotes: checked }))
                     }
                   />

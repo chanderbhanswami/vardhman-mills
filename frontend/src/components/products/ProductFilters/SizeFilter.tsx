@@ -42,10 +42,10 @@ const SizeFilter: React.FC<SizeFilterProps> = ({
 
   const handleSizeToggle = (sizeId: string) => {
     if (disabled) return;
-    
+
     const size = sizes.find(s => s.id === sizeId);
     if (!size?.isAvailable) return;
-    
+
     if (selectedSizes.includes(sizeId)) {
       onSizeChange(selectedSizes.filter(id => id !== sizeId));
     } else {
@@ -64,7 +64,7 @@ const SizeFilter: React.FC<SizeFilterProps> = ({
     return (
       <div className={cn('space-y-4', className)}>
         <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-gray-900">Size</h3>
+          <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">Size</h3>
           {selectedCount > 0 && (
             <button
               onClick={handleClearAll}
@@ -81,7 +81,7 @@ const SizeFilter: React.FC<SizeFilterProps> = ({
             <AnimatePresence mode="popLayout">
               {visibleSizes.map((size, index) => {
                 const isSelected = selectedSizes.includes(size.id);
-                
+
                 return (
                   <motion.button
                     key={size.id}
@@ -98,8 +98,8 @@ const SizeFilter: React.FC<SizeFilterProps> = ({
                       isSelected
                         ? 'border-primary-600 bg-primary-600 text-white'
                         : size.isAvailable
-                        ? 'border-gray-300 hover:border-gray-400 bg-white text-gray-900'
-                        : 'border-gray-200 bg-gray-50 text-gray-400 line-through',
+                          ? 'border-gray-300 hover:border-gray-400 bg-white text-gray-900'
+                          : 'border-gray-200 bg-gray-50 text-gray-400 line-through',
                       !size.isAvailable && 'opacity-50'
                     )}
                   >
@@ -173,7 +173,7 @@ const SizeFilter: React.FC<SizeFilterProps> = ({
   return (
     <div className={cn('space-y-4', className)}>
       <div className="flex items-center justify-between">
-        <h3 className="font-semibold text-gray-900">Size</h3>
+        <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">Size</h3>
         {selectedCount > 0 && (
           <button
             onClick={handleClearAll}
@@ -189,7 +189,7 @@ const SizeFilter: React.FC<SizeFilterProps> = ({
         <AnimatePresence mode="popLayout">
           {visibleSizes.map((size, index) => {
             const isSelected = selectedSizes.includes(size.id);
-            
+
             return (
               <motion.label
                 key={size.id}
@@ -218,7 +218,7 @@ const SizeFilter: React.FC<SizeFilterProps> = ({
                     aria-label={`Select ${size.name} size`}
                     title={size.name}
                   />
-                  
+
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
                       <span className={cn(

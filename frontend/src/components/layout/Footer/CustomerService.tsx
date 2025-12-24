@@ -3,9 +3,9 @@
 import React from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { 
-  PhoneIcon, 
-  EnvelopeIcon, 
+import {
+  PhoneIcon,
+  EnvelopeIcon,
   ChatBubbleLeftRightIcon,
   QuestionMarkCircleIcon,
   DocumentTextIcon,
@@ -72,7 +72,7 @@ const CustomerService: React.FC<CustomerServiceProps> = ({
   variant = 'default',
 }) => {
   const linkVariants = {
-    hover: { 
+    hover: {
       x: 4,
       transition: { type: 'tween' as const, duration: 0.2 }
     }
@@ -81,7 +81,7 @@ const CustomerService: React.FC<CustomerServiceProps> = ({
   if (variant === 'minimal') {
     return (
       <div className={`${className}`}>
-        <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
+        <h3 className="text-sm font-semibold text-white mb-3">
           {title}
         </h3>
         <div className="space-y-2">
@@ -91,7 +91,7 @@ const CustomerService: React.FC<CustomerServiceProps> = ({
               <Link
                 key={service.href}
                 href={service.href}
-                className="flex items-center text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors duration-200"
+                className="flex items-center text-sm text-gray-400 hover:text-white transition-colors duration-200"
               >
                 <Icon className="w-4 h-4 mr-2" />
                 {service.label}
@@ -105,10 +105,10 @@ const CustomerService: React.FC<CustomerServiceProps> = ({
 
   return (
     <div className={`${className}`}>
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">
+      <h3 className="text-lg font-semibold text-white mb-4">
         {title}
       </h3>
-      
+
       <div className="space-y-4">
         {serviceLinks.map((service) => {
           const Icon = service.icon;
@@ -123,40 +123,40 @@ const CustomerService: React.FC<CustomerServiceProps> = ({
                 href={service.href}
                 className={`
                   flex items-start space-x-3 p-3 rounded-lg transition-all duration-200
-                  ${service.isActive 
-                    ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800' 
-                    : 'hover:bg-gray-50 dark:hover:bg-gray-800 border border-transparent'
+                  ${service.isActive
+                    ? 'bg-blue-900/20 border border-blue-800'
+                    : 'hover:bg-gray-800 border border-transparent hover:border-gray-700'
                   }
                 `}
               >
                 <div className={`
                   flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center
-                  ${service.isActive 
-                    ? 'bg-blue-100 dark:bg-blue-800 text-blue-600 dark:text-blue-300' 
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 group-hover:bg-blue-100 dark:group-hover:bg-blue-800 group-hover:text-blue-600 dark:group-hover:text-blue-300'
+                  ${service.isActive
+                    ? 'bg-blue-800 text-blue-300'
+                    : 'bg-gray-700 text-gray-400 group-hover:bg-blue-800 group-hover:text-blue-300'
                   }
-                  transition-all duration-200
+                  transition-all duration-200 shadow-sm
                 `}>
                   <Icon className="w-4 h-4" />
                 </div>
-                
+
                 <div className="flex-1 min-w-0">
                   <div className={`
-                    text-sm font-medium transition-colors duration-200
-                    ${service.isActive 
-                      ? 'text-blue-900 dark:text-blue-100' 
-                      : 'text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400'
+                    text-sm font-bold transition-colors duration-200
+                    ${service.isActive
+                      ? 'text-blue-100'
+                      : 'text-white group-hover:text-blue-400'
                     }
                   `}>
                     {service.label}
                     {service.isActive && (
-                      <span className="ml-2 px-1.5 py-0.5 text-xs font-bold text-white bg-green-500 rounded-full">
+                      <span className="ml-2 px-1.5 py-0.5 text-xs font-bold text-white bg-green-600 rounded-full">
                         Available
                       </span>
                     )}
                   </div>
                   {service.description && (
-                    <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                    <div className="text-xs text-gray-400 mt-1 font-medium">
                       {service.description}
                     </div>
                   )}
@@ -168,14 +168,14 @@ const CustomerService: React.FC<CustomerServiceProps> = ({
       </div>
 
       {/* Service Hours */}
-      <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-        <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
+      <div className="mt-6 p-4 bg-gray-800 border border-gray-700 rounded-lg shadow-sm">
+        <h4 className="text-sm font-semibold text-white mb-3">
           Service Hours
         </h4>
-        <div className="space-y-2 text-xs text-gray-600 dark:text-gray-400">
+        <div className="space-y-2 text-xs text-gray-400 font-medium">
           <div className="flex justify-between">
             <span>Customer Support:</span>
-            <span className="text-green-600 dark:text-green-400 font-medium">24/7 Available</span>
+            <span className="text-green-400 font-bold">24/7 Available</span>
           </div>
           <div className="flex justify-between">
             <span>Phone Support:</span>
@@ -183,7 +183,7 @@ const CustomerService: React.FC<CustomerServiceProps> = ({
           </div>
           <div className="flex justify-between">
             <span>Live Chat:</span>
-            <span className="text-green-600 dark:text-green-400 font-medium">Always Online</span>
+            <span className="text-green-400 font-bold">Always Online</span>
           </div>
           <div className="flex justify-between">
             <span>Email Response:</span>
@@ -193,14 +193,14 @@ const CustomerService: React.FC<CustomerServiceProps> = ({
       </div>
 
       {/* Emergency Contact */}
-      <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+      <div className="mt-4 p-3 bg-red-900/20 border border-red-800 rounded-lg">
         <div className="flex items-center">
-          <PhoneIcon className="w-4 h-4 text-red-600 dark:text-red-400 mr-2" />
-          <span className="text-sm font-medium text-red-900 dark:text-red-100">
+          <PhoneIcon className="w-4 h-4 text-red-400 mr-2" />
+          <span className="text-sm font-bold text-red-100">
             Emergency: +91-161-5039001
           </span>
         </div>
-        <p className="text-xs text-red-700 dark:text-red-300 mt-1">
+        <p className="text-xs text-red-300 mt-1 font-medium">
           For urgent production or delivery issues
         </p>
       </div>

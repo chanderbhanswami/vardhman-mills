@@ -200,7 +200,7 @@ export const FeatureGrid: React.FC<FeatureGridProps> = ({
   // ============================================================================
 
   const gridClasses = cn(
-    'grid gap-6',
+    'grid gap-6 items-stretch',
     layout === 'grid' && [
       columns.mobile === 1 && 'grid-cols-1',
       columns.tablet === 2 && 'md:grid-cols-2',
@@ -353,25 +353,33 @@ export const FeatureGrid: React.FC<FeatureGridProps> = ({
       </div>
 
       {/* Features Grid */}
-      <div className={gridClasses}>
-        <AnimatePresence mode="wait">
+      {/* Features Grid */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={selectedCategory}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+          className={gridClasses}
+        >
           {displayedFeatures.map((feature, index) => (
-            <motion.div
-              key={feature.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.4, delay: index * staggerDelay }}
-              layout={layout === 'masonry'}
-            >
-              <FeatureCard
-                {...feature}
-                onClick={() => handleFeatureClick(feature)}
-              />
-            </motion.div>
+            <div key={`${feature.id}-${index}`} className="h-full">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: index * staggerDelay }}
+                className="h-full"
+              >
+                <FeatureCard
+                  {...feature}
+                  onClick={() => handleFeatureClick(feature)}
+                />
+              </motion.div>
+            </div>
           ))}
-        </AnimatePresence>
-      </div>
+        </motion.div>
+      </AnimatePresence>
 
       {/* Load More Button */}
       {enableLoadMore && hasMore && (

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Social Links API Client
  * Comprehensive social media links management system
  */
@@ -248,7 +248,7 @@ export interface SocialLinksAnalytics {
  * Social Links API Service Class
  */
 export class SocialLinksApiService {
-  private baseUrl = '/api/v1/social-links';
+  private baseUrl = '/social-links';
 
   // ============================================================================
   // BASIC CRUD OPERATIONS

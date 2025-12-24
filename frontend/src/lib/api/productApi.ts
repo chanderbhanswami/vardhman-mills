@@ -1,13 +1,13 @@
 import { HttpClient } from './client';
 import { endpoints } from './endpoints';
-import { 
-  Product, 
+import {
+  Product,
   ProductVariant,
   Category,
   Brand
 } from '../../types/product.types';
 import { ProductReview as Review } from '../../types/review.types';
-import { 
+import {
   APIResponse as ApiResponse,
   PaginationMeta
 } from '../../types/common.types';
@@ -48,7 +48,7 @@ class ProductApiService {
       sku: backendProduct.variants?.[0]?.sku || '',
       description: backendProduct.description,
       shortDescription: backendProduct.shortDescription,
-      
+
       categoryId: backendProduct.category?._id || backendProduct.category?.id || '',
       category: backendProduct.category ? {
         id: backendProduct.category._id || backendProduct.category.id,
@@ -69,16 +69,16 @@ class ProductApiService {
         updatedBy: '',
         createdAt: '',
         updatedAt: ''
-      } : { 
-        id: '', name: '', slug: '', level: 0, children: [], path: '', seo: {}, 
-        status: 'active', isVisible: true, isFeatured: false, 
+      } : {
+        id: '', name: '', slug: '', level: 0, children: [], path: '', seo: {},
+        status: 'active', isVisible: true, isFeatured: false,
         productCount: 0, activeProductCount: 0, sortOrder: 0, attributeGroups: [],
-        createdBy: '', updatedBy: '', createdAt: '', updatedAt: '' 
+        createdBy: '', updatedBy: '', createdAt: '', updatedAt: ''
       },
-      
+
       collectionIds: [],
       collections: [],
-      
+
       price: price,
       pricing: {
         basePrice: { amount: price, currency: 'INR', formatted: `₹${price}` },
@@ -88,52 +88,53 @@ class ProductApiService {
         taxable: true
       },
 
-      // Inventory
-      stock: backendProduct.stock || 0,
+
+      // Inventory - Default to "in stock" when backend doesn't provide stock data
+      stock: backendProduct.stock ?? 100, // Default to 100 if not provided
       inventory: {
-        quantity: backendProduct.stock || 0,
-        isInStock: (backendProduct.stock || 0) > 0,
-        isLowStock: (backendProduct.stock || 0) < 10,
+        quantity: backendProduct.stock ?? 100,
+        isInStock: backendProduct.stock !== undefined ? backendProduct.stock > 0 : true, // Default to in stock
+        isLowStock: backendProduct.stock !== undefined ? backendProduct.stock < 10 : false,
         lowStockThreshold: 10,
-        availableQuantity: backendProduct.stock || 0,
+        availableQuantity: backendProduct.stock ?? 100,
         backorderAllowed: false
       },
-      
+
       variants: (backendProduct.variants || []).map((v: any) => ({
         id: v._id || v.id,
         productId: backendProduct._id || backendProduct.id,
         name: `${v.size || ''} ${v.color || ''}`.trim(),
         sku: v.sku,
         options: [
-            { id: 'opt-size', optionId: 'size', value: v.size, displayValue: v.size, sortOrder: 0, isAvailable: true },
-            { id: 'opt-color', optionId: 'color', value: v.color, displayValue: v.color, sortOrder: 1, isAvailable: true }
+          { id: 'opt-size', optionId: 'size', value: v.size, displayValue: v.size, sortOrder: 0, isAvailable: true },
+          { id: 'opt-color', optionId: 'color', value: v.color, displayValue: v.color, sortOrder: 1, isAvailable: true }
         ].filter((o: any) => o.value),
         pricing: {
-            basePrice: { amount: v.price, currency: 'INR', formatted: `₹${v.price}` },
-            salePrice: v.comparePrice ? { amount: v.price, currency: 'INR', formatted: `₹${v.price}` } : undefined,
-            compareAtPrice: v.comparePrice ? { amount: v.comparePrice, currency: 'INR', formatted: `₹${v.comparePrice}` } : undefined,
-            isDynamicPricing: false,
-            taxable: true
+          basePrice: { amount: v.price, currency: 'INR', formatted: `₹${v.price}` },
+          salePrice: v.comparePrice ? { amount: v.price, currency: 'INR', formatted: `₹${v.price}` } : undefined,
+          compareAtPrice: v.comparePrice ? { amount: v.comparePrice, currency: 'INR', formatted: `₹${v.comparePrice}` } : undefined,
+          isDynamicPricing: false,
+          taxable: true
         },
         inventory: {
-            quantity: v.stock || 0,
-            isInStock: (v.stock || 0) > 0,
-            isLowStock: (v.stock || 0) < 10,
-            lowStockThreshold: 10,
-            availableQuantity: v.stock || 0,
-            backorderAllowed: false
+          quantity: v.stock || 0,
+          isInStock: (v.stock || 0) > 0,
+          isLowStock: (v.stock || 0) < 10,
+          lowStockThreshold: 10,
+          availableQuantity: v.stock || 0,
+          backorderAllowed: false
         },
         status: 'active',
         isDefault: false,
         createdAt: '',
         updatedAt: ''
       })),
-      
+
       images: images,
       media: {
         images: imageAssets
       },
-      
+
       rating: {
         average: backendProduct.averageRating || 0,
         count: backendProduct.totalReviews || 0,
@@ -144,7 +145,7 @@ class ProductApiService {
       status: backendProduct.isActive ? 'active' : 'inactive',
       isPublished: backendProduct.isActive,
       isFeatured: backendProduct.isFeatured || false,
-      
+
       createdAt: backendProduct.createdAt,
       updatedAt: backendProduct.updatedAt
     } as Product;
@@ -186,7 +187,7 @@ class ProductApiService {
       ...buildSearchParams(params || {}),
       ...buildPaginationParams(params || {}),
     };
-    
+
     const response = await this.client.get<any>(endpoints.products.list, { params: queryParams });
     return this.transformListResponse(response);
   }
@@ -252,7 +253,7 @@ class ProductApiService {
       ...buildSearchParams(params || {}),
       ...buildPaginationParams(params || {}),
     };
-    
+
     const response = await this.client.get<any>(endpoints.products.search, { params: searchParams });
     return this.transformListResponse(response);
   }
@@ -264,7 +265,7 @@ class ProductApiService {
       ...buildSearchParams(params || {}),
       ...buildPaginationParams(params || {}),
     };
-    
+
     const response = await this.client.get<any>(endpoints.products.byCategory(categoryId), { params: queryParams });
     return this.transformListResponse(response);
   }
@@ -276,7 +277,7 @@ class ProductApiService {
       ...buildSearchParams(params || {}),
       ...buildPaginationParams(params || {}),
     };
-    
+
     const response = await this.client.get<any>(endpoints.products.byBrand(brandId), { params: queryParams });
     return this.transformListResponse(response);
   }
@@ -304,7 +305,7 @@ class ProductApiService {
     files.forEach((file, index) => {
       formData.append(`images[${index}]`, file);
     });
-    
+
     return this.client.post<string[]>(endpoints.products.uploadImages(id), formData);
   }
 
@@ -337,13 +338,13 @@ class ProductApiService {
     const response = await this.client.get<any>(endpoints.products.reviews(id), { params: queryParams });
     // Reviews might also need transformation if they follow the same pattern
     if (response && response.data && Array.isArray(response.data.reviews)) {
-        return {
-            success: response.status === 'success',
-            data: response.data.reviews,
-            meta: {
-                total: response.results || 0
-            }
-        };
+      return {
+        success: response.status === 'success',
+        data: response.data.reviews,
+        meta: {
+          total: response.results || 0
+        }
+      };
     }
     return response;
   }
@@ -352,10 +353,10 @@ class ProductApiService {
   async addProductReview(id: string, review: { rating: number; comment: string; title?: string }): Promise<ApiResponse<Review>> {
     const response = await this.client.post<any>(endpoints.products.addReview(id), review);
     if (response && response.data && response.data.review) {
-        return {
-            success: response.status === 'success',
-            data: response.data.review
-        };
+      return {
+        success: response.status === 'success',
+        data: response.data.review
+      };
     }
     return response;
   }
@@ -387,7 +388,7 @@ class ProductApiService {
 
   // Get product export data (Admin only)
   async exportProducts(format: 'csv' | 'xlsx' | 'json' = 'csv'): Promise<ApiResponse<Blob>> {
-    return this.client.get<Blob>(endpoints.products.export, { 
+    return this.client.get<Blob>(endpoints.products.export, {
       params: { format },
       responseType: 'blob'
     });
@@ -397,7 +398,7 @@ class ProductApiService {
   async importProducts(file: File): Promise<ApiResponse<{ imported: number; errors: string[] }>> {
     const formData = new FormData();
     formData.append('file', file);
-    
+
     return this.client.post<{ imported: number; errors: string[] }>(endpoints.products.import, formData);
   }
 }
@@ -417,7 +418,7 @@ export const useProducts = (params?: SearchParams & PaginationParams) => {
 export const useInfiniteProducts = (params?: SearchParams & PaginationParams) => {
   return useInfiniteQuery({
     queryKey: [CACHE_KEYS.PRODUCTS, 'infinite', params],
-    queryFn: ({ pageParam = 1 }) => 
+    queryFn: ({ pageParam = 1 }) =>
       productApiService.getProducts({ ...params, page: pageParam }),
     getNextPageParam: (lastPage) => {
       if (!lastPage.meta || !lastPage.meta.page || !lastPage.meta.totalPages) return undefined;
@@ -527,9 +528,9 @@ export const useProductsByBrand = (brandId: string, params?: SearchParams & Pagi
 // Mutation Hooks
 export const useCreateProduct = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: (data: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) => 
+    mutationFn: (data: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) =>
       productApiService.createProduct(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [CACHE_KEYS.PRODUCTS] });
@@ -539,9 +540,9 @@ export const useCreateProduct = () => {
 
 export const useUpdateProduct = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<Product> }) => 
+    mutationFn: ({ id, data }: { id: string; data: Partial<Product> }) =>
       productApiService.updateProduct(id, data),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: [CACHE_KEYS.PRODUCTS] });
@@ -552,7 +553,7 @@ export const useUpdateProduct = () => {
 
 export const useDeleteProduct = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (id: string) => productApiService.deleteProduct(id),
     onSuccess: () => {
@@ -563,9 +564,9 @@ export const useDeleteProduct = () => {
 
 export const useUploadProductImages = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: ({ id, files }: { id: string; files: File[] }) => 
+    mutationFn: ({ id, files }: { id: string; files: File[] }) =>
       productApiService.uploadProductImages(id, files),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: [CACHE_KEYS.PRODUCTS, 'detail', id] });
@@ -575,9 +576,9 @@ export const useUploadProductImages = () => {
 
 export const useDeleteProductImage = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: ({ id, imageUrl }: { id: string; imageUrl: string }) => 
+    mutationFn: ({ id, imageUrl }: { id: string; imageUrl: string }) =>
       productApiService.deleteProductImage(id, imageUrl),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: [CACHE_KEYS.PRODUCTS, 'detail', id] });
@@ -587,9 +588,9 @@ export const useDeleteProductImage = () => {
 
 export const useUpdateProductStock = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: ({ id, stock }: { id: string; stock: number }) => 
+    mutationFn: ({ id, stock }: { id: string; stock: number }) =>
       productApiService.updateProductStock(id, stock),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: [CACHE_KEYS.PRODUCTS, 'detail', id] });
@@ -599,9 +600,9 @@ export const useUpdateProductStock = () => {
 
 export const useUpdateProductPrice = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: ({ id, price, salePrice }: { id: string; price: number; salePrice?: number }) => 
+    mutationFn: ({ id, price, salePrice }: { id: string; price: number; salePrice?: number }) =>
       productApiService.updateProductPrice(id, price, salePrice),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: [CACHE_KEYS.PRODUCTS, 'detail', id] });
@@ -611,9 +612,9 @@ export const useUpdateProductPrice = () => {
 
 export const useToggleProductStatus = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: ({ id, isActive }: { id: string; isActive: boolean }) => 
+    mutationFn: ({ id, isActive }: { id: string; isActive: boolean }) =>
       productApiService.toggleProductStatus(id, isActive),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: [CACHE_KEYS.PRODUCTS, 'detail', id] });
@@ -623,9 +624,9 @@ export const useToggleProductStatus = () => {
 
 export const useBulkUpdateProducts = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: (updates: Array<{ id: string; data: Partial<Product> }>) => 
+    mutationFn: (updates: Array<{ id: string; data: Partial<Product> }>) =>
       productApiService.bulkUpdateProducts(updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [CACHE_KEYS.PRODUCTS] });
@@ -635,7 +636,7 @@ export const useBulkUpdateProducts = () => {
 
 export const useBulkDeleteProducts = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (ids: string[]) => productApiService.bulkDeleteProducts(ids),
     onSuccess: () => {
@@ -646,7 +647,7 @@ export const useBulkDeleteProducts = () => {
 
 export const useImportProducts = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (file: File) => productApiService.importProducts(file),
     onSuccess: () => {

@@ -158,7 +158,7 @@ class AnnouncementBarSocketManager {
     this.isConnecting = true;
     
     try {
-      const serverUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+      const serverUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5000';
       
       this.socket = io(`${serverUrl}/announcements`, {
         transports: ['websocket', 'polling'],
@@ -703,7 +703,7 @@ class AnnouncementBarService {
   }
 
   constructor() {
-    this.baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+    this.baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5000';
     this.queryClient = new QueryClient();
     this.socketManager = AnnouncementBarSocketManager.getInstance();
     this.analyticsManager = AnnouncementBarAnalyticsManager.getInstance();

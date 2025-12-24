@@ -24,7 +24,7 @@ import {
   InformationCircleIcon,
   TagIcon,
 } from '@heroicons/react/24/outline';
-import { useCart } from '@/contexts/CartContext';
+import { useCart } from '@/components/providers/CartProvider';
 import { Badge } from '@/components/ui/Badge';
 import { Tooltip } from '@/components/ui/Tooltip';
 import { cn } from '@/lib/utils';
@@ -73,18 +73,21 @@ export const CartSummary: React.FC<CartSummaryProps> = ({
   // HOOKS & STATE
   // ============================================================================
 
-  const { state } = useCart();
-  const summary = state.summary;
+  const { summary } = useCart();
 
   // ============================================================================
   // COMPUTED VALUES
   // ============================================================================
 
-  const hasCoupon = !!state.couponCode;
+  // CartProvider's summary already includes discount and total
+  // Note: The provider doesn't support couponCode/couponDiscount separately,
+  // but discounts are included in summary.discount and appliedCoupons
+  const hasCoupon = summary.appliedCoupons && summary.appliedCoupons.length > 0;
+  const couponDiscount = summary.appliedCoupons?.reduce((sum, c) => sum + c.discount, 0) || 0;
   const hasShipping = summary.shipping > 0;
   const hasTax = summary.tax > 0;
-  const hasSavings = summary.savings > 0 || (state.couponDiscount && state.couponDiscount > 0);
-  const totalSavings = summary.savings + (state.couponDiscount || 0);
+  const hasSavings = summary.discount > 0;
+  const totalSavings = summary.discount;
 
   // ============================================================================
   // RENDER HELPERS
@@ -136,14 +139,14 @@ export const CartSummary: React.FC<CartSummaryProps> = ({
     return (
       <div className={cn('space-y-2', className)}>
         {renderSummaryRow('Subtotal', summary.subtotal, undefined, undefined, false)}
-        
-        {hasCoupon && state.couponDiscount && state.couponDiscount > 0 && (
+
+        {hasCoupon && couponDiscount > 0 && (
           <div className="flex items-center justify-between text-sm text-green-600">
             <div className="flex items-center gap-2">
               <TagIcon className="h-4 w-4" />
-              <span>Coupon ({state.couponCode})</span>
+              <span>Coupon Applied</span>
             </div>
-            <span>-{formatCurrency(state.couponDiscount, 'INR')}</span>
+            <span>-{formatCurrency(couponDiscount, 'INR')}</span>
           </div>
         )}
 
@@ -189,13 +192,13 @@ export const CartSummary: React.FC<CartSummaryProps> = ({
       )}
 
       {/* Coupon */}
-      {hasCoupon && state.couponDiscount && state.couponDiscount > 0 && (
+      {hasCoupon && couponDiscount > 0 && (
         <div className="flex items-center justify-between text-green-600">
           <div className="flex items-center gap-2">
             <TagIcon className="h-4 w-4" />
-            <span>Coupon ({state.couponCode})</span>
+            <span>Coupon Applied</span>
           </div>
-          <span>-{formatCurrency(state.couponDiscount, 'INR')}</span>
+          <span>-{formatCurrency(couponDiscount, 'INR')}</span>
         </div>
       )}
 

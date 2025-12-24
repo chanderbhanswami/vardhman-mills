@@ -48,8 +48,8 @@ import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { cn } from '@/lib/utils';
 import { formatCurrency } from '@/lib/format';
-import { useCart } from '@/contexts/CartContext';
-import { useWishlist } from '@/contexts/WishlistContext';
+import { useCart } from '@/components/providers/CartProvider';
+import { useWishlist } from '@/components/providers/WishlistProvider';
 import toast from 'react-hot-toast';
 
 // ============================================================================
@@ -429,8 +429,8 @@ export const CartComparison: React.FC<CartComparisonProps> = ({
                     className={cn(
                       'border-b border-gray-200 hover:bg-gray-50',
                       highlightDifferences &&
-                        hasDifference(key) &&
-                        'bg-yellow-50'
+                      hasDifference(key) &&
+                      'bg-yellow-50'
                     )}
                   >
                     <td className="p-4 font-medium text-gray-700">{key}</td>

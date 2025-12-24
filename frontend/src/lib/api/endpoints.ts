@@ -4,7 +4,7 @@
  */
 
 const API_VERSION = 'v1';
-const BASE_PATH = '/api/v1';
+const BASE_PATH = '';
 
 export const endpoints = {
   // Authentication Endpoints
@@ -241,29 +241,29 @@ export const endpoints = {
     validate: `${BASE_PATH}/cart/validate`,
     syncGuest: `${BASE_PATH}/cart/sync-guest`,
     merge: `${BASE_PATH}/cart/merge`,
-    
+
     // Item Operations
     addItem: `${BASE_PATH}/cart/items`,
     updateItem: (itemId: string) => `${BASE_PATH}/cart/items/${itemId}`,
     removeItem: (itemId: string) => `${BASE_PATH}/cart/items/${itemId}`,
     moveToWishlist: (itemId: string) => `${BASE_PATH}/cart/items/${itemId}/move-to-wishlist`,
     moveFromWishlist: (wishlistItemId: string) => `${BASE_PATH}/cart/items/move-from-wishlist/${wishlistItemId}`,
-    
+
     // Bulk Operations
     addMultiple: `${BASE_PATH}/cart/items/bulk-add`,
     updateMultiple: `${BASE_PATH}/cart/items/bulk-update`,
     removeMultiple: `${BASE_PATH}/cart/items/bulk-remove`,
-    
+
     // Quantity Operations
     increaseQuantity: (itemId: string) => `${BASE_PATH}/cart/items/${itemId}/increase`,
     decreaseQuantity: (itemId: string) => `${BASE_PATH}/cart/items/${itemId}/decrease`,
     setQuantity: (itemId: string) => `${BASE_PATH}/cart/items/${itemId}/quantity`,
-    
+
     // Coupon Operations
     applyCoupon: `${BASE_PATH}/cart/coupons/apply`,
     removeCoupon: (couponId: string) => `${BASE_PATH}/cart/coupons/${couponId}`,
     validateCoupon: `${BASE_PATH}/cart/coupons/validate`,
-    
+
     // Saved Carts
     saved: {
       list: `${BASE_PATH}/cart/saved`,
@@ -273,41 +273,41 @@ export const endpoints = {
       delete: (id: string) => `${BASE_PATH}/cart/saved/${id}`,
       update: (id: string) => `${BASE_PATH}/cart/saved/${id}`,
     },
-    
+
     // Recommendations
     recommendations: `${BASE_PATH}/cart/recommendations`,
     frequentlyBoughtTogether: (productId: string) => `${BASE_PATH}/cart/frequently-bought-together/${productId}`,
     upsell: `${BASE_PATH}/cart/upsell`,
     crossSell: `${BASE_PATH}/cart/cross-sell`,
-    
+
     // Shipping and Tax
     calculateShipping: `${BASE_PATH}/cart/calculate-shipping`,
     calculateTax: `${BASE_PATH}/cart/calculate-tax`,
     estimateTotal: `${BASE_PATH}/cart/estimate-total`,
-    
+
     // Cart Recovery
     abandoned: `${BASE_PATH}/cart/abandoned`,
     sendRecovery: (cartId: string) => `${BASE_PATH}/cart/${cartId}/send-recovery`,
     recover: (token: string) => `${BASE_PATH}/cart/recover/${token}`,
-    
+
     // Analytics
     analytics: `${BASE_PATH}/cart/analytics`,
     conversionFunnel: `${BASE_PATH}/cart/conversion-funnel`,
-    
+
     // Cart Sharing
     share: `${BASE_PATH}/cart/share`,
     getShared: (shareId: string) => `${BASE_PATH}/cart/shared/${shareId}`,
     copyShared: (shareId: string) => `${BASE_PATH}/cart/shared/${shareId}/copy`,
-    
+
     // Quick Operations
     quickAdd: `${BASE_PATH}/cart/quick-add`,
     export: `${BASE_PATH}/cart/export`,
     compare: `${BASE_PATH}/cart/compare`,
-    
+
     // Templates
     templates: `${BASE_PATH}/cart/templates`,
     applyTemplate: (templateId: string) => `${BASE_PATH}/cart/templates/${templateId}/apply`,
-    
+
     // Additional Operations
     count: `${BASE_PATH}/cart/count`,
     estimate: `${BASE_PATH}/cart/estimate`,
@@ -342,77 +342,77 @@ export const endpoints = {
     update: (id: string) => `${BASE_PATH}/orders/${id}`,
     delete: (id: string) => `${BASE_PATH}/orders/${id}`,
     duplicate: (id: string) => `${BASE_PATH}/orders/${id}/duplicate`,
-    
+
     // Order Lookup & Search
     byNumber: (orderNumber: string) => `${BASE_PATH}/orders/number/${orderNumber}`,
     search: `${BASE_PATH}/orders/search`,
     byCustomer: (customerId: string) => `${BASE_PATH}/orders/customer/${customerId}`,
     byProduct: (productId: string) => `${BASE_PATH}/orders/product/${productId}`,
-    
+
     // Order Status Management
     updateStatus: (id: string) => `${BASE_PATH}/orders/${id}/status`,
     cancel: (id: string) => `${BASE_PATH}/orders/${id}/cancel`,
     hold: (id: string) => `${BASE_PATH}/orders/${id}/hold`,
     release: (id: string) => `${BASE_PATH}/orders/${id}/release`,
-    
+
     // Order Fulfillment
     fulfill: (id: string) => `${BASE_PATH}/orders/${id}/fulfill`,
     partialFulfill: (id: string) => `${BASE_PATH}/orders/${id}/partial-fulfill`,
     updateShipping: (id: string) => `${BASE_PATH}/orders/${id}/shipping`,
-    
+
     // Payment Operations
     capturePayment: (id: string) => `${BASE_PATH}/orders/${id}/capture-payment`,
     refund: (id: string) => `${BASE_PATH}/orders/${id}/refund`,
     voidPayment: (id: string) => `${BASE_PATH}/orders/${id}/void-payment`,
-    
+
     // Returns & Exchanges Management
     createReturn: (id: string) => `${BASE_PATH}/orders/${id}/returns`,
     processReturn: (id: string, returnId: string) => `${BASE_PATH}/orders/${id}/returns/${returnId}`,
     return: (id: string) => `${BASE_PATH}/orders/${id}/return`,
     exchange: (id: string) => `${BASE_PATH}/orders/${id}/exchange`,
-    
+
     // Order Tracking
     track: (orderNumber: string) => `${BASE_PATH}/orders/track/${orderNumber}`,
     tracking: (id: string) => `${BASE_PATH}/orders/${id}/tracking`,
     updateTracking: (id: string) => `${BASE_PATH}/orders/${id}/tracking`,
-    
+
     // Order Invoice & Documents
     invoice: (id: string) => `${BASE_PATH}/orders/${id}/invoice`,
     generateInvoice: (id: string) => `${BASE_PATH}/orders/${id}/generate-invoice`,
     downloadInvoice: (id: string) => `${BASE_PATH}/orders/${id}/invoice/download`,
     receipt: (id: string) => `${BASE_PATH}/orders/${id}/receipt`,
-    
+
     // Order Notes & Communication
     addNote: (id: string) => `${BASE_PATH}/orders/${id}/notes`,
     notes: (id: string) => `${BASE_PATH}/orders/${id}/notes`,
     updateNote: (id: string, noteId: string) => `${BASE_PATH}/orders/${id}/notes/${noteId}`,
     deleteNote: (id: string, noteId: string) => `${BASE_PATH}/orders/${id}/notes/${noteId}`,
-    
+
     // Order Reviews & Ratings
     addReview: (id: string) => `${BASE_PATH}/orders/${id}/review`,
-    
+
     // Order Actions
     reorder: (id: string) => `${BASE_PATH}/orders/${id}/reorder`,
     items: (id: string) => `${BASE_PATH}/orders/${id}/items`,
     shipping: (id: string) => `${BASE_PATH}/orders/${id}/shipping`,
-    
+
     // Order Validation & Verification
     validate: `${BASE_PATH}/orders/validate`,
     verifyInventory: `${BASE_PATH}/orders/verify-inventory`,
-    
+
     // Fraud Detection & Risk Management
     riskAssessment: (id: string) => `${BASE_PATH}/orders/${id}/risk-assessment`,
     flag: (id: string) => `${BASE_PATH}/orders/${id}/flag`,
     unflag: (id: string) => `${BASE_PATH}/orders/${id}/unflag`,
-    
+
     // Integration & Sync
     syncMarketplace: (id: string) => `${BASE_PATH}/orders/${id}/sync-marketplace`,
     webhook: (id: string) => `${BASE_PATH}/orders/${id}/webhook`,
-    
+
     // Bulk Operations
     bulk: `${BASE_PATH}/orders/bulk`,
     export: `${BASE_PATH}/orders/export`,
-    
+
     // Analytics & Reports
     analytics: `${BASE_PATH}/orders/analytics`,
     reports: {
@@ -422,7 +422,7 @@ export const endpoints = {
       product: `${BASE_PATH}/orders/reports/product`,
       geographic: `${BASE_PATH}/orders/reports/geographic`,
     },
-    
+
     // Admin Operations
     admin: {
       list: `${BASE_PATH}/admin/orders`,
@@ -446,13 +446,13 @@ export const endpoints = {
     byId: (id: string) => `${BASE_PATH}/payments/${id}`,
     update: (id: string) => `${BASE_PATH}/payments/${id}`,
     delete: (id: string) => `${BASE_PATH}/payments/${id}`,
-    
+
     // Payment Processing Operations
     authorize: (id: string) => `${BASE_PATH}/payments/${id}/authorize`,
     capture: (id: string) => `${BASE_PATH}/payments/${id}/capture`,
     void: (id: string) => `${BASE_PATH}/payments/${id}/void`,
     cancel: (id: string) => `${BASE_PATH}/payments/${id}/cancel`,
-    
+
     // Refund Operations
     createRefund: (id: string) => `${BASE_PATH}/payments/${id}/refunds`,
     refunds: (id: string) => `${BASE_PATH}/payments/${id}/refunds`,
@@ -460,53 +460,53 @@ export const endpoints = {
     refund: (paymentId: string, refundId: string) => `${BASE_PATH}/payments/${paymentId}/refunds/${refundId}`,
     updateRefund: (paymentId: string, refundId: string) => `${BASE_PATH}/payments/${paymentId}/refunds/${refundId}`,
     refundStatus: (refundId: string) => `${BASE_PATH}/payments/refunds/${refundId}/status`,
-    
+
     // Dispute Management
     disputes: (id: string) => `${BASE_PATH}/payments/${id}/disputes`,
     allDisputes: `${BASE_PATH}/payments/disputes`,
     dispute: (paymentId: string, disputeId: string) => `${BASE_PATH}/payments/${paymentId}/disputes/${disputeId}`,
     submitEvidence: (paymentId: string, disputeId: string) => `${BASE_PATH}/payments/${paymentId}/disputes/${disputeId}/evidence`,
     acceptDispute: (paymentId: string, disputeId: string) => `${BASE_PATH}/payments/${paymentId}/disputes/${disputeId}/accept`,
-    
+
     // Payment Methods Management
     paymentMethods: `${BASE_PATH}/payments/methods`,
     addPaymentMethod: `${BASE_PATH}/payments/methods`,
     updatePaymentMethod: (id: string) => `${BASE_PATH}/payments/methods/${id}`,
     deletePaymentMethod: (id: string) => `${BASE_PATH}/payments/methods/${id}`,
     setDefaultPaymentMethod: (id: string) => `${BASE_PATH}/payments/methods/${id}/default`,
-    
+
     // Subscription Management
     subscriptions: `${BASE_PATH}/payments/subscriptions`,
     subscription: (id: string) => `${BASE_PATH}/payments/subscriptions/${id}`,
     createSubscription: `${BASE_PATH}/payments/subscriptions`,
     updateSubscription: (id: string) => `${BASE_PATH}/payments/subscriptions/${id}`,
     cancelSubscription: (id: string) => `${BASE_PATH}/payments/subscriptions/${id}/cancel`,
-    
+
     // Search & Filtering
     search: `${BASE_PATH}/payments/search`,
     byCustomer: (customerId: string) => `${BASE_PATH}/customers/${customerId}/payments`,
     byOrder: (orderId: string) => `${BASE_PATH}/orders/${orderId}/payments`,
-    
+
     // Bulk Operations
     bulk: `${BASE_PATH}/payments/bulk`,
     export: `${BASE_PATH}/payments/export`,
-    
+
     // Validation & Verification
     validatePaymentMethod: `${BASE_PATH}/payments/validate-method`,
     verifyMicroDeposits: (bankAccountId: string) => `${BASE_PATH}/payments/methods/${bankAccountId}/verify`,
-    
+
     // Webhook & Events
     webhookEvents: (id: string) => `${BASE_PATH}/payments/${id}/webhook-events`,
     resendWebhook: (paymentId: string, eventId: string) => `${BASE_PATH}/payments/${paymentId}/webhook-events/${eventId}/resend`,
-    
+
     // Gateway & Integration
     gatewayStatus: `${BASE_PATH}/payments/gateway-status`,
     syncWithGateway: (id: string) => `${BASE_PATH}/payments/${id}/sync`,
-    
+
     // Analytics & Reports
     analytics: `${BASE_PATH}/payments/analytics`,
     reports: (type: string) => `${BASE_PATH}/payments/reports/${type}`,
-    
+
     // Legacy Gateway Endpoints (for compatibility)
     createRazorpayOrder: `${BASE_PATH}/payments/razorpay/order`,
     verifyRazorpayPayment: `${BASE_PATH}/payments/razorpay/verify`,
@@ -515,18 +515,18 @@ export const endpoints = {
     upiPayment: `${BASE_PATH}/payments/upi`,
     walletPayment: `${BASE_PATH}/payments/wallet`,
     netBanking: `${BASE_PATH}/payments/netbanking`,
-    
+
     // Configuration
     gateways: `${BASE_PATH}/payments/gateways`,
     banks: `${BASE_PATH}/payments/banks`,
     wallets: `${BASE_PATH}/payments/wallets`,
     calculateFees: `${BASE_PATH}/payments/calculate-fees`,
-    
+
     // Transaction Management (Legacy)
     transactions: `${BASE_PATH}/payments/transactions`,
     transactionById: (id: string) => `${BASE_PATH}/payments/transactions/${id}`,
     transactionStatus: (id: string) => `${BASE_PATH}/payments/transactions/${id}/status`,
-    
+
     // Admin Operations
     admin: {
       list: `${BASE_PATH}/admin/payments`,
@@ -541,7 +541,7 @@ export const endpoints = {
       fraudDetection: `${BASE_PATH}/admin/payments/fraud`,
       reconciliation: `${BASE_PATH}/admin/payments/reconcile`,
     },
-    
+
     // Legacy webhook endpoint
     webhook: `${BASE_PATH}/payments/webhook`,
   },
@@ -554,7 +554,7 @@ export const endpoints = {
     byId: (id: string) => `${BASE_PATH}/reviews/${id}`,
     update: (id: string) => `${BASE_PATH}/reviews/${id}`,
     delete: (id: string) => `${BASE_PATH}/reviews/${id}`,
-    
+
     // Retrieval
     byProduct: (productId: string) => `${BASE_PATH}/products/${productId}/reviews`,
     byUser: (userId: string) => `${BASE_PATH}/users/${userId}/reviews`,
@@ -562,27 +562,27 @@ export const endpoints = {
     featured: `${BASE_PATH}/reviews/featured`,
     recent: `${BASE_PATH}/reviews/recent`,
     search: `${BASE_PATH}/reviews/search`,
-    
+
     // Interactions
     helpful: (id: string) => `${BASE_PATH}/reviews/${id}/helpful`,
     report: (id: string) => `${BASE_PATH}/reviews/${id}/report`,
     reply: (id: string) => `${BASE_PATH}/reviews/${id}/replies`,
     updateReply: (replyId: string) => `${BASE_PATH}/reviews/replies/${replyId}`,
     deleteReply: (replyId: string) => `${BASE_PATH}/reviews/replies/${replyId}`,
-    
+
     // Media
     uploadMedia: (id: string) => `${BASE_PATH}/reviews/${id}/media`,
     deleteMedia: (id: string) => `${BASE_PATH}/reviews/${id}/media`,
-    
+
     // Analytics
     analytics: `${BASE_PATH}/reviews/analytics`,
     sentiment: (id: string) => `${BASE_PATH}/reviews/${id}/sentiment`,
     insights: (productId: string) => `${BASE_PATH}/products/${productId}/reviews/insights`,
-    
+
     // Templates & Invitations
     templates: `${BASE_PATH}/reviews/templates`,
     generateInvitation: `${BASE_PATH}/reviews/invitations`,
-    
+
     // Admin Operations
     admin: {
       list: `${BASE_PATH}/admin/reviews`,
@@ -608,21 +608,21 @@ export const endpoints = {
     update: (id: string) => `${BASE_PATH}/blog/posts/${id}`,
     delete: (id: string) => `${BASE_PATH}/blog/posts/${id}`,
     duplicate: (id: string) => `${BASE_PATH}/blog/posts/${id}/duplicate`,
-    
+
     // Bulk operations
     bulkCreate: `${BASE_PATH}/blog/posts/bulk`,
     bulkUpdate: `${BASE_PATH}/blog/posts/bulk/update`,
     bulkDelete: `${BASE_PATH}/blog/posts/bulk/delete`,
     bulkPublish: `${BASE_PATH}/blog/posts/bulk/publish`,
     bulkArchive: `${BASE_PATH}/blog/posts/bulk/archive`,
-    
+
     // Status management
     publish: (id: string) => `${BASE_PATH}/blog/posts/${id}/publish`,
     unpublish: (id: string) => `${BASE_PATH}/blog/posts/${id}/unpublish`,
     archive: (id: string) => `${BASE_PATH}/blog/posts/${id}/archive`,
     schedule: (id: string) => `${BASE_PATH}/blog/posts/${id}/schedule`,
     toggleFeatured: (id: string) => `${BASE_PATH}/blog/posts/${id}/toggle-featured`,
-    
+
     // Categories
     categories: {
       list: `${BASE_PATH}/blog/categories`,
@@ -633,7 +633,7 @@ export const endpoints = {
     },
     byCategory: (categoryId: string) => `${BASE_PATH}/blog/posts/category/${categoryId}`,
     categoryPosts: (slug: string) => `${BASE_PATH}/blog/categories/${slug}/posts`,
-    
+
     // Tags
     tags: {
       list: `${BASE_PATH}/blog/tags`,
@@ -644,14 +644,14 @@ export const endpoints = {
     },
     byTag: (tagId: string) => `${BASE_PATH}/blog/posts/tag/${tagId}`,
     tagPosts: (tag: string) => `${BASE_PATH}/blog/tags/${tag}/posts`,
-    
+
     // Authors
     authors: {
       list: `${BASE_PATH}/blog/authors`,
       byId: (id: string) => `${BASE_PATH}/blog/authors/${id}`,
     },
     byAuthor: (authorId: string) => `${BASE_PATH}/blog/posts/author/${authorId}`,
-    
+
     // Comments
     comments: {
       byBlog: (blogId: string) => `${BASE_PATH}/blog/posts/${blogId}/comments`,
@@ -661,45 +661,45 @@ export const endpoints = {
       approve: (id: string) => `${BASE_PATH}/blog/comments/${id}/approve`,
       reject: (id: string) => `${BASE_PATH}/blog/comments/${id}/reject`,
     },
-    
+
     // Engagement
     like: (id: string) => `${BASE_PATH}/blog/posts/${id}/like`,
     unlike: (id: string) => `${BASE_PATH}/blog/posts/${id}/unlike`,
     view: (id: string) => `${BASE_PATH}/blog/posts/${id}/view`,
     share: (id: string) => `${BASE_PATH}/blog/posts/${id}/share`,
-    
+
     // Search and filtering
     search: `${BASE_PATH}/blog/search`,
     related: (id: string) => `${BASE_PATH}/blog/posts/${id}/related`,
-    
+
     // Analytics
     analytics: `${BASE_PATH}/blog/analytics`,
     stats: (id: string) => `${BASE_PATH}/blog/posts/${id}/stats`,
     trending: `${BASE_PATH}/blog/trending`,
-    
+
     // SEO
     seo: (id: string) => `${BASE_PATH}/blog/posts/${id}/seo`,
     analyzeSEO: (id: string) => `${BASE_PATH}/blog/posts/${id}/seo/analyze`,
     optimizeSEO: (id: string) => `${BASE_PATH}/blog/posts/${id}/seo/optimize`,
-    
+
     // Content management
     uploadImage: `${BASE_PATH}/blog/upload/image`,
     generateSlug: `${BASE_PATH}/blog/generate-slug`,
     preview: (id: string) => `${BASE_PATH}/blog/posts/${id}/preview`,
     saveAsDraft: (id: string) => `${BASE_PATH}/blog/posts/${id}/draft`,
-    
+
     // Export/Import
     export: `${BASE_PATH}/blog/export`,
     import: `${BASE_PATH}/blog/import`,
-    
+
     // Content generation
     generateContent: `${BASE_PATH}/blog/generate-content`,
     improve: (id: string) => `${BASE_PATH}/blog/posts/${id}/improve`,
-    
+
     // Newsletter integration
     addToNewsletter: (id: string) => `${BASE_PATH}/blog/posts/${id}/newsletter`,
     removeFromNewsletter: (id: string) => `${BASE_PATH}/blog/posts/${id}/newsletter`,
-    
+
     // RSS and sitemap
     rss: `${BASE_PATH}/blog/rss`,
     sitemap: `${BASE_PATH}/blog/sitemap`,
@@ -715,13 +715,13 @@ export const endpoints = {
     update: (id: string) => `${BASE_PATH}/faq/${id}`,
     delete: (id: string) => `${BASE_PATH}/faq/${id}`,
     duplicate: (id: string) => `${BASE_PATH}/faq/${id}/duplicate`,
-    
+
     // FAQ Status Management
     publish: (id: string) => `${BASE_PATH}/faq/${id}/publish`,
     archive: (id: string) => `${BASE_PATH}/faq/${id}/archive`,
     featured: `${BASE_PATH}/faq/featured`,
     reorder: `${BASE_PATH}/faq/reorder`,
-    
+
     // Categories
     categories: {
       list: `${BASE_PATH}/faq/categories`,
@@ -734,22 +734,22 @@ export const endpoints = {
       tree: `${BASE_PATH}/faq/categories/tree`,
       stats: (id: string) => `${BASE_PATH}/faq/categories/${id}/stats`,
     },
-    
+
     // Featured & Popular
     popular: `${BASE_PATH}/faq/popular`,
     recent: `${BASE_PATH}/faq/recent`,
     related: (id: string) => `${BASE_PATH}/faq/${id}/related`,
-    
+
     // Search & Filter
     search: `${BASE_PATH}/faq/search`,
     searchSuggestions: `${BASE_PATH}/faq/search-suggestions`,
     autoComplete: `${BASE_PATH}/faq/autocomplete`,
-    
+
     // FAQ Interaction
     vote: (id: string) => `${BASE_PATH}/faq/${id}/vote`,
     view: (id: string) => `${BASE_PATH}/faq/${id}/view`,
     report: (id: string) => `${BASE_PATH}/faq/${id}/report`,
-    
+
     // FAQ Suggestions
     suggestions: {
       list: `${BASE_PATH}/faq/suggestions`,
@@ -757,7 +757,7 @@ export const endpoints = {
       process: (id: string) => `${BASE_PATH}/faq/suggestions/${id}/process`,
       delete: (id: string) => `${BASE_PATH}/faq/suggestions/${id}`,
     },
-    
+
     // FAQ Templates
     templates: {
       list: `${BASE_PATH}/faq/templates`,
@@ -767,21 +767,21 @@ export const endpoints = {
       delete: (id: string) => `${BASE_PATH}/faq/templates/${id}`,
       createFAQ: (templateId: string) => `${BASE_PATH}/faq/templates/${templateId}/create-faq`,
     },
-    
+
     // Analytics & Statistics
     analytics: (id: string) => `${BASE_PATH}/faq/${id}/analytics`,
     stats: `${BASE_PATH}/faq/stats`,
-    
+
     // Bulk Operations
     bulk: {
       update: `${BASE_PATH}/faq/bulk-update`,
       delete: `${BASE_PATH}/faq/bulk-delete`,
     },
-    
+
     // Import/Export
     import: `${BASE_PATH}/faq/import`,
     export: `${BASE_PATH}/faq/export`,
-    
+
     // AI & Automation
     ai: {
       generate: `${BASE_PATH}/faq/ai/generate`,
@@ -789,23 +789,23 @@ export const endpoints = {
       similar: (id: string) => `${BASE_PATH}/faq/${id}/ai/similar`,
       translate: (id: string) => `${BASE_PATH}/faq/${id}/ai/translate`,
     },
-    
+
     // Multilingual Support
     translations: (id: string) => `${BASE_PATH}/faq/${id}/translations`,
     updateTranslation: (id: string, language: string) => `${BASE_PATH}/faq/${id}/translations/${language}`,
     deleteTranslation: (id: string, language: string) => `${BASE_PATH}/faq/${id}/translations/${language}`,
-    
+
     // FAQ Review & Moderation
     review: {
       list: `${BASE_PATH}/faq/review`,
       process: (id: string) => `${BASE_PATH}/faq/${id}/review`,
       flag: (id: string) => `${BASE_PATH}/faq/${id}/flag`,
     },
-    
+
     // Content Validation
     validate: `${BASE_PATH}/faq/validate`,
     checkDuplicates: `${BASE_PATH}/faq/check-duplicates`,
-    
+
     // Legacy endpoints
     byCategory: (category: string) => `${BASE_PATH}/faq/categories/${category}`,
   },
@@ -819,22 +819,22 @@ export const endpoints = {
     info: `${BASE_PATH}/contact/info`,
     categories: `${BASE_PATH}/contact/categories`,
     faqs: `${BASE_PATH}/contact/faqs`,
-    
+
     // Tracking
     track: (ticketNumber: string) => `${BASE_PATH}/contact/track/${ticketNumber}`,
     byToken: (token: string) => `${BASE_PATH}/contact/token/${token}`,
-    
+
     // Customer Response
     addResponse: (submissionId: string) => `${BASE_PATH}/contact/${submissionId}/response`,
     rateSatisfaction: (submissionId: string) => `${BASE_PATH}/contact/${submissionId}/rating`,
-    
+
     // Newsletter
     newsletter: {
       subscribe: `${BASE_PATH}/contact/newsletter/subscribe`,
       unsubscribe: `${BASE_PATH}/contact/newsletter/unsubscribe`,
       confirm: (token: string) => `${BASE_PATH}/contact/newsletter/confirm/${token}`,
     },
-    
+
     // Admin Operations
     admin: {
       list: `${BASE_PATH}/admin/contact`,
@@ -845,7 +845,7 @@ export const endpoints = {
       bulkUpdate: `${BASE_PATH}/admin/contact/bulk-update`,
       delete: (id: string) => `${BASE_PATH}/admin/contact/${id}`,
       export: `${BASE_PATH}/admin/contact/export`,
-      
+
       // Templates
       templates: {
         list: `${BASE_PATH}/admin/contact/templates`,
@@ -853,28 +853,28 @@ export const endpoints = {
         update: (id: string) => `${BASE_PATH}/admin/contact/templates/${id}`,
         delete: (id: string) => `${BASE_PATH}/admin/contact/templates/${id}`,
       },
-      
+
       // Statistics
       stats: `${BASE_PATH}/admin/contact/stats`,
       performance: `${BASE_PATH}/admin/contact/performance`,
-      
+
       // Settings
       settings: `${BASE_PATH}/admin/contact/settings`,
       testEmail: `${BASE_PATH}/admin/contact/test-email`,
-      
+
       // Auto-response
       autoResponse: {
         test: `${BASE_PATH}/admin/contact/auto-response/test`,
         templates: `${BASE_PATH}/admin/contact/auto-response/templates`,
       },
     },
-    
+
     // Knowledge Base Integration
     knowledgeBase: {
       search: `${BASE_PATH}/contact/kb/search`,
       suggest: (submissionId: string) => `${BASE_PATH}/contact/kb/suggest/${submissionId}`,
     },
-    
+
     // Legacy endpoints for backward compatibility
     support: `${BASE_PATH}/contact/support`,
     feedback: `${BASE_PATH}/contact/feedback`,
@@ -889,7 +889,7 @@ export const endpoints = {
     confirm: `${BASE_PATH}/newsletter/confirm`,
     preferences: `${BASE_PATH}/newsletter/preferences`,
     verify: `${BASE_PATH}/newsletter/verify`,
-    
+
     // Subscriber Management
     subscribers: {
       list: `${BASE_PATH}/newsletter/subscribers`,
@@ -903,7 +903,7 @@ export const endpoints = {
       preferences: (id: string) => `${BASE_PATH}/newsletter/subscribers/${id}/preferences`,
       activity: (id: string) => `${BASE_PATH}/newsletter/subscribers/${id}/activity`,
     },
-    
+
     // Campaign Management
     campaigns: {
       list: `${BASE_PATH}/newsletter/campaigns`,
@@ -912,19 +912,19 @@ export const endpoints = {
       update: (id: string) => `${BASE_PATH}/newsletter/campaigns/${id}`,
       delete: (id: string) => `${BASE_PATH}/newsletter/campaigns/${id}`,
       duplicate: (id: string) => `${BASE_PATH}/newsletter/campaigns/${id}/duplicate`,
-      
+
       // Campaign Operations
       send: (id: string) => `${BASE_PATH}/newsletter/campaigns/${id}/send`,
       pause: (id: string) => `${BASE_PATH}/newsletter/campaigns/${id}/pause`,
       resume: (id: string) => `${BASE_PATH}/newsletter/campaigns/${id}/resume`,
       cancel: (id: string) => `${BASE_PATH}/newsletter/campaigns/${id}/cancel`,
       test: (id: string) => `${BASE_PATH}/newsletter/campaigns/${id}/test`,
-      
+
       // Analytics & Performance
       analytics: (id: string) => `${BASE_PATH}/newsletter/campaigns/${id}/analytics`,
       performance: (id: string) => `${BASE_PATH}/newsletter/campaigns/${id}/performance`,
     },
-    
+
     // Template Management
     templates: {
       list: `${BASE_PATH}/newsletter/templates`,
@@ -935,7 +935,7 @@ export const endpoints = {
       duplicate: (id: string) => `${BASE_PATH}/newsletter/templates/${id}/duplicate`,
       preview: (id: string) => `${BASE_PATH}/newsletter/templates/${id}/preview`,
     },
-    
+
     // Segment Management
     segments: {
       list: `${BASE_PATH}/newsletter/segments`,
@@ -946,7 +946,7 @@ export const endpoints = {
       refresh: (id: string) => `${BASE_PATH}/newsletter/segments/${id}/refresh`,
       subscribers: (id: string) => `${BASE_PATH}/newsletter/segments/${id}/subscribers`,
     },
-    
+
     // A/B Testing
     abTest: {
       create: `${BASE_PATH}/newsletter/ab-tests`,
@@ -955,7 +955,7 @@ export const endpoints = {
       results: (campaignId: string) => `${BASE_PATH}/newsletter/campaigns/${campaignId}/ab-test-results`,
       selectWinner: `${BASE_PATH}/newsletter/ab-tests/select-winner`,
     },
-    
+
     // Analytics & Reporting
     analytics: `${BASE_PATH}/newsletter/analytics`,
     reports: {
@@ -964,7 +964,7 @@ export const endpoints = {
       engagement: `${BASE_PATH}/newsletter/reports/engagement`,
       revenue: `${BASE_PATH}/newsletter/reports/revenue`,
     },
-    
+
     // Automation & Workflows
     automations: {
       list: `${BASE_PATH}/newsletter/automations`,
@@ -974,13 +974,13 @@ export const endpoints = {
       delete: (id: string) => `${BASE_PATH}/newsletter/automations/${id}`,
       toggle: (id: string) => `${BASE_PATH}/newsletter/automations/${id}/toggle`,
     },
-    
+
     // Email Validation & List Cleaning
     validation: {
       email: `${BASE_PATH}/newsletter/validation/email`,
       cleanList: `${BASE_PATH}/newsletter/validation/clean-list`,
     },
-    
+
     // Deliverability & Compliance
     deliverability: {
       report: `${BASE_PATH}/newsletter/deliverability/report`,
@@ -988,7 +988,7 @@ export const endpoints = {
     compliance: {
       check: `${BASE_PATH}/newsletter/compliance/check`,
     },
-    
+
     // Search & Tracking
     search: `${BASE_PATH}/newsletter/search`,
     tracking: {
@@ -1073,25 +1073,25 @@ export const endpoints = {
     update: (id: string) => `${BASE_PATH}/gift-cards/${id}`,
     delete: (id: string) => `${BASE_PATH}/gift-cards/${id}`,
     duplicate: (id: string) => `${BASE_PATH}/gift-cards/${id}/duplicate`,
-    
+
     // Status Management
     activate: (id: string) => `${BASE_PATH}/gift-cards/${id}/activate`,
     deactivate: (id: string) => `${BASE_PATH}/gift-cards/${id}/deactivate`,
     cancel: (id: string) => `${BASE_PATH}/gift-cards/${id}/cancel`,
     suspend: (id: string) => `${BASE_PATH}/gift-cards/${id}/suspend`,
-    
+
     // Balance Management
     balance: (code: string) => `${BASE_PATH}/gift-cards/code/${code}/balance`,
     addBalance: (id: string) => `${BASE_PATH}/gift-cards/${id}/add-balance`,
     deductBalance: (id: string) => `${BASE_PATH}/gift-cards/${id}/deduct-balance`,
     refund: (id: string) => `${BASE_PATH}/gift-cards/${id}/refund`,
-    
+
     // Usage & Redemption
     redeem: `${BASE_PATH}/gift-cards/redeem`,
     validate: `${BASE_PATH}/gift-cards/validate`,
     apply: `${BASE_PATH}/gift-cards/apply`,
     usageHistory: (id: string) => `${BASE_PATH}/gift-cards/${id}/usage-history`,
-    
+
     // Templates
     templates: {
       list: `${BASE_PATH}/gift-cards/templates`,
@@ -1101,7 +1101,7 @@ export const endpoints = {
       delete: (id: string) => `${BASE_PATH}/gift-cards/templates/${id}`,
       duplicate: (id: string) => `${BASE_PATH}/gift-cards/templates/${id}/duplicate`,
     },
-    
+
     // Bulk Operations
     bulkCreate: `${BASE_PATH}/gift-cards/bulk-create`,
     bulkOrders: `${BASE_PATH}/gift-cards/bulk-orders`,
@@ -1109,13 +1109,13 @@ export const endpoints = {
     updateBulkOrder: (id: string) => `${BASE_PATH}/gift-cards/bulk-orders/${id}`,
     cancelBulkOrder: (id: string) => `${BASE_PATH}/gift-cards/bulk-orders/${id}/cancel`,
     processBulkOrder: (id: string) => `${BASE_PATH}/gift-cards/bulk-orders/${id}/process`,
-    
+
     // Delivery & Notifications
     send: (id: string) => `${BASE_PATH}/gift-cards/${id}/send`,
     resend: (id: string) => `${BASE_PATH}/gift-cards/${id}/resend`,
     deliveryStatus: (id: string) => `${BASE_PATH}/gift-cards/${id}/delivery-status`,
     scheduleReminder: (id: string) => `${BASE_PATH}/gift-cards/${id}/schedule-reminder`,
-    
+
     // Campaigns
     campaigns: {
       list: `${BASE_PATH}/gift-cards/campaigns`,
@@ -1127,30 +1127,30 @@ export const endpoints = {
       pause: (id: string) => `${BASE_PATH}/gift-cards/campaigns/${id}/pause`,
       complete: (id: string) => `${BASE_PATH}/gift-cards/campaigns/${id}/complete`,
     },
-    
+
     // Analytics & Reports
     analytics: `${BASE_PATH}/gift-cards/analytics`,
     expiryReport: `${BASE_PATH}/gift-cards/reports/expiry`,
     usageReport: `${BASE_PATH}/gift-cards/reports/usage`,
     revenueReport: `${BASE_PATH}/gift-cards/reports/revenue`,
-    
+
     // Search & Filter
     search: `${BASE_PATH}/gift-cards/search`,
     filters: `${BASE_PATH}/gift-cards/filters`,
-    
+
     // Import/Export
     import: `${BASE_PATH}/gift-cards/import`,
     export: `${BASE_PATH}/gift-cards/export`,
-    
+
     // Validation & Compliance
     validateBulk: `${BASE_PATH}/gift-cards/validate-bulk`,
     compliance: (id: string) => `${BASE_PATH}/gift-cards/${id}/compliance`,
-    
+
     // Integration & APIs
     generateApiKey: `${BASE_PATH}/gift-cards/api-keys`,
     webhooks: `${BASE_PATH}/gift-cards/webhooks`,
     updateWebhooks: `${BASE_PATH}/gift-cards/webhooks`,
-    
+
     // Legacy endpoints for backward compatibility
     transactions: (code: string) => `${BASE_PATH}/gift-cards/code/${code}/transactions`,
   },
@@ -1164,19 +1164,19 @@ export const endpoints = {
     update: (id: string) => `${BASE_PATH}/heroes/${id}`,
     delete: (id: string) => `${BASE_PATH}/heroes/${id}`,
     duplicate: (id: string) => `${BASE_PATH}/heroes/${id}/duplicate`,
-    
+
     // Status Management
     activate: (id: string) => `${BASE_PATH}/heroes/${id}/activate`,
     deactivate: (id: string) => `${BASE_PATH}/heroes/${id}/deactivate`,
     archive: (id: string) => `${BASE_PATH}/heroes/${id}/archive`,
     publish: (id: string) => `${BASE_PATH}/heroes/${id}/publish`,
     unpublish: (id: string) => `${BASE_PATH}/heroes/${id}/unpublish`,
-    
+
     // Priority & Position Management
     priority: (id: string) => `${BASE_PATH}/heroes/${id}/priority`,
     reorder: `${BASE_PATH}/heroes/reorder`,
     move: (id: string) => `${BASE_PATH}/heroes/${id}/move`,
-    
+
     // Template Management
     templates: {
       list: `${BASE_PATH}/heroes/templates`,
@@ -1187,10 +1187,10 @@ export const endpoints = {
       duplicate: (id: string) => `${BASE_PATH}/heroes/templates/${id}/duplicate`,
       createHero: (templateId: string) => `${BASE_PATH}/heroes/templates/${templateId}/create-hero`,
     },
-    
+
     // Bulk Operations
     bulk: `${BASE_PATH}/heroes/bulk`,
-    
+
     // Scheduling
     schedules: {
       list: `${BASE_PATH}/heroes/schedules`,
@@ -1201,7 +1201,7 @@ export const endpoints = {
       activate: (id: string) => `${BASE_PATH}/heroes/schedules/${id}/activate`,
       pause: (id: string) => `${BASE_PATH}/heroes/schedules/${id}/pause`,
     },
-    
+
     // Campaign Management
     campaigns: {
       list: `${BASE_PATH}/heroes/campaigns`,
@@ -1213,7 +1213,7 @@ export const endpoints = {
       pause: (id: string) => `${BASE_PATH}/heroes/campaigns/${id}/pause`,
       complete: (id: string) => `${BASE_PATH}/heroes/campaigns/${id}/complete`,
     },
-    
+
     // Analytics & Performance
     analytics: `${BASE_PATH}/heroes/analytics`,
     performance: (id: string) => `${BASE_PATH}/heroes/${id}/performance`,
@@ -1221,7 +1221,7 @@ export const endpoints = {
       performance: `${BASE_PATH}/heroes/reports/performance`,
       engagement: `${BASE_PATH}/heroes/reports/engagement`,
     },
-    
+
     // A/B Testing
     abTest: {
       create: `${BASE_PATH}/heroes/ab-tests`,
@@ -1231,27 +1231,27 @@ export const endpoints = {
       stop: (id: string) => `${BASE_PATH}/heroes/ab-tests/${id}/stop`,
       results: (id: string) => `${BASE_PATH}/heroes/ab-tests/${id}/results`,
     },
-    
+
     // Search & Filter
     search: `${BASE_PATH}/heroes/search`,
     filters: `${BASE_PATH}/heroes/filters`,
-    
+
     // Preview & Testing
     preview: (id: string) => `${BASE_PATH}/heroes/${id}/preview`,
     test: (id: string) => `${BASE_PATH}/heroes/${id}/test`,
-    
+
     // Import/Export
     import: `${BASE_PATH}/heroes/import`,
     export: `${BASE_PATH}/heroes/export`,
-    
+
     // Optimization & AI
     optimize: (id: string) => `${BASE_PATH}/heroes/${id}/optimize`,
     aiGenerate: `${BASE_PATH}/heroes/ai-generate`,
-    
+
     // Compliance & Validation
     validate: (id: string) => `${BASE_PATH}/heroes/${id}/validate`,
     compliance: `${BASE_PATH}/heroes/compliance`,
-    
+
     // Integration & Webhooks
     webhooks: `${BASE_PATH}/heroes/webhooks`,
     updateWebhooks: `${BASE_PATH}/heroes/webhooks`,
@@ -1326,12 +1326,12 @@ export const endpoints = {
     update: (id: string) => `${BASE_PATH}/featured/${id}`,
     delete: (id: string) => `${BASE_PATH}/featured/${id}`,
     duplicate: (id: string) => `${BASE_PATH}/featured/${id}/duplicate`,
-    
+
     // Status Management
     activate: (id: string) => `${BASE_PATH}/featured/${id}/activate`,
     deactivate: (id: string) => `${BASE_PATH}/featured/${id}/deactivate`,
     schedule: (id: string) => `${BASE_PATH}/featured/${id}/schedule`,
-    
+
     // Section Management
     bySection: (section: string) => `${BASE_PATH}/featured/section/${section}`,
     sections: {
@@ -1341,34 +1341,34 @@ export const endpoints = {
       update: (id: string) => `${BASE_PATH}/featured/sections/${id}`,
       delete: (id: string) => `${BASE_PATH}/featured/sections/${id}`,
     },
-    
+
     // Position & Priority
     reorder: (section: string) => `${BASE_PATH}/featured/section/${section}/reorder`,
     priority: (id: string) => `${BASE_PATH}/featured/${id}/priority`,
-    
+
     // Content Type Management
     byType: (type: string) => `${BASE_PATH}/featured/type/${type}`,
     types: `${BASE_PATH}/featured/types`,
-    
+
     // Visibility & Audience
     visibility: (id: string) => `${BASE_PATH}/featured/${id}/visibility`,
     audience: (audience: string) => `${BASE_PATH}/featured/audience/${audience}`,
-    
+
     // Rules & Conditions
     rules: (id: string) => `${BASE_PATH}/featured/${id}/rules`,
     validateRules: `${BASE_PATH}/featured/validate-rules`,
-    
+
     // Display Settings
     displaySettings: (id: string) => `${BASE_PATH}/featured/${id}/display-settings`,
     preview: (id: string) => `${BASE_PATH}/featured/${id}/preview`,
-    
+
     // Performance & Analytics
     performance: (id: string) => `${BASE_PATH}/featured/${id}/performance`,
     analytics: `${BASE_PATH}/featured/analytics`,
     recordView: (id: string) => `${BASE_PATH}/featured/${id}/view`,
     recordClick: (id: string) => `${BASE_PATH}/featured/${id}/click`,
     recordConversion: (id: string) => `${BASE_PATH}/featured/${id}/conversion`,
-    
+
     // Templates
     templates: {
       list: `${BASE_PATH}/featured/templates`,
@@ -1378,7 +1378,7 @@ export const endpoints = {
       delete: (id: string) => `${BASE_PATH}/featured/templates/${id}`,
       createContent: (templateId: string) => `${BASE_PATH}/featured/templates/${templateId}/create-content`,
     },
-    
+
     // Scheduling
     schedules: {
       list: `${BASE_PATH}/featured/schedules`,
@@ -1388,7 +1388,7 @@ export const endpoints = {
       delete: (id: string) => `${BASE_PATH}/featured/schedules/${id}`,
       execute: (id: string) => `${BASE_PATH}/featured/schedules/${id}/execute`,
     },
-    
+
     // A/B Testing
     abTests: {
       list: `${BASE_PATH}/featured/ab-tests`,
@@ -1400,27 +1400,27 @@ export const endpoints = {
       pause: (id: string) => `${BASE_PATH}/featured/ab-tests/${id}/pause`,
       complete: (id: string) => `${BASE_PATH}/featured/ab-tests/${id}/complete`,
     },
-    
+
     // Bulk Operations
     bulk: `${BASE_PATH}/featured/bulk`,
-    
+
     // Search & Filter
     search: `${BASE_PATH}/featured/search`,
     searchSuggestions: `${BASE_PATH}/featured/search-suggestions`,
-    
+
     // Content Suggestions
     suggestions: (section: string) => `${BASE_PATH}/featured/suggestions/${section}`,
     trending: `${BASE_PATH}/featured/trending`,
     popular: `${BASE_PATH}/featured/popular`,
-    
+
     // Import/Export
     import: `${BASE_PATH}/featured/import`,
     export: `${BASE_PATH}/featured/export`,
-    
+
     // Validation
     validate: `${BASE_PATH}/featured/validate`,
     checkConflicts: `${BASE_PATH}/featured/check-conflicts`,
-    
+
     // AI & Automation
     ai: {
       generate: `${BASE_PATH}/featured/ai/generate`,
@@ -1428,21 +1428,21 @@ export const endpoints = {
       recommendations: (section: string) => `${BASE_PATH}/featured/ai/recommendations/${section}`,
       autoSchedule: `${BASE_PATH}/featured/ai/auto-schedule`,
     },
-    
+
     // Advanced Analytics
     conversionFunnel: (section: string) => `${BASE_PATH}/featured/analytics/funnel/${section}`,
     heatmap: (section: string) => `${BASE_PATH}/featured/analytics/heatmap/${section}`,
     userJourney: (section: string) => `${BASE_PATH}/featured/analytics/journey/${section}`,
-    
+
     // Mobile & Responsive
     mobile: `${BASE_PATH}/featured/mobile`,
     mobileSettings: (id: string) => `${BASE_PATH}/featured/${id}/mobile-settings`,
-    
+
     // Integration & Webhooks
     syncCMS: `${BASE_PATH}/featured/sync-cms`,
     webhooks: `${BASE_PATH}/featured/webhooks`,
     testWebhook: (id: string) => `${BASE_PATH}/featured/webhooks/${id}/test`,
-    
+
     // Legacy endpoints for backward compatibility
     products: `${BASE_PATH}/featured/products`,
     categories: `${BASE_PATH}/featured/categories`,
@@ -1459,28 +1459,28 @@ export const endpoints = {
     update: (id: string) => `${BASE_PATH}/deals/${id}`,
     delete: (id: string) => `${BASE_PATH}/deals/${id}`,
     duplicate: (id: string) => `${BASE_PATH}/deals/${id}/duplicate`,
-    
+
     // Status Management
     activate: (id: string) => `${BASE_PATH}/deals/${id}/activate`,
     pause: (id: string) => `${BASE_PATH}/deals/${id}/pause`,
     cancel: (id: string) => `${BASE_PATH}/deals/${id}/cancel`,
     extend: (id: string) => `${BASE_PATH}/deals/${id}/extend`,
-    
+
     // Featured & Priority
     featured: `${BASE_PATH}/deals/featured`,
     priority: (id: string) => `${BASE_PATH}/deals/${id}/priority`,
-    
+
     // Categories & Types
     byType: (type: string) => `${BASE_PATH}/deals/type/${type}`,
     byCategory: (category: string) => `${BASE_PATH}/deals/category/${category}`,
     upcoming: `${BASE_PATH}/deals/upcoming`,
     expired: `${BASE_PATH}/deals/expired`,
-    
+
     // Analytics
     analytics: (id: string) => `${BASE_PATH}/deals/${id}/analytics`,
     stats: `${BASE_PATH}/deals/stats`,
     performance: `${BASE_PATH}/deals/performance`,
-    
+
     // Templates
     templates: {
       list: `${BASE_PATH}/deal-templates`,
@@ -1490,7 +1490,7 @@ export const endpoints = {
       delete: (id: string) => `${BASE_PATH}/deal-templates/${id}`,
       createDeal: (templateId: string) => `${BASE_PATH}/deal-templates/${templateId}/create-deal`,
     },
-    
+
     // Flash Sales
     flashSales: {
       list: `${BASE_PATH}/flash-sales`,
@@ -1501,7 +1501,7 @@ export const endpoints = {
       active: `${BASE_PATH}/flash-sales/active`,
       upcoming: `${BASE_PATH}/flash-sales/upcoming`,
     },
-    
+
     // Campaigns
     campaigns: {
       list: `${BASE_PATH}/deal-campaigns`,
@@ -1511,33 +1511,33 @@ export const endpoints = {
       delete: (id: string) => `${BASE_PATH}/deal-campaigns/${id}`,
       analytics: (id: string) => `${BASE_PATH}/deal-campaigns/${id}/analytics`,
     },
-    
+
     // Bulk Operations
     bulk: {
       update: `${BASE_PATH}/deals/bulk-update`,
       delete: `${BASE_PATH}/deals/bulk-delete`,
     },
-    
+
     // Import/Export
     import: `${BASE_PATH}/deals/import`,
     export: `${BASE_PATH}/deals/export`,
-    
+
     // Recommendations
     recommendations: (id: string) => `${BASE_PATH}/deals/${id}/recommendations`,
     personalized: (userId: string) => `${BASE_PATH}/deals/personalized/${userId}`,
-    
+
     // Search & Validation
     search: `${BASE_PATH}/deals/search`,
     validate: `${BASE_PATH}/deals/validate`,
     preview: `${BASE_PATH}/deals/preview`,
-    
+
     // Notifications
     notifications: {
       start: (id: string) => `${BASE_PATH}/deals/${id}/notify-start`,
       end: (id: string) => `${BASE_PATH}/deals/${id}/notify-end`,
       schedule: (id: string) => `${BASE_PATH}/deals/${id}/schedule-notification`,
     },
-    
+
     // Legacy endpoints
     products: (id: string) => `${BASE_PATH}/deals/${id}/products`,
     flash: `${BASE_PATH}/deals/flash`,
@@ -1564,32 +1564,32 @@ export const endpoints = {
     search: `${BASE_PATH}/analytics/search`,
     events: `${BASE_PATH}/analytics/events`,
     batchTrack: `${BASE_PATH}/analytics/batch-track`,
-    
+
     // User Behavior
     userBehavior: `${BASE_PATH}/analytics/user-behavior`,
     userJourney: `${BASE_PATH}/analytics/user-journey`,
     sessionAnalytics: `${BASE_PATH}/analytics/session-analytics`,
-    
+
     // Product Analytics
     productPerformance: `${BASE_PATH}/analytics/product-performance`,
     categoryAnalytics: `${BASE_PATH}/analytics/category-analytics`,
-    
+
     // Revenue Analytics
     revenueAnalytics: `${BASE_PATH}/analytics/revenue-analytics`,
     conversionFunnel: `${BASE_PATH}/analytics/conversion-funnel`,
-    
+
     // Search Analytics
     searchAnalytics: `${BASE_PATH}/analytics/search-analytics`,
-    
+
     // Reporting
     dashboard: `${BASE_PATH}/analytics/dashboard`,
     customReport: (id: string) => `${BASE_PATH}/analytics/reports/${id}`,
     reports: `${BASE_PATH}/analytics/reports`,
     export: `${BASE_PATH}/analytics/export`,
-    
+
     // Real-time Analytics
     realtime: `${BASE_PATH}/analytics/realtime`,
-    
+
     // Admin Operations
     admin: {
       systemAnalytics: `${BASE_PATH}/admin/analytics/system-analytics`,
@@ -1619,42 +1619,42 @@ export const endpoints = {
     markAllRead: `${BASE_PATH}/notifications/mark-all-read`,
     delete: (id: string) => `${BASE_PATH}/notifications/${id}`,
     clear: `${BASE_PATH}/notifications/clear`,
-    
+
     // Notification Preferences
     preferences: `${BASE_PATH}/notifications/preferences`,
     emailPreferences: `${BASE_PATH}/notifications/preferences/email`,
     pushPreferences: `${BASE_PATH}/notifications/preferences/push`,
     smsPreferences: `${BASE_PATH}/notifications/preferences/sms`,
-    
+
     // Push Notifications
     subscribePush: `${BASE_PATH}/notifications/push/subscribe`,
     unsubscribePush: `${BASE_PATH}/notifications/push/unsubscribe`,
     testPush: `${BASE_PATH}/notifications/push/test`,
-    
+
     // Newsletter
     subscribeNewsletter: `${BASE_PATH}/notifications/newsletter/subscribe`,
     unsubscribeNewsletter: `${BASE_PATH}/notifications/newsletter/unsubscribe`,
     newsletterPreferences: `${BASE_PATH}/notifications/newsletter/preferences`,
     newsletterCategories: `${BASE_PATH}/notifications/newsletter/categories`,
-    
+
     // SMS
     verifyPhone: `${BASE_PATH}/notifications/sms/verify-phone`,
     confirmPhone: `${BASE_PATH}/notifications/sms/confirm-phone`,
     removePhone: `${BASE_PATH}/notifications/sms/remove-phone`,
-    
+
     // History & Analytics
     history: `${BASE_PATH}/notifications/history`,
     analytics: `${BASE_PATH}/notifications/analytics`,
-    
+
     // Admin Operations
     admin: {
       sendToUser: (userId: string) => `${BASE_PATH}/admin/notifications/send/${userId}`,
       sendBulk: `${BASE_PATH}/admin/notifications/send-bulk`,
-      
+
       // Email Templates
       templates: `${BASE_PATH}/admin/notifications/templates`,
       templateById: (id: string) => `${BASE_PATH}/admin/notifications/templates/${id}`,
-      
+
       // Email Campaigns
       campaigns: `${BASE_PATH}/admin/notifications/campaigns`,
       campaignById: (id: string) => `${BASE_PATH}/admin/notifications/campaigns/${id}`,
@@ -1663,7 +1663,7 @@ export const endpoints = {
       resumeCampaign: (id: string) => `${BASE_PATH}/admin/notifications/campaigns/${id}/resume`,
       cancelCampaign: (id: string) => `${BASE_PATH}/admin/notifications/campaigns/${id}/cancel`,
       campaignStats: (id: string) => `${BASE_PATH}/admin/notifications/campaigns/${id}/statistics`,
-      
+
       // System Settings
       systemSettings: `${BASE_PATH}/admin/notifications/system-settings`,
       testSystem: `${BASE_PATH}/admin/notifications/test-system`,
@@ -1691,39 +1691,39 @@ export const endpoints = {
     create: `${BASE_PATH}/inventory/items`,
     update: (id: string) => `${BASE_PATH}/inventory/items/${id}`,
     delete: (id: string) => `${BASE_PATH}/inventory/items/${id}`,
-    
+
     // Stock management
     adjustStock: (id: string) => `${BASE_PATH}/inventory/items/${id}/adjust`,
     reserveStock: (id: string) => `${BASE_PATH}/inventory/items/${id}/reserve`,
     releaseStock: (id: string) => `${BASE_PATH}/inventory/items/${id}/release`,
     transfer: `${BASE_PATH}/inventory/transfer`,
-    
+
     // Stock movements
     movements: `${BASE_PATH}/inventory/movements`,
     movementById: (id: string) => `${BASE_PATH}/inventory/movements/${id}`,
-    
+
     // Warehouses
     warehouses: `${BASE_PATH}/inventory/warehouses`,
     warehouseById: (id: string) => `${BASE_PATH}/inventory/warehouses/${id}`,
     createWarehouse: `${BASE_PATH}/inventory/warehouses`,
     updateWarehouse: (id: string) => `${BASE_PATH}/inventory/warehouses/${id}`,
     deleteWarehouse: (id: string) => `${BASE_PATH}/inventory/warehouses/${id}`,
-    
+
     // Alerts & notifications
     alerts: `${BASE_PATH}/inventory/alerts`,
     acknowledgeAlert: (id: string) => `${BASE_PATH}/inventory/alerts/${id}/acknowledge`,
     bulkAcknowledge: `${BASE_PATH}/inventory/alerts/bulk-acknowledge`,
-    
+
     // Analytics & reports
     statistics: `${BASE_PATH}/inventory/statistics`,
     generateReport: `${BASE_PATH}/inventory/reports`,
     reportById: (id: string) => `${BASE_PATH}/inventory/reports/${id}`,
     turnoverAnalysis: `${BASE_PATH}/inventory/analytics/turnover`,
-    
+
     // Bulk operations
     bulkUpdate: `${BASE_PATH}/inventory/bulk/update`,
     bulkAdjustment: `${BASE_PATH}/inventory/bulk/adjust`,
-    
+
     // Legacy endpoints for compatibility
     stock: (productId: string) => `${BASE_PATH}/inventory/products/${productId}/stock`,
     availability: `${BASE_PATH}/inventory/availability`,
@@ -1790,7 +1790,7 @@ export const endpoints = {
       delete: (id: string) => `${BASE_PATH}/shipping/zones/${id}`,
       testCoverage: (id: string) => `${BASE_PATH}/shipping/zones/${id}/test-coverage`,
     },
-    
+
     // Methods
     methods: {
       list: `${BASE_PATH}/shipping/methods`,
@@ -2072,41 +2072,41 @@ export const endpoints = {
     create: `${BASE_PATH}/bestsellers`,
     update: (id: string) => `${BASE_PATH}/bestsellers/${id}`,
     delete: (id: string) => `${BASE_PATH}/bestsellers/${id}`,
-    
+
     // Bulk operations
     bulkCreate: `${BASE_PATH}/bestsellers/bulk`,
     bulkUpdate: `${BASE_PATH}/bestsellers/bulk/update`,
     bulkDelete: `${BASE_PATH}/bestsellers/bulk/delete`,
     reorder: `${BASE_PATH}/bestsellers/reorder`,
-    
+
     // Status management
     toggleStatus: (id: string) => `${BASE_PATH}/bestsellers/${id}/toggle-status`,
     activate: (id: string) => `${BASE_PATH}/bestsellers/${id}/activate`,
     deactivate: (id: string) => `${BASE_PATH}/bestsellers/${id}/deactivate`,
-    
+
     // Analytics and reports
     analytics: `${BASE_PATH}/bestsellers/analytics`,
     report: `${BASE_PATH}/bestsellers/report`,
     trends: `${BASE_PATH}/bestsellers/trends`,
-    
+
     // Automatic management
     generate: `${BASE_PATH}/bestsellers/generate`,
     refresh: `${BASE_PATH}/bestsellers/refresh`,
     syncSales: `${BASE_PATH}/bestsellers/sync-sales`,
-    
+
     // Product operations
     addProduct: (productId: string) => `${BASE_PATH}/bestsellers/products/${productId}`,
     removeProduct: (productId: string) => `${BASE_PATH}/bestsellers/products/${productId}`,
     productStatus: (productId: string) => `${BASE_PATH}/bestsellers/products/${productId}/status`,
-    
+
     // Category and brand operations
     byCategory: (categoryId: string) => `${BASE_PATH}/bestsellers/categories/${categoryId}`,
     byBrand: (brandId: string) => `${BASE_PATH}/bestsellers/brands/${brandId}`,
-    
+
     // Export/Import
     export: `${BASE_PATH}/bestsellers/export`,
     import: `${BASE_PATH}/bestsellers/import`,
-    
+
     // Settings
     settings: `${BASE_PATH}/bestsellers/settings`,
   },
@@ -2119,40 +2119,40 @@ export const endpoints = {
     byId: (id: string) => `${BASE_PATH}/favorite-sections/${id}`,
     update: (id: string) => `${BASE_PATH}/favorite-sections/${id}`,
     delete: (id: string) => `${BASE_PATH}/favorite-sections/${id}`,
-    
+
     // Template Operations
     templates: `${BASE_PATH}/favorite-sections/templates`,
     template: (id: string) => `${BASE_PATH}/favorite-sections/templates/${id}`,
     createFromTemplate: (templateId: string) => `${BASE_PATH}/favorite-sections/templates/${templateId}/create`,
     saveAsTemplate: (sectionId: string) => `${BASE_PATH}/favorite-sections/${sectionId}/save-as-template`,
-    
+
     // Publishing and Status
     publish: (id: string) => `${BASE_PATH}/favorite-sections/${id}/publish`,
     unpublish: (id: string) => `${BASE_PATH}/favorite-sections/${id}/unpublish`,
     archive: (id: string) => `${BASE_PATH}/favorite-sections/${id}/archive`,
     duplicate: (id: string) => `${BASE_PATH}/favorite-sections/${id}/duplicate`,
-    
+
     // Analytics
     analytics: (id: string) => `${BASE_PATH}/favorite-sections/${id}/analytics`,
     analyticsReport: `${BASE_PATH}/favorite-sections/analytics/report`,
-    
+
     // A/B Testing
     createAbTest: (sectionId: string) => `${BASE_PATH}/favorite-sections/${sectionId}/ab-test`,
     abTestResults: (sectionId: string) => `${BASE_PATH}/favorite-sections/${sectionId}/ab-test/results`,
     endAbTest: (sectionId: string) => `${BASE_PATH}/favorite-sections/${sectionId}/ab-test/end`,
-    
+
     // Bulk Operations
     bulk: `${BASE_PATH}/favorite-sections/bulk`,
-    
+
     // Import/Export
     export: `${BASE_PATH}/favorite-sections/export`,
     import: `${BASE_PATH}/favorite-sections/import`,
-    
+
     // Search and Content
     search: `${BASE_PATH}/favorite-sections/search`,
     updateContent: (sectionId: string) => `${BASE_PATH}/favorite-sections/${sectionId}/content`,
     refreshContent: (sectionId: string) => `${BASE_PATH}/favorite-sections/${sectionId}/refresh`,
-    
+
     // Preview and Validation
     preview: (sectionId: string) => `${BASE_PATH}/favorite-sections/${sectionId}/preview`,
     validate: `${BASE_PATH}/favorite-sections/validate`,
@@ -2166,54 +2166,54 @@ export const endpoints = {
     byId: (id: string) => `${BASE_PATH}/footer-logos/${id}`,
     update: (id: string) => `${BASE_PATH}/footer-logos/${id}`,
     delete: (id: string) => `${BASE_PATH}/footer-logos/${id}`,
-    
+
     // Upload and Processing
     upload: `${BASE_PATH}/footer-logos/upload`,
     generateVariants: (logoId: string) => `${BASE_PATH}/footer-logos/${logoId}/variants`,
     optimize: (logoId: string) => `${BASE_PATH}/footer-logos/${logoId}/optimize`,
-    
+
     // Template Operations
     templates: `${BASE_PATH}/footer-logos/templates`,
     template: (id: string) => `${BASE_PATH}/footer-logos/templates/${id}`,
     createFromTemplate: (templateId: string) => `${BASE_PATH}/footer-logos/templates/${templateId}/create`,
     saveAsTemplate: (logoId: string) => `${BASE_PATH}/footer-logos/${logoId}/save-as-template`,
-    
+
     // Publishing and Status
     publish: (id: string) => `${BASE_PATH}/footer-logos/${id}/publish`,
     unpublish: (id: string) => `${BASE_PATH}/footer-logos/${id}/unpublish`,
     archive: (id: string) => `${BASE_PATH}/footer-logos/${id}/archive`,
     duplicate: (id: string) => `${BASE_PATH}/footer-logos/${id}/duplicate`,
-    
+
     // Analytics and Reporting
     analytics: (id: string) => `${BASE_PATH}/footer-logos/${id}/analytics`,
     analyticsReport: `${BASE_PATH}/footer-logos/analytics/report`,
-    
+
     // Approval Workflow
     submitForApproval: (logoId: string) => `${BASE_PATH}/footer-logos/${logoId}/submit-approval`,
     approve: (logoId: string) => `${BASE_PATH}/footer-logos/${logoId}/approve`,
     reject: (logoId: string) => `${BASE_PATH}/footer-logos/${logoId}/reject`,
-    
+
     // A/B Testing
     createAbTest: (logoId: string) => `${BASE_PATH}/footer-logos/${logoId}/ab-test`,
     abTestResults: (logoId: string) => `${BASE_PATH}/footer-logos/${logoId}/ab-test/results`,
     endAbTest: (logoId: string) => `${BASE_PATH}/footer-logos/${logoId}/ab-test/end`,
-    
+
     // Usage Tracking
     trackUsage: (logoId: string) => `${BASE_PATH}/footer-logos/${logoId}/track-usage`,
     usageReport: (logoId: string) => `${BASE_PATH}/footer-logos/${logoId}/usage-report`,
-    
+
     // Bulk Operations
     bulk: `${BASE_PATH}/footer-logos/bulk`,
-    
+
     // Import/Export
     export: `${BASE_PATH}/footer-logos/export`,
     import: `${BASE_PATH}/footer-logos/import`,
-    
+
     // Search and Versioning
     search: `${BASE_PATH}/footer-logos/search`,
     versions: (logoId: string) => `${BASE_PATH}/footer-logos/${logoId}/versions`,
     revertVersion: (logoId: string) => `${BASE_PATH}/footer-logos/${logoId}/revert`,
-    
+
     // Preview and Validation
     preview: (logoId: string) => `${BASE_PATH}/footer-logos/${logoId}/preview`,
     validate: `${BASE_PATH}/footer-logos/validate`,
@@ -2227,55 +2227,55 @@ export const endpoints = {
     byId: (id: string) => `${BASE_PATH}/header-logos/${id}`,
     update: (id: string) => `${BASE_PATH}/header-logos/${id}`,
     delete: (id: string) => `${BASE_PATH}/header-logos/${id}`,
-    
+
     // Upload and Processing
     upload: `${BASE_PATH}/header-logos/upload`,
     generateVariants: (logoId: string) => `${BASE_PATH}/header-logos/${logoId}/variants`,
     optimize: (logoId: string) => `${BASE_PATH}/header-logos/${logoId}/optimize`,
-    
+
     // Template Operations
     templates: `${BASE_PATH}/header-logos/templates`,
     template: (id: string) => `${BASE_PATH}/header-logos/templates/${id}`,
     createFromTemplate: (templateId: string) => `${BASE_PATH}/header-logos/templates/${templateId}/create`,
     saveAsTemplate: (logoId: string) => `${BASE_PATH}/header-logos/${logoId}/save-as-template`,
-    
+
     // Publishing and Status
     publish: (id: string) => `${BASE_PATH}/header-logos/${id}/publish`,
     unpublish: (id: string) => `${BASE_PATH}/header-logos/${id}/unpublish`,
     archive: (id: string) => `${BASE_PATH}/header-logos/${id}/archive`,
     duplicate: (id: string) => `${BASE_PATH}/header-logos/${id}/duplicate`,
-    
+
     // Analytics and Reporting
     analytics: (id: string) => `${BASE_PATH}/header-logos/${id}/analytics`,
     analyticsReport: `${BASE_PATH}/header-logos/analytics/report`,
-    
+
     // Review Workflow
     submitForReview: (logoId: string) => `${BASE_PATH}/header-logos/${logoId}/submit-review`,
     approve: (logoId: string) => `${BASE_PATH}/header-logos/${logoId}/approve`,
     reject: (logoId: string) => `${BASE_PATH}/header-logos/${logoId}/reject`,
-    
+
     // A/B Testing
     createAbTest: (logoId: string) => `${BASE_PATH}/header-logos/${logoId}/ab-test`,
     abTestResults: (logoId: string) => `${BASE_PATH}/header-logos/${logoId}/ab-test/results`,
     endAbTest: (logoId: string) => `${BASE_PATH}/header-logos/${logoId}/ab-test/end`,
-    
+
     // Interaction Tracking
     trackInteraction: (logoId: string) => `${BASE_PATH}/header-logos/${logoId}/track-interaction`,
     usageAnalysis: (logoId: string) => `${BASE_PATH}/header-logos/${logoId}/usage-analysis`,
-    
+
     // Bulk Operations
     bulk: `${BASE_PATH}/header-logos/bulk`,
-    
+
     // Import/Export
     export: `${BASE_PATH}/header-logos/export`,
     import: `${BASE_PATH}/header-logos/import`,
-    
+
     // Search and Versioning
     search: `${BASE_PATH}/header-logos/search`,
     versions: (logoId: string) => `${BASE_PATH}/header-logos/${logoId}/versions`,
     revertVersion: (logoId: string) => `${BASE_PATH}/header-logos/${logoId}/revert`,
     createBranch: (logoId: string) => `${BASE_PATH}/header-logos/${logoId}/branch`,
-    
+
     // Preview and Validation
     preview: (logoId: string) => `${BASE_PATH}/header-logos/${logoId}/preview`,
     validate: `${BASE_PATH}/header-logos/validate`,

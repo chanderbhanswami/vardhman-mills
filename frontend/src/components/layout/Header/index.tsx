@@ -10,8 +10,6 @@ import Logo from './Logo';
 import Navigation from './Navigation';
 import SearchBar from './SearchBar';
 import MobileMenu from './MobileMenu';
-import HomeIcon from './HomeIcon';
-import ShopIcon from './ShopIcon';
 
 // Dynamic imports for components that might not be immediately needed
 const UserMenu = dynamic(() => import('./UserMenu'), { ssr: false });
@@ -152,78 +150,78 @@ const Header: React.FC<HeaderProps> = ({
         variants={headerVariants}
         animate={state.isSticky ? 'visible' : 'visible'}
         className={`
-          sticky top-0 z-50 bg-background/80 backdrop-blur-md transition-all duration-300
-          ${isScrolled ? 'shadow-sm border-b border-border' : 'border-b border-transparent'}
+          sticky top-0 z-50 bg-white shadow-md border-b border-border transition-all duration-300
           ${compact ? 'py-2' : 'py-3 lg:py-4'}
           ${className}
         `}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            {/* Mobile Menu Button */}
-            <div className="flex items-center lg:hidden">
-              <button
-                onClick={onToggleMobileMenu}
-                className="p-2 rounded-md text-foreground hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                aria-label="Toggle mobile menu"
-              >
-                <motion.div
-                  animate={isMobileMenuOpen ? 'open' : 'closed'}
-                  className="w-6 h-6 flex flex-col justify-center items-center"
+        <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between gap-4">
+            {/* Left Section: Logo + Navigation */}
+            <div className="flex items-center gap-4">
+              {/* Mobile Menu Button */}
+              <div className="flex items-center lg:hidden">
+                <button
+                  onClick={onToggleMobileMenu}
+                  className="p-2 rounded-md text-gray-900 hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  aria-label="Toggle mobile menu"
                 >
-                  <motion.span
-                    variants={{
-                      closed: { rotate: 0, y: 0 },
-                      open: { rotate: 45, y: 6 },
-                    }}
-                    className="block w-6 h-0.5 bg-current transform transition-transform"
-                  />
-                  <motion.span
-                    variants={{
-                      closed: { opacity: 1 },
-                      open: { opacity: 0 },
-                    }}
-                    className="block w-6 h-0.5 bg-current mt-1.5 transition-opacity"
-                  />
-                  <motion.span
-                    variants={{
-                      closed: { rotate: 0, y: 0 },
-                      open: { rotate: -45, y: -6 },
-                    }}
-                    className="block w-6 h-0.5 bg-current mt-1.5 transform transition-transform"
-                  />
-                </motion.div>
-              </button>
-            </div>
-
-            {/* Logo */}
-            <div className="flex-shrink-0">
-              <Logo compact={compact} />
-            </div>
-
-            {/* Desktop Navigation */}
-            <div className="hidden lg:flex lg:items-center lg:space-x-8">
-              <div className="flex items-center space-x-2 text-foreground">
-                <HomeIcon size="sm" />
-                <ShopIcon size="sm" />
+                  <motion.div
+                    animate={isMobileMenuOpen ? 'open' : 'closed'}
+                    className="w-6 h-6 flex flex-col justify-center items-center"
+                  >
+                    <motion.span
+                      variants={{
+                        closed: { rotate: 0, y: 0 },
+                        open: { rotate: 45, y: 6 },
+                      }}
+                      className="block w-6 h-0.5 bg-current transform transition-transform"
+                    />
+                    <motion.span
+                      variants={{
+                        closed: { opacity: 1 },
+                        open: { opacity: 0 },
+                      }}
+                      className="block w-6 h-0.5 bg-current mt-1.5 transition-opacity"
+                    />
+                    <motion.span
+                      variants={{
+                        closed: { rotate: 0, y: 0 },
+                        open: { rotate: -45, y: -6 },
+                      }}
+                      className="block w-6 h-0.5 bg-current mt-1.5 transform transition-transform"
+                    />
+                  </motion.div>
+                </button>
               </div>
-              <Navigation />
+
+              {/* Logo */}
+              <div className="flex-shrink-0">
+                <Logo compact={compact} />
+              </div>
+
+              {/* Desktop Navigation */}
+              <div className="hidden lg:flex lg:items-center">
+                <Navigation />
+              </div>
             </div>
 
-            {/* Search Bar - Desktop */}
+            {/* Center Section: Search Bar */}
             {showSearch && (
-              <div className="hidden md:flex flex-1 max-w-lg mx-8">
-                <SearchBar />
+              <div className="hidden md:flex flex-1 justify-center mx-4">
+                <div className="w-full max-w-md">
+                  <SearchBar />
+                </div>
               </div>
             )}
 
-            {/* Right Side Actions */}
-            <div className="flex items-center space-x-2 lg:space-x-4">
+            {/* Right Section: Actions */}
+            <div className="flex items-center justify-end space-x-2 lg:space-x-3">
               {/* Search Toggle - Mobile */}
               {showSearch && (
                 <button
                   onClick={toggleSearch}
-                  className="md:hidden p-2 rounded-md text-foreground hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="md:hidden p-2 rounded-md text-gray-900 hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   aria-label="Toggle search"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

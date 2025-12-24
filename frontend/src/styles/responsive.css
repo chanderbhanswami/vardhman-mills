@@ -994,7 +994,7 @@ html {
 }
 
 /* Dark Mode Responsive Adjustments */
-@media (prefers-color-scheme: dark) {
+@media (max-width: 0px) /* (prefers-color-scheme: dark) disabled */ {
   .nav-menu {
     background: var(--neutral-900);
     color: var(--neutral-100);

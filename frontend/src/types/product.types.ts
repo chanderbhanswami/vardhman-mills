@@ -1,22 +1,22 @@
-import { 
-  ID, 
-  Timestamp, 
-  BaseEntity, 
-  ImageAsset, 
-  VideoAsset, 
-  MediaGallery, 
-  Price, 
-  PriceRange, 
-  SEOData, 
-  Status, 
-  StockInfo, 
+import {
+  ID,
+  Timestamp,
+  BaseEntity,
+  ImageAsset,
+  VideoAsset,
+  MediaGallery,
+  Price,
+  PriceRange,
+  SEOData,
+  Status,
+  StockInfo,
   Rating,
   SortOrder,
   PaginatedResponse
 } from './common.types';
 
 // Re-export commonly used types
-export type { ImageAsset, VideoAsset, MediaGallery, Price, ID, Timestamp, BaseEntity };
+export type { ImageAsset, VideoAsset, MediaGallery, Price, ID, Timestamp, BaseEntity, StockInfo };
 
 // Product Types
 export interface Product extends BaseEntity {
@@ -26,7 +26,7 @@ export interface Product extends BaseEntity {
   sku: string;
   description: string;
   shortDescription?: string;
-  
+
   // Categorization
   categoryId: ID;
   category: Category;
@@ -36,19 +36,19 @@ export interface Product extends BaseEntity {
   brand?: Brand | string;
   collectionIds: ID[];
   collections: Collection[];
-  
+
   // Pricing (supports both backend and frontend structures)
   price?: number; // Convenience property for quick price access (backend)
   pricing?: ProductPricing; // Frontend pricing structure
-  
+
   // Variants (supports both structures)
   variants: ProductVariant[] | BackendProductVariant[];
-  
+
   // Media
   media?: MediaGallery;
   image?: string; // Convenience property for quick image access
   images?: string[]; // Convenience property for image array
-  
+
   // Product Details
   specifications?: ProductSpecification[] | Map<string, string>;
   features?: string[];
@@ -57,16 +57,16 @@ export interface Product extends BaseEntity {
   sizes?: ProductSize[];
   dimensions?: ProductDimensions;
   weight?: ProductWeight;
-  
+
   // Inventory
   inventory?: StockInfo;
   stock?: number; // Convenience property for quick stock check
-  
+
   // Marketing
   tags?: string[];
   keywords?: string[];
   seo?: SEOData;
-  
+
   // Status and Visibility
   status?: Status;
   isPublished?: boolean;
@@ -75,31 +75,31 @@ export interface Product extends BaseEntity {
   isBestseller?: boolean;
   isOnSale?: boolean;
   isActive?: boolean; // Backend field
-  
+
   // Dates
   launchDate?: Timestamp;
   publishedAt?: Timestamp;
   discontinuedAt?: Timestamp;
-  
+
   // Reviews and Ratings
   rating?: Rating;
   reviewCount?: number;
   averageRating?: number; // Backend field
   totalReviews?: number; // Backend field
-  
+
   // Additional Info
   careInstructions?: string[];
   warranty?: ProductWarranty;
   certifications?: ProductCertification[];
-  
+
   // Variants (for products with multiple options)
   variantOptions?: VariantOption[];
-  
+
   // Related Products
   relatedProductIds?: ID[];
   crossSellProductIds?: ID[];
   upsellProductIds?: ID[];
-  
+
   // Admin Fields
   createdBy?: ID;
   updatedBy?: ID;
@@ -109,47 +109,50 @@ export interface Product extends BaseEntity {
 // Backend Product Variant (from MongoDB)
 export interface BackendProductVariant {
   _id?: string;
-  size?: string;
-  color?: string;
-  material?: string;
+  id?: string;
   sku: string;
-  price: number;
-  comparePrice?: number;
-  stock: number;
-  images: string[];
-  isActive: boolean;
+  stock?: number;
+  price?: number;
+  salePrice?: number;
+  color?: string;
+  size?: string;
+  images?: string[];
+  image?: string;
+  name?: string;
+  title?: string;
+  isActive?: boolean;
 }
 
 export interface ProductVariant extends BaseEntity {
   productId: ID;
   name: string;
   sku: string;
-  
+
   // Variant Options (e.g., color: red, size: large)
   options: VariantOptionValue[];
-  
+
   // Convenience properties for common options
   color?: string;
   size?: string;
   material?: string;
-  
+
   // Pricing (can override product pricing)
   pricing?: ProductPricing;
-  
+
   // Media (can override product media)
   media?: MediaGallery;
-  
+
   // Inventory
   inventory: StockInfo;
-  
+
   // Status
   status: Status;
   isDefault: boolean;
-  
+
   // Physical Properties
   dimensions?: ProductDimensions;
   weight?: ProductWeight;
-  
+
   // Barcode/EAN
   barcode?: string;
   ean?: string;
@@ -181,18 +184,18 @@ export interface ProductPricing {
   salePrice?: Price;
   compareAtPrice?: Price; // MSRP or original price
   costPrice?: Price; // for margin calculation
-  
+
   // Bulk Pricing
   bulkPricing?: BulkPricingTier[];
-  
+
   // Dynamic Pricing
   isDynamicPricing: boolean;
   priceRules?: PriceRule[];
-  
+
   // Tax
   taxable: boolean;
   taxClassId?: ID;
-  
+
   // Currency specific pricing
   currencyPrices?: CurrencyPrice[];
 }
@@ -314,40 +317,40 @@ export interface Category extends BaseEntity {
   children: Category[];
   level: number;
   path: string; // breadcrumb path
-  
+
   // Display
   image?: ImageAsset;
   icon?: string;
   bannerImage?: ImageAsset;
-  
+
   // SEO
   seo: SEOData;
-  
+
   // Status
   status: Status;
   isVisible: boolean;
   isFeatured: boolean;
-  
+
   // Additional Status Flags
   isHot?: boolean;
   isNew?: boolean;
-  
+
   // Product Count
   productCount: number;
   activeProductCount: number;
-  
+
   // Stats
   viewCount?: number;
-  
+
   // Tags for filtering
   tags?: string[];
-  
+
   // Sort Order
   sortOrder: number;
-  
+
   // Attributes (for filtering)
   attributeGroups: CategoryAttributeGroup[];
-  
+
   // Admin
   createdBy: ID;
   updatedBy: ID;
@@ -381,45 +384,45 @@ export interface Brand extends BaseEntity {
   name: string;
   slug: string;
   description?: string;
-  
+
   // Media
   logo?: ImageAsset;
   bannerImage?: ImageAsset;
   brandGallery?: ImageAsset[];
-  
+
   // Brand Information
   foundedYear?: number;
   headquarters?: string;
   website?: string;
   email?: string;
   phone?: string;
-  
+
   // Additional Brand Properties
   awards?: number;
   rating?: number;
   origin?: string;
   isVerified?: boolean;
-  
+
   // Social Media
   socialLinks: SocialLink[];
-  
+
   // SEO
   seo: SEOData;
-  
+
   // Status
   status: Status;
   isVisible: boolean;
   isFeatured: boolean;
-  
+
   // Stats
   productCount: number;
   followersCount?: number;
-  
+
   // Story and Values
   brandStory?: string;
   values?: string[];
   achievements?: string[];
-  
+
   // Sort Order
   sortOrder: number;
 }
@@ -436,35 +439,35 @@ export interface Collection extends BaseEntity {
   slug: string;
   description?: string;
   type: 'manual' | 'automatic' | 'seasonal' | 'promotional';
-  
+
   // Display
   image?: ImageAsset;
   bannerImage?: ImageAsset;
-  
+
   // Tags for filtering and categorization
   tags?: string[];
-  
+
   // SEO
   seo: SEOData;
-  
+
   // Status and Visibility
   status: Status;
   isVisible: boolean;
   isFeatured: boolean;
-  
+
   // Automatic Collection Rules (if type is automatic)
   rules?: CollectionRule[];
-  
+
   // Manual Product Selection (if type is manual)
   productIds?: ID[];
-  
+
   // Dates
   startDate?: Timestamp;
   endDate?: Timestamp;
-  
+
   // Stats
   productCount: number;
-  
+
   // Sort Order
   sortOrder: number;
   productSortOrder: 'created_desc' | 'created_asc' | 'price_desc' | 'price_asc' | 'name_asc' | 'name_desc' | 'manual';
@@ -499,7 +502,7 @@ export interface ProductFilters {
   limit?: number;
 }
 
-export type ProductSortOption = 
+export type ProductSortOption =
   | 'relevance'
   | 'name_asc'
   | 'name_desc'

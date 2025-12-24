@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Upload import type {
   ApiResponse,
   PaginatedResponse,
@@ -227,7 +227,7 @@ export interface UploadAnalytics {
  * Upload API Service Class
  */
 export class UploadApiService {
-  private baseUrl = '/api/v1/uploads';
+  private baseUrl = '/uploads';
 
   // ============================================================================
   // FILE UPLOAD OPERATIONS

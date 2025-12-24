@@ -13,7 +13,7 @@ export const API_ENDPOINTS = {
   PRODUCT_FILTERS: '/api/products/filters',
   PRODUCT_CATEGORIES: '/api/products/categories',
   PRODUCT_REVIEWS: (id: string) => `/api/products/${id}/reviews`,
-  
+
   // Cart
   CART: '/api/cart',
   CART_ADD: '/api/cart/items',  // Fixed: Use /items endpoint
@@ -26,35 +26,35 @@ export const API_ENDPOINTS = {
   CART_RECOMMENDATIONS: '/api/cart/recommendations',
   CART_SAVED: '/api/cart/saved',
   CART_SAVE: '/api/cart/save',
-  
+
   // Wishlist
   WISHLIST: '/api/wishlist',
   WISHLIST_ADD: '/api/wishlist/items',  // Fixed: Use /items endpoint
   WISHLIST_REMOVE: (id: string) => `/api/wishlist/items/${id}`,  // Fixed: Use /items/:id with DELETE
-  
+
   // Orders
   ORDERS: '/api/orders',
   ORDER_BY_ID: (id: string) => `/api/orders/${id}`,
   ORDER_TRACKING: (id: string) => `/api/orders/${id}/tracking`,  // Fixed: Use /tracking not /track
   ORDER_INVOICE: (id: string) => `/api/orders/${id}/invoice`,
   ORDER_CANCEL: (id: string) => `/api/orders/${id}/cancel`,
-  
+
   // User
   USER_PROFILE: '/api/user/profile',
   USER_ADDRESSES: '/api/user/addresses',
   USER_ORDERS: '/api/user/orders',
-  
+
   // Auth
   AUTH_LOGIN: '/api/auth/login',
   AUTH_REGISTER: '/api/auth/register',
   AUTH_LOGOUT: '/api/auth/logout',
   AUTH_REFRESH: '/api/auth/refresh',
-  
+
   // Checkout
   CHECKOUT: '/api/checkout',
   CHECKOUT_PAYMENT: '/api/checkout/payment',
   CHECKOUT_VALIDATE: '/api/checkout/validate',
-  
+
   // Search
   SEARCH: '/api/search',
   SEARCH_SUGGESTIONS: '/api/search/suggestions',
@@ -65,16 +65,16 @@ export const APP_CONFIG = {
   APP_NAME: 'Vardhman Mills',
   APP_DESCRIPTION: 'Premium Quality Bedsheets and Home Textiles',
   APP_URL: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
-  API_BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000',
-  
+  API_BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5000/api/v1',
+
   // Pagination
   PRODUCTS_PER_PAGE: 24,
   ORDERS_PER_PAGE: 10,
   REVIEWS_PER_PAGE: 10,
-  
+
   // Cache
   CACHE_DURATION: 5 * 60 * 1000, // 5 minutes
-  
+
   // Features
   ENABLE_WISHLIST: true,
   ENABLE_COMPARE: true,

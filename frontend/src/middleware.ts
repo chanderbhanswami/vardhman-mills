@@ -8,17 +8,17 @@ import { getToken } from 'next-auth/jwt';
 import type { JWT } from 'next-auth/jwt';
 
 // Import constants
-import { 
-  PROTECTED_ROUTES, 
-  GUEST_ONLY_ROUTES, 
+import {
+  PROTECTED_ROUTES,
+  GUEST_ONLY_ROUTES,
   AUTH_ROUTES,
   ACCOUNT_ROUTES,
   SHOPPING_ROUTES,
   PUBLIC_ROUTES,
   ADMIN_ROUTES
 } from '@/constants/routes.constants';
-import { 
-  USER_ROLES, 
+import {
+  USER_ROLES,
   SESSION_CONFIG,
   AUTH_CONSTANTS
 } from '@/constants/auth.constants';
@@ -35,13 +35,13 @@ const SECURITY_HEADERS = {
   'X-XSS-Protection': '1; mode=block',
   'Referrer-Policy': 'origin-when-cross-origin',
   'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
-  'Content-Security-Policy': 
+  'Content-Security-Policy':
     "default-src 'self'; " +
     "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://checkout.razorpay.com; " +
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
     "font-src 'self' https://fonts.gstatic.com data:; " +
     "img-src 'self' data: https: blob:; " +
-    "connect-src 'self' http://localhost:5000 https://www.google-analytics.com https://api.razorpay.com https://checkout.razorpay.com; " +
+    "connect-src 'self' http://127.0.0.1:5000 https://www.google-analytics.com https://api.razorpay.com https://checkout.razorpay.com; " +
     "frame-src 'self' https://checkout.razorpay.com; " +
     "object-src 'none'; " +
     "base-uri 'self'; " +
@@ -88,13 +88,13 @@ function checkRateLimit(ip: string, limit: number = 100, window: number = 60000)
 function cleanupRateLimitStore() {
   const now = Date.now();
   const entriesToDelete: string[] = [];
-  
+
   rateLimitStore.forEach((entry, ip) => {
     if (now > entry.resetTime) {
       entriesToDelete.push(ip);
     }
   });
-  
+
   entriesToDelete.forEach(ip => rateLimitStore.delete(ip));
 }
 
@@ -109,15 +109,15 @@ if (typeof setInterval !== 'undefined') {
 function getClientIp(request: NextRequest): string {
   const forwarded = request.headers.get('x-forwarded-for');
   const real = request.headers.get('x-real-ip');
-  
+
   if (forwarded) {
     return forwarded.split(',')[0].trim();
   }
-  
+
   if (real) {
     return real;
   }
-  
+
   return 'unknown';
 }
 
@@ -130,7 +130,7 @@ function detectLocale(request: NextRequest): Locale {
   const pathnameLocale = SUPPORTED_LOCALES.find(
     locale => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
   );
-  
+
   if (pathnameLocale) {
     return pathnameLocale;
   }
@@ -147,7 +147,7 @@ function detectLocale(request: NextRequest): Locale {
     const preferredLanguages = acceptLanguage
       .split(',')
       .map(lang => lang.split(';')[0].trim().toLowerCase().split('-')[0]);
-    
+
     for (const lang of preferredLanguages) {
       const locale = SUPPORTED_LOCALES.find(l => l === lang);
       if (locale) {
@@ -187,8 +187,8 @@ function isGuestOnlyRoute(pathname: string): boolean {
  * Check if route is admin route
  */
 function isAdminRoute(pathname: string): boolean {
-  return pathname.startsWith('/admin') || 
-         Object.values(ADMIN_ROUTES).some(route => pathname.startsWith(route as string));
+  return pathname.startsWith('/admin') ||
+    Object.values(ADMIN_ROUTES).some(route => pathname.startsWith(route as string));
 }
 
 /**
@@ -203,12 +203,12 @@ function isApiRoute(pathname: string): boolean {
  */
 function hasRequiredRole(token: JWT | null, requiredRole: string): boolean {
   if (!token) return false;
-  
+
   const userRole = (token.role as string) || USER_ROLES.USER;
-  
+
   // Admin has access to everything
   if (userRole === USER_ROLES.ADMIN) return true;
-  
+
   // Check specific role
   return userRole === requiredRole;
 }
@@ -218,13 +218,13 @@ function hasRequiredRole(token: JWT | null, requiredRole: string): boolean {
  */
 function getAuthRedirectUrl(request: NextRequest, path: string): URL {
   const redirectUrl = new URL(path, request.url);
-  
+
   // Store the original URL for redirect after login
   const callbackUrl = request.nextUrl.pathname + request.nextUrl.search;
   if (callbackUrl !== '/') {
     redirectUrl.searchParams.set('callbackUrl', callbackUrl);
   }
-  
+
   return redirectUrl;
 }
 
@@ -235,12 +235,12 @@ function trackPageView(request: NextRequest, response: NextResponse) {
   const pathname = request.nextUrl.pathname;
   const referrer = request.headers.get('referer') || '';
   const userAgent = request.headers.get('user-agent') || '';
-  
+
   // Set analytics cookies/headers for client-side tracking
   response.headers.set('X-Page-Path', pathname);
   response.headers.set('X-Referrer', referrer);
   response.headers.set('X-User-Agent', userAgent);
-  
+
   return response;
 }
 
@@ -251,15 +251,15 @@ function handleCorsPreFlight(request: NextRequest): NextResponse | null {
   if (request.method === 'OPTIONS') {
     const origin = request.headers.get('origin') || '*';
     const response = new NextResponse(null, { status: 204 });
-    
+
     response.headers.set('Access-Control-Allow-Origin', origin);
     Object.entries(CORS_HEADERS).forEach(([key, value]) => {
       response.headers.set(key, value);
     });
-    
+
     return response;
   }
-  
+
   return null;
 }
 
@@ -270,7 +270,7 @@ function addSecurityHeaders(response: NextResponse): NextResponse {
   Object.entries(SECURITY_HEADERS).forEach(([key, value]) => {
     response.headers.set(key, value);
   });
-  
+
   return response;
 }
 
@@ -279,7 +279,7 @@ function addSecurityHeaders(response: NextResponse): NextResponse {
  */
 function addCorsHeaders(request: NextRequest, response: NextResponse): NextResponse {
   const origin = request.headers.get('origin');
-  
+
   // Allow requests from same origin and specific trusted origins
   if (origin) {
     const allowedOrigins = [
@@ -287,13 +287,13 @@ function addCorsHeaders(request: NextRequest, response: NextResponse): NextRespo
       'http://localhost:3000',
       'http://localhost:3001',
     ].filter(Boolean);
-    
+
     if (allowedOrigins.includes(origin)) {
       response.headers.set('Access-Control-Allow-Origin', origin);
       response.headers.set('Access-Control-Allow-Credentials', 'true');
     }
   }
-  
+
   return response;
 }
 
@@ -302,10 +302,10 @@ function addCorsHeaders(request: NextRequest, response: NextResponse): NextRespo
  */
 function handleLocaleRedirect(request: NextRequest, locale: Locale): NextResponse | null {
   const pathname = request.nextUrl.pathname;
-  
+
   // Skip if already has locale or is API route
   if (
-    pathname.startsWith(`/${locale}`) || 
+    pathname.startsWith(`/${locale}`) ||
     isApiRoute(pathname) ||
     pathname.startsWith('/_next') ||
     pathname.includes('/public/') ||
@@ -318,17 +318,17 @@ function handleLocaleRedirect(request: NextRequest, locale: Locale): NextRespons
   if (!SUPPORTED_LOCALES.some(l => pathname.startsWith(`/${l}`))) {
     const url = request.nextUrl.clone();
     url.pathname = `/${locale}${pathname}`;
-    
+
     const response = NextResponse.redirect(url);
     response.cookies.set('NEXT_LOCALE', locale, {
       maxAge: 31536000, // 1 year
       path: '/',
       sameSite: 'lax',
     });
-    
+
     return response;
   }
-  
+
   return null;
 }
 
@@ -354,7 +354,7 @@ function logRequest(request: NextRequest, token: JWT | null, action: string) {
  */
 export async function middleware(request: NextRequest) {
   const startTime = Date.now();
-  
+
   // Handle CORS preflight
   const corsResponse = handleCorsPreFlight(request);
   if (corsResponse) {
@@ -363,7 +363,7 @@ export async function middleware(request: NextRequest) {
 
   const { pathname, search } = request.nextUrl;
   const fullPath = pathname + search; // Full URL path with query params
-  
+
   // Skip middleware for static files and Next.js internals
   if (
     pathname.startsWith('/_next') ||
@@ -381,10 +381,10 @@ export async function middleware(request: NextRequest) {
   // Rate limiting
   const clientIp = getClientIp(request);
   const isRateLimitOk = checkRateLimit(clientIp, 100, 60000); // 100 requests per minute
-  
+
   if (!isRateLimitOk) {
     logRequest(request, null, 'RATE_LIMIT_EXCEEDED');
-    return new NextResponse('Too Many Requests', { 
+    return new NextResponse('Too Many Requests', {
       status: 429,
       headers: {
         'Retry-After': '60',
@@ -395,7 +395,7 @@ export async function middleware(request: NextRequest) {
 
   // Detect locale
   const locale = DEFAULT_LOCALE; // Temporarily hardcoded to avoid redirects
-  
+
   // TEMPORARILY DISABLED: Handle locale redirection for non-API routes
   // const localeRedirect = handleLocaleRedirect(request, locale);
   // if (localeRedirect) {
@@ -405,7 +405,7 @@ export async function middleware(request: NextRequest) {
   // Get authentication token
   let token: JWT | null = null;
   try {
-    token = await getToken({ 
+    token = await getToken({
       req: request,
       secret: process.env.NEXTAUTH_SECRET,
     });
@@ -422,7 +422,7 @@ export async function middleware(request: NextRequest) {
   // Handle admin routes (separate admin panel)
   if (isAdminRoute(cleanPathname)) {
     logRequest(request, token, 'ADMIN_ACCESS_ATTEMPT');
-    
+
     // Redirect to admin panel (separate application)
     const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL || '/admin';
     return NextResponse.redirect(new URL(adminUrl, request.url));
@@ -431,17 +431,17 @@ export async function middleware(request: NextRequest) {
   // Handle guest-only routes (redirect authenticated users)
   if (isGuestOnlyRoute(cleanPathname) && isAuthenticated) {
     logRequest(request, token, 'GUEST_ROUTE_REDIRECT');
-    
+
     const callbackUrl = request.nextUrl.searchParams.get('callbackUrl');
     const redirectPath = callbackUrl || ACCOUNT_ROUTES.DASHBOARD;
-    
+
     return NextResponse.redirect(new URL(`/${locale}${redirectPath}`, request.url));
   }
 
   // Handle protected routes (require authentication)
   if (isProtectedRoute(cleanPathname) && !isAuthenticated) {
     logRequest(request, token, 'AUTH_REQUIRED');
-    
+
     const loginUrl = getAuthRedirectUrl(request, `/${locale}${AUTH_ROUTES.LOGIN}`);
     return NextResponse.redirect(loginUrl);
   }
@@ -449,7 +449,7 @@ export async function middleware(request: NextRequest) {
   // Additional protection for checkout routes (require authentication)
   if (cleanPathname.startsWith(SHOPPING_ROUTES.CHECKOUT) && !isAuthenticated) {
     logRequest(request, token, 'CHECKOUT_AUTH_REQUIRED');
-    
+
     const loginUrl = getAuthRedirectUrl(request, `/${locale}${AUTH_ROUTES.LOGIN}`);
     return NextResponse.redirect(loginUrl);
   }
@@ -459,18 +459,18 @@ export async function middleware(request: NextRequest) {
     const tokenIat = token.iat;
     if (tokenIat && typeof tokenIat === 'number') {
       const tokenAge = Date.now() - (tokenIat * 1000);
-      
+
       if (tokenAge > SESSION_CONFIG.TIMEOUT) {
         logRequest(request, token, 'SESSION_TIMEOUT');
-        
+
         // Clear session and redirect to login
         const response = NextResponse.redirect(
           getAuthRedirectUrl(request, `/${locale}${AUTH_ROUTES.LOGIN}`)
         );
-        
+
         response.cookies.delete(AUTH_CONSTANTS.TOKEN_KEY);
         response.cookies.delete(AUTH_CONSTANTS.SESSION_KEY);
-        
+
         return addSecurityHeaders(response);
       }
     }
@@ -481,7 +481,7 @@ export async function middleware(request: NextRequest) {
     // Check if user has proper role
     if (!hasRequiredRole(token, USER_ROLES.USER)) {
       logRequest(request, token, 'INSUFFICIENT_PERMISSIONS');
-      
+
       return NextResponse.redirect(new URL(`/${locale}${PUBLIC_ROUTES.HOME}`, request.url));
     }
   }
@@ -533,7 +533,7 @@ export async function middleware(request: NextRequest) {
   // Add request ID for tracing
   const requestId = crypto.randomUUID();
   response.headers.set('X-Request-Id', requestId);
-  
+
   // Add full path for debugging
   response.headers.set('X-Full-Path', fullPath);
 

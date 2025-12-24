@@ -34,11 +34,14 @@ import {
   SparklesIcon,
   TruckIcon,
   TagIcon,
-  CheckCircleIcon,
+  BookmarkIcon,
   XMarkIcon,
+  ArchiveBoxIcon,
+  CheckCircleIcon,
 } from '@heroicons/react/24/outline';
-import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
+import { HeartIcon as HeartSolidIcon, BookmarkIcon as BookmarkSolidIcon } from '@heroicons/react/24/solid';
 import Image from 'next/image';
+import Link from 'next/link';
 
 // Components - Import directly from submodules
 import { CartDrawer, CartActions, CartItem as CartDrawerItem, CartSummary as CartDrawerSummary } from '@/components/cart/CartDrawer';
@@ -73,6 +76,7 @@ import LoadingSpinner from '@/components/common/LoadingSpinner';
 // Hooks
 import { useCart } from '@/hooks/useCart';
 import { useWishlist } from '@/hooks/useWishlist';
+import { useSaveForLater } from '@/hooks/useSaveForLater';
 import { useToast } from '@/hooks/useToast';
 import { useAuth } from '@/hooks/auth/useAuth';
 
@@ -95,6 +99,8 @@ interface CartState {
   shipping: number;
   discount: number;
   total: number;
+  regularTotal: number;
+  productDiscount: number;
 }
 
 interface CouponState {
@@ -119,31 +125,29 @@ const RECOMMENDATIONS_LIMIT = 8;
 export default function CartPage() {
   const router = useRouter();
   const { user } = useAuth();
-  const { addToWishlist, isInWishlist } = useWishlist();
+  const { toggleWishlist, isInWishlist } = useWishlist();
   const { toast } = useToast();
-  const { cart, isLoading: cartLoading, updateQuantity, removeItem, clearCart } = useCart();
+  const { cart, isLoading: cartLoading, updateQuantity, removeItem, clearCart, addItem } = useCart();
+  const { items: savedForLater, saveItem, moveToCart: moveSFLToCart, removeItem: removeSFLItem, isInSaveForLater } = useSaveForLater();
+
+  // Refs for scrolling
+  const shareSectionRef = React.useRef<HTMLDivElement>(null);
 
   // ============================================================================
   // STATE
   // ============================================================================
 
-  const [cartItems, setCartItems] = useState<CartItemType[]>([]);
-  
-  // Sync cart items from useCart hook
-  useEffect(() => {
-    if (cart?.items) {
-      setCartItems(cart.items);
-    }
-  }, [cart]);
+  // Use cart.items directly instead of local state for proper reactivity
+  const cartItems = cart?.items || [];
+
   const [isLoading, setIsLoading] = useState(false);
   const [isUpdating, setIsUpdating] = useState<string | null>(null);
   const [showQuickView, setShowQuickView] = useState<Product | null>(null);
-  const [showShareDialog, setShowShareDialog] = useState(false);
+  const [showShareSection, setShowShareSection] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
-  const [savedForLater, setSavedForLater] = useState<CartItemType[]>([]);
   const [isGiftEnabled, setIsGiftEnabled] = useState(false);
   const [giftMessage, setGiftMessage] = useState('');
-  
+
   const [coupon, setCoupon] = useState<CouponState>({
     code: '',
     isValid: false,
@@ -157,19 +161,25 @@ export default function CartPage() {
   // ============================================================================
 
   const cartStats = useMemo<CartState>(() => {
-    const subtotal = cartItems.reduce((sum, item) => sum + item.total.amount, 0);
-    const tax = subtotal * 0.18; // 18% GST
-    const shipping = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : 50;
-    const discount = coupon.discount;
-    const total = subtotal + tax + shipping - discount;
+    // Use flat price property from new useCart interface
+    const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const regularTotal = cartItems.reduce((sum, item) => sum + ((item.originalPrice || item.price) * item.quantity), 0);
+    const productDiscount = regularTotal - subtotal;
+    const tax = 0;
+    const shipping = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : 99;
+    const couponDiscount = coupon.discount;
+    const totalDiscount = productDiscount + couponDiscount;
+    const total = subtotal + shipping - couponDiscount;
 
     return {
       items: cartItems,
       subtotal,
       tax,
       shipping,
-      discount,
+      discount: totalDiscount,
       total,
+      regularTotal,
+      productDiscount,
     };
   }, [cartItems, coupon.discount]);
 
@@ -186,97 +196,86 @@ export default function CartPage() {
     if (newQuantity < 1) return;
 
     setIsUpdating(itemId);
-    
     try {
       await updateQuantity(itemId, newQuantity);
-      toast({
-        title: 'Cart updated',
-        description: 'Quantity has been updated',
-        variant: 'success',
-      });
+      // useCart hook already shows toast
     } catch (error) {
       console.error('Failed to update quantity:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to update quantity',
-        variant: 'error',
-      });
     } finally {
       setIsUpdating(null);
     }
-  }, [updateQuantity, toast]);
+  }, [updateQuantity]);
 
   const handleRemoveItem = useCallback(async (itemId: string) => {
     setIsUpdating(itemId);
-    
     try {
       await removeItem(itemId);
-      toast({
-        title: 'Item removed',
-        description: 'Product has been removed from cart',
-        variant: 'success',
-      });
+      // useCart hook already shows toast
     } catch (error) {
       console.error('Failed to remove item:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to remove item',
-        variant: 'error',
-      });
     } finally {
       setIsUpdating(null);
     }
-  }, [removeItem, toast]);
+  }, [removeItem]);
 
+  // Save For Later handlers
   const handleSaveForLater = useCallback(async (itemId: string) => {
     const item = cartItems.find(i => i.id === itemId);
     if (!item) return;
 
     setIsUpdating(itemId);
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
-    setSavedForLater(items => [...items, item]);
-    setCartItems(items => items.filter(i => i.id !== itemId));
-    setIsUpdating(null);
-    
-    toast({
-      title: 'Saved for later',
-      description: 'Item moved to saved for later',
-      variant: 'success',
-    });
-  }, [cartItems, toast]);
-
-  const handleMoveToCart = useCallback(async (itemId: string) => {
-    const item = savedForLater.find(i => i.id === itemId);
-    if (!item) return;
-
-    setSavedForLater(items => items.filter(i => i.id !== itemId));
-    setCartItems(items => [...items, item]);
-    
-    toast({
-      title: 'Moved to cart',
-      description: 'Item moved back to cart',
-      variant: 'success',
-    });
-  }, [savedForLater, toast]);
-
-  const handleAddToWishlist = useCallback(async (product: Product) => {
     try {
-      await addToWishlist(product);
-      toast({
-        title: 'Added to wishlist',
-        description: `${product.name} has been added to your wishlist`,
-        variant: 'success',
+      // Save to SFL first
+      saveItem({
+        id: item.id,
+        productId: item.productId,
+        product: item.product,
+        price: item.price,
+        originalPrice: item.originalPrice,
+        color: item.color,
+        size: item.size,
+        fabric: item.fabric,
       });
+
+      // Then remove from cart
+      await removeItem(item.id);
     } catch (error) {
-      console.error('Failed to add to wishlist:', error);
+      console.error('Failed to save item for later:', error);
       toast({
         title: 'Error',
-        description: 'Failed to add to wishlist',
-        variant: 'error',
+        description: 'Failed to save item for later',
+        variant: 'destructive',
       });
     }
-  }, [addToWishlist, toast]);
+    setIsUpdating(null);
+  }, [cartItems, saveItem, removeItem, toast]);
+
+  const handleMoveToCart = useCallback(async (itemId: string) => {
+    try {
+      // Get item from SFL and remove it
+      const sflItem = moveSFLToCart(itemId);
+      if (sflItem) {
+        // Add to cart
+        await addItem(sflItem.product, 1);
+      }
+    } catch (error) {
+      console.error('Failed to move to cart:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to move item to cart',
+        variant: 'destructive',
+      });
+    }
+  }, [moveSFLToCart, addItem, toast]);
+
+  const handleToggleWishlist = useCallback(async (product: Product) => {
+    try {
+      await toggleWishlist(product);
+      // Removed local toast since custom hook handles it
+    } catch (error) {
+      console.error('Failed to update wishlist:', error);
+    }
+  }, [toggleWishlist]);
 
   const handleApplyCoupon = useCallback(async () => {
     if (!coupon.code.trim()) {
@@ -285,14 +284,14 @@ export default function CartPage() {
     }
 
     setCoupon(prev => ({ ...prev, isApplying: true, error: null }));
-    
+
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
-    
+
     // Mock validation
     const isValid = coupon.code.toUpperCase() === 'SAVE10';
     const discount = isValid ? cartStats.subtotal * 0.1 : 0;
-    
+
     setCoupon(prev => ({
       ...prev,
       isApplying: false,
@@ -300,7 +299,7 @@ export default function CartPage() {
       discount,
       error: isValid ? null : 'Invalid coupon code',
     }));
-    
+
     if (isValid) {
       toast({
         title: 'Coupon applied',
@@ -318,7 +317,7 @@ export default function CartPage() {
       error: null,
       discount: 0,
     });
-    
+
     toast({
       title: 'Coupon removed',
       variant: 'default',
@@ -327,7 +326,7 @@ export default function CartPage() {
 
   const handleClearCart = useCallback(async () => {
     setIsLoading(true);
-    
+
     try {
       await clearCart();
       setCoupon({
@@ -360,7 +359,7 @@ export default function CartPage() {
       router.push('/login?redirect=/checkout');
       return;
     }
-    
+
     router.push('/checkout');
   }, [user, router]);
 
@@ -395,7 +394,7 @@ export default function CartPage() {
             <ArrowLeftIcon className="w-5 h-5" />
             Continue Shopping
           </Button>
-          
+
           <div className="flex items-center gap-2">
             <ShoppingCartIcon className="w-8 h-8 text-purple-600" />
             <h1 className="text-3xl font-bold text-gray-900">Shopping Cart</h1>
@@ -410,15 +409,21 @@ export default function CartPage() {
         {!isEmpty && (
           <div className="flex items-center gap-2">
             <Button
+              type="button"
               variant="outline"
               size="sm"
-              onClick={() => setShowShareDialog(true)}
-              className="gap-2"
+              onClick={() => {
+                setShowShareSection(true);
+                setTimeout(() => {
+                  shareSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+              }}
+              className="gap-2 cursor-pointer"
             >
               <ShareIcon className="w-4 h-4" />
               Share Cart
             </Button>
-            
+
             <Button
               variant="ghost"
               size="sm"
@@ -438,15 +443,13 @@ export default function CartPage() {
     if (cartStats.subtotal >= FREE_SHIPPING_THRESHOLD) {
       return (
         <Card className="mb-6 bg-green-50 border-green-200">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
+          <CardContent className="py-5 px-4">
+            <div className="flex items-center justify-center gap-3">
               <CheckCircleIcon className="w-6 h-6 text-green-600 flex-shrink-0" />
-              <div className="flex-1">
-                <p className="font-medium text-green-900">
-                  Congratulations! You qualify for FREE shipping
-                </p>
-              </div>
-              <TruckIcon className="w-8 h-8 text-green-600" />
+              <p className="font-medium text-green-900 text-center">
+                Congratulations! You qualify for FREE shipping
+              </p>
+              <TruckIcon className="w-8 h-8 text-green-600 flex-shrink-0" />
             </div>
           </CardContent>
         </Card>
@@ -477,137 +480,204 @@ export default function CartPage() {
 
   const renderCartItems = () => (
     <div className="space-y-4">
-      {cartItems.map((item, index) => (
-        <motion.div
-          key={item.id}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, x: -100 }}
-          transition={{ delay: index * 0.05 }}
-        >
-          <Card className={cn(
-            isUpdating === item.id && 'opacity-50 pointer-events-none'
-          )}>
-            <CardContent className="p-4">
-              <div className="flex gap-4">
-                {/* Product Image */}
-                <div className="w-24 h-24 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden relative">
-                  <Image
-                    src={item.product.media.images[0]?.url || '/placeholder.jpg'}
-                    alt={item.product.media.images[0]?.alt || item.product.name}
-                    fill
-                    className="object-cover"
-                    sizes="96px"
-                  />
-                </div>
+      {cartItems.map((item, index) => {
+        const productImage = item.product?.media?.images?.[0]?.url || item.product?.image || '/placeholder.jpg';
+        const productName = item.product?.name || 'Product';
+        const productSlug = item.product?.slug || '#';
+        const productSku = item.product?.sku || 'N/A';
+        const productBrand = typeof item.product?.brand === 'string' ? item.product.brand : item.product?.brand?.name;
+        const productCategory = typeof item.product?.category === 'string' ? item.product.category : item.product?.category?.name;
+        const isInStock = item.product?.inventory?.isInStock !== false;
+        const maxQuantity = item.product?.inventory?.availableQuantity || 99;
 
-                {/* Product Details */}
-                <div className="flex-1">
-                  <div className="flex justify-between mb-2">
-                    <div>
-                      <h3 className="font-semibold text-gray-900 hover:text-purple-600 cursor-pointer">
-                        {item.product.name}
-                      </h3>
-                      <p className="text-sm text-gray-500">SKU: {item.product.sku}</p>
-                      
-                      {/* Stock Status */}
-                      {item.product.inventory.isInStock ? (
-                        <Badge variant="success" className="mt-1">
-                          In Stock
-                        </Badge>
-                      ) : (
-                        <Badge variant="destructive" className="mt-1">
-                          Out of Stock
-                        </Badge>
-                      )}
-                    </div>
+        return (
+          <motion.div
+            key={item.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, x: -100 }}
+            transition={{ delay: index * 0.05 }}
+          >
+            <Card className={cn(
+              isUpdating === item.id && 'opacity-50 pointer-events-none'
+            )}>
+              <CardContent className="p-4">
+                <div className="flex gap-4">
+                  {/* Product Image */}
+                  <Link href={`/products/${productSlug}`} className="w-24 h-24 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden relative block cursor-pointer">
+                    <Image
+                      src={productImage}
+                      alt={productName}
+                      fill
+                      className="object-cover"
+                      sizes="96px"
+                    />
+                  </Link>
 
-                    <div className="text-right">
-                      <p className="text-lg font-bold text-purple-600">
-                        {item.total.formatted}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        {item.price.formatted} each
-                      </p>
-                    </div>
-                  </div>
+                  {/* Product Details */}
+                  <div className="flex-1">
+                    <div className="flex justify-between">
+                      <div className="flex-1 pr-4">
+                        {/* Brand */}
+                        {productBrand && (
+                          <p className="text-xs text-gray-500 font-medium mb-0.5">{productBrand}</p>
+                        )}
 
-                  {/* Quantity Controls */}
-                  <div className="flex items-center gap-4 mt-3">
-                    <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
-                      <button
-                        onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
-                        disabled={item.quantity <= 1 || isUpdating === item.id}
-                        className="px-3 py-1 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        −
-                      </button>
-                      <span className="px-4 py-1 border-x border-gray-300 min-w-[60px] text-center font-medium">
-                        {item.quantity}
-                      </span>
-                      <button
-                        onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
-                        disabled={isUpdating === item.id || item.quantity >= item.product.inventory.availableQuantity}
-                        className="px-3 py-1 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        +
-                      </button>
-                    </div>
+                        <Link href={`/products/${productSlug}`} className="font-semibold text-gray-900 hover:text-purple-600 block cursor-pointer">
+                          {productName}
+                        </Link>
 
-                    {/* Actions */}
-                    <div className="flex items-center gap-2 ml-auto">
-                      <Tooltip content="Save for later">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleSaveForLater(item.id)}
-                          disabled={isUpdating === item.id}
-                        >
-                          <HeartIcon className="w-4 h-4" />
-                        </Button>
-                      </Tooltip>
-
-                      <Tooltip content="Add to wishlist">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleAddToWishlist(item.product)}
-                          disabled={isUpdating === item.id}
-                        >
-                          {isInWishlist(item.product.id) ? (
-                            <HeartSolidIcon className="w-4 h-4 text-red-600" />
-                          ) : (
-                            <HeartIcon className="w-4 h-4" />
+                        {/* Product Info Row: Category, SKU, Color, Size, Fabric */}
+                        <div className="flex flex-wrap gap-x-2 gap-y-1 mt-1 text-sm text-gray-500">
+                          {productCategory && (
+                            <>
+                              <span>Category: {productCategory}</span>
+                              <span className="text-gray-300">|</span>
+                            </>
                           )}
-                        </Button>
-                      </Tooltip>
+                          <span>SKU: {productSku}</span>
+                          {item.color && (
+                            <>
+                              <span className="text-gray-300">|</span>
+                              <span>Color: {item.color}</span>
+                            </>
+                          )}
+                          {item.size && (
+                            <>
+                              <span className="text-gray-300">|</span>
+                              <span>Size: {item.size}</span>
+                            </>
+                          )}
+                          {item.fabric && (
+                            <>
+                              <span className="text-gray-300">|</span>
+                              <span>Fabric: {item.fabric}</span>
+                            </>
+                          )}
+                        </div>
 
-                      <Tooltip content="Remove">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleRemoveItem(item.id)}
-                          disabled={isUpdating === item.id}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        {/* Stock Status */}
+                        {isInStock ? (
+                          <Badge variant="success" className="mt-2">
+                            In Stock
+                          </Badge>
+                        ) : (
+                          <Badge variant="destructive" className="mt-2">
+                            Out of Stock
+                          </Badge>
+                        )}
+                      </div>
+
+                      <div className="text-right flex-shrink-0">
+                        {/* Pricing - Vertical Layout for alignment */}
+                        <div className="flex flex-col items-end gap-1">
+                          <span className="text-lg font-bold text-gray-900">
+                            ₹{(item.price * item.quantity).toLocaleString('en-IN')}
+                          </span>
+                          {item.originalPrice && item.originalPrice > item.price && (
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm text-gray-400 line-through">
+                                ₹{(item.originalPrice * item.quantity).toLocaleString('en-IN')}
+                              </span>
+                              <span className="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded font-semibold">
+                                {Math.round(((item.originalPrice - item.price) / item.originalPrice) * 100)}% OFF
+                              </span>
+                            </div>
+                          )}
+                          <span className="text-sm text-gray-500">
+                            ₹{item.price.toLocaleString('en-IN')} each
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Quantity Controls */}
+                    <div className="flex items-center gap-4 mt-4">
+                      <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
+                        <button
+                          type="button"
+                          onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
+                          disabled={item.quantity <= 1 || isUpdating === item.id}
+                          className="px-3 py-2 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors"
                         >
-                          <TrashIcon className="w-4 h-4" />
-                        </Button>
-                      </Tooltip>
-                    </div>
-                  </div>
+                          <span className="text-lg font-medium">−</span>
+                        </button>
+                        <span className="px-4 py-2 border-x border-gray-300 min-w-[50px] text-center font-medium bg-white">
+                          {item.quantity}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
+                          disabled={isUpdating === item.id || item.quantity >= maxQuantity}
+                          className="px-3 py-2 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors"
+                        >
+                          <span className="text-lg font-medium">+</span>
+                        </button>
+                      </div>
 
-                  {/* Loading Spinner */}
-                  {isUpdating === item.id && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-white/50">
-                      <LoadingSpinner size="sm" />
+                      {/* Actions */}
+                      <div className="flex items-center gap-2 ml-auto">
+                        <Tooltip content="Save for later">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleSaveForLater(item.id)}
+                            disabled={isUpdating === item.id}
+                            className="text-gray-500 hover:text-purple-600 cursor-pointer"
+                          >
+                            <BookmarkIcon className="w-4 h-4 mr-1" />
+                            <span className="text-xs">Save for Later</span>
+                          </Button>
+                        </Tooltip>
+
+                        <Tooltip content="Add to wishlist">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleToggleWishlist(item.product)}
+                            disabled={isUpdating === item.id}
+                            className={cn("cursor-pointer", isInWishlist(item.product?.id || '') ? "text-red-500 hover:text-red-600" : "text-gray-500 hover:text-red-500")}
+                          >
+                            {isInWishlist(item.product?.id || '') ? (
+                              <HeartSolidIcon className="w-4 h-4 mr-1" />
+                            ) : (
+                              <HeartIcon className="w-4 h-4 mr-1" />
+                            )}
+                            <span className="text-xs">Wishlist</span>
+                          </Button>
+                        </Tooltip>
+
+                        <Tooltip content="Remove">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleRemoveItem(item.id)}
+                            disabled={isUpdating === item.id}
+                            className="text-red-500 hover:text-red-700 hover:bg-red-50 cursor-pointer"
+                          >
+                            <TrashIcon className="w-4 h-4 mr-1" />
+                            <span className="text-xs">Remove</span>
+                          </Button>
+                        </Tooltip>
+                      </div>
                     </div>
-                  )}
+
+                    {/* Loading Spinner */}
+                    {isUpdating === item.id && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-white/50 z-10">
+                        <LoadingSpinner size="sm" />
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-      ))}
+              </CardContent>
+            </Card>
+          </motion.div>
+        );
+      })}
     </div>
   );
 
@@ -615,42 +685,105 @@ export default function CartPage() {
     if (savedForLater.length === 0) return null;
 
     return (
-      <Card className="mt-8">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <HeartIcon className="w-5 h-5 text-purple-600" />
+      <Card className="mt-8 bg-gray-50 border-gray-200">
+        <CardHeader className="pb-4 border-b border-gray-200">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <BookmarkIcon className="w-5 h-5 text-purple-600" />
             Saved for Later ({savedForLater.length})
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {savedForLater.map(item => (
-              <div key={item.id} className="border border-gray-200 rounded-lg p-3">
-                <div className="w-full h-32 relative rounded-lg mb-2 overflow-hidden">
-                  <Image
-                    src={item.product.media.images[0]?.url || '/placeholder.jpg'}
-                    alt={item.product.name}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 50vw, 25vw"
-                  />
+        <CardContent className="pt-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {savedForLater.map(item => {
+              const hasDiscount = item.originalPrice && item.originalPrice > item.price;
+              const discountPercent = hasDiscount
+                ? Math.round(((item.originalPrice! - item.price) / item.originalPrice!) * 100)
+                : 0;
+
+              return (
+                <div key={item.id} className="bg-white border border-gray-200 rounded-lg p-3 group hover:shadow-md transition-shadow">
+                  <Link href={`/products/${item.product?.slug || '#'}`} className="w-full h-40 relative rounded-lg mb-3 overflow-hidden block cursor-pointer">
+                    <Image
+                      src={item.product?.media?.images?.[0]?.url || item.product?.image || '/placeholder.jpg'}
+                      alt={item.product?.name || 'Product'}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      sizes="(max-width: 768px) 50vw, 25vw"
+                    />
+                    {/* Discount Badge */}
+                    {hasDiscount && (
+                      <span className="absolute top-2 left-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded">
+                        {discountPercent}% OFF
+                      </span>
+                    )}
+                    {/* Remove Button */}
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        removeSFLItem(item.id);
+                      }}
+                      className="absolute top-2 right-2 p-1.5 bg-white/90 rounded-full text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                      title="Remove from list"
+                    >
+                      <XMarkIcon className="w-4 h-4" />
+                    </button>
+                  </Link>
+
+                  <div className="space-y-1">
+                    {/* Brand */}
+                    {item.product?.brand && (
+                      <p className="text-xs text-gray-500 font-medium">{item.product.brand}</p>
+                    )}
+
+                    {/* Name */}
+                    <Link href={`/products/${item.product?.slug || '#'}`} className="cursor-pointer">
+                      <h4 className="text-sm font-semibold text-gray-900 truncate hover:text-purple-600">
+                        {item.product?.name || 'Product'}
+                      </h4>
+                    </Link>
+
+                    {/* Category */}
+                    {item.product?.category && (
+                      <p className="text-xs text-gray-400">{typeof item.product.category === 'string' ? item.product.category : item.product.category?.name}</p>
+                    )}
+
+                    {/* Color, Size, Fabric */}
+                    {(item.color || item.size || item.fabric) && (
+                      <div className="text-xs text-gray-400 flex flex-wrap gap-1">
+                        {item.color && <span>{item.color}</span>}
+                        {item.color && (item.size || item.fabric) && <span>|</span>}
+                        {item.size && <span>{item.size}</span>}
+                        {item.size && item.fabric && <span>|</span>}
+                        {item.fabric && <span>{item.fabric}</span>}
+                      </div>
+                    )}
+
+                    {/* Price */}
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-sm font-bold text-gray-900">
+                        ₹{item.price.toLocaleString('en-IN')}
+                      </span>
+                      {hasDiscount && (
+                        <>
+                          <span className="text-xs text-gray-400 line-through">
+                            ₹{item.originalPrice!.toLocaleString('en-IN')}
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleMoveToCart(item.id)}
+                    className="w-full mt-3 bg-white hover:bg-purple-50 hover:text-purple-700 hover:border-purple-200 cursor-pointer"
+                  >
+                    Move to Cart
+                  </Button>
                 </div>
-                <h4 className="text-sm font-medium text-gray-900 truncate">
-                  {item.product.name}
-                </h4>
-                <p className="text-sm font-bold text-purple-600 mt-1">
-                  {item.price.formatted}
-                </p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleMoveToCart(item.id)}
-                  className="w-full mt-2"
-                >
-                  Move to Cart
-                </Button>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </CardContent>
       </Card>
@@ -658,47 +791,65 @@ export default function CartPage() {
   };
 
   const renderCartSummary = () => (
-    <Card className="sticky top-4">
-      <CardHeader>
+    <Card className="sticky top-4 border-gray-200">
+      <CardHeader className="pb-4 border-b border-gray-200">
         <CardTitle>Order Summary</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-6">
         <div className="space-y-3 mb-6">
+          {/* Regular Price (MRP) */}
           <div className="flex justify-between text-gray-600">
-            <span>Subtotal ({itemCount} items)</span>
-            <span className="font-medium">{formatCurrency(cartStats.subtotal)}</span>
+            <span>Price ({itemCount} items)</span>
+            <span className="font-medium">₹{cartStats.regularTotal.toLocaleString('en-IN')}</span>
           </div>
 
-          <div className="flex justify-between text-gray-600">
-            <span>Tax (GST 18%)</span>
-            <span className="font-medium">{formatCurrency(cartStats.tax)}</span>
-          </div>
+          {/* Product Discount */}
+          {cartStats.productDiscount > 0 && (
+            <div className="flex justify-between text-green-600">
+              <span>Discount</span>
+              <span className="font-medium">
+                -₹{cartStats.productDiscount.toLocaleString('en-IN')} ({Math.round((cartStats.productDiscount / cartStats.regularTotal) * 100)}% OFF)
+              </span>
+            </div>
+          )}
 
+          {/* Shipping */}
           <div className="flex justify-between text-gray-600">
             <span>Shipping</span>
             <span className="font-medium">
               {cartStats.shipping === 0 ? (
-                <span className="text-green-600 font-semibold">FREE</span>
+                <div className="flex flex-col items-end">
+                  <span className="text-xs text-gray-400 line-through">₹99</span>
+                  <span className="text-green-600 font-semibold">FREE</span>
+                </div>
               ) : (
                 formatCurrency(cartStats.shipping)
               )}
             </span>
           </div>
 
+          {/* Coupon Discount */}
           {coupon.isValid && (
             <div className="flex justify-between text-green-600">
               <span className="flex items-center gap-1">
                 <TagIcon className="w-4 h-4" />
-                Discount ({coupon.code})
+                Coupon ({coupon.code})
               </span>
               <span className="font-medium">-{formatCurrency(coupon.discount)}</span>
             </div>
           )}
 
-          <div className="border-t border-gray-200 pt-3">
-            <div className="flex justify-between text-lg font-bold text-gray-900">
-              <span>Total</span>
-              <span className="text-purple-600">{formatCurrency(cartStats.total)}</span>
+          <div className="border-t border-gray-200 pt-3 mt-4">
+            <div className="flex justify-between items-center">
+              <span className="text-lg font-bold text-gray-900">Total</span>
+              <div className="text-right">
+                <div className="text-2xl font-bold text-gray-900">{formatCurrency(cartStats.total)}</div>
+                {coupon.discount > 0 && (
+                  <div className="text-xs text-green-600 font-medium mt-1">
+                    You save {formatCurrency(coupon.discount)}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -723,7 +874,7 @@ export default function CartPage() {
               <Button
                 variant="outline"
                 onClick={handleRemoveCoupon}
-                className="gap-2"
+                className="gap-2 shrink-0"
               >
                 <XMarkIcon className="w-4 h-4" />
                 Remove
@@ -732,7 +883,7 @@ export default function CartPage() {
               <Button
                 onClick={handleApplyCoupon}
                 disabled={coupon.isApplying}
-                className="gap-2"
+                className="gap-2 shrink-0"
               >
                 {coupon.isApplying ? <LoadingSpinner size="xs" /> : <TagIcon className="w-4 h-4" />}
                 Apply
@@ -752,17 +903,20 @@ export default function CartPage() {
 
         {/* Gift Option */}
         <div className="mb-6 pb-6 border-b border-gray-200">
-          <label className="flex items-center gap-2 cursor-pointer">
+          <div className="flex items-center">
             <input
               type="checkbox"
+              id="gift-checkbox"
               checked={isGiftEnabled}
               onChange={(e) => setIsGiftEnabled(e.target.checked)}
-              className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+              className="h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500 cursor-pointer"
             />
-            <GiftIcon className="w-5 h-5 text-purple-600" />
-            <span className="text-sm font-medium text-gray-700">This is a gift</span>
-          </label>
-          
+            <label htmlFor="gift-checkbox" className="ml-2 flex items-center gap-2 cursor-pointer select-none text-sm font-medium text-gray-700">
+              <GiftIcon className="w-5 h-5 text-purple-600" />
+              This is a gift
+            </label>
+          </div>
+
           {isGiftEnabled && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
@@ -775,6 +929,7 @@ export default function CartPage() {
                 onChange={(e) => setGiftMessage(e.target.value)}
                 placeholder="Enter gift message"
                 rows={3}
+                className="resize-none"
               />
             </motion.div>
           )}
@@ -784,7 +939,7 @@ export default function CartPage() {
         <Button
           onClick={handleCheckout}
           disabled={isEmpty}
-          className="w-full mb-3"
+          className="w-full mb-3 py-6 text-lg font-semibold shadow-md active:scale-[0.98] transition-all"
           size="lg"
         >
           Proceed to Checkout
@@ -793,7 +948,7 @@ export default function CartPage() {
         <Button
           variant="outline"
           onClick={handleContinueShopping}
-          className="w-full"
+          className="w-full hover:bg-gray-50"
         >
           Continue Shopping
         </Button>
@@ -855,14 +1010,7 @@ export default function CartPage() {
 
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Breadcrumbs */}
-          <Breadcrumbs
-            items={[
-              { label: 'Home', href: '/' },
-              { label: 'Cart', href: '/cart' },
-            ]}
-            className="mb-6"
-          />
+
 
           {/* Header */}
           {renderHeader()}
@@ -892,19 +1040,37 @@ export default function CartPage() {
                 </div>
               </div>
 
+              {/* Share Cart Section */}
+              {showShareSection && (
+                <div ref={shareSectionRef} className="mt-8">
+                  <div className="max-w-2xl mx-auto">
+                    <CartSharing
+                      cartId="current-cart"
+                      items={cartItems.map(item => ({
+                        id: item.id,
+                        name: item.product?.name || 'Product',
+                        price: item.price,
+                        quantity: item.quantity,
+                        image: item.product?.media?.images?.[0]?.url || item.product?.image || '/placeholder.jpg'
+                      }))}
+                    />
+                  </div>
+                </div>
+              )}
+
               {/* Recommendations - Max {RECOMMENDATIONS_LIMIT} items */}
               <div className="mt-12">
                 <CartRecommendations
                   cartItems={cartItems.map(item => ({
                     productId: item.productId,
-                    name: item.product.name
+                    name: item.product?.name || 'Product'
                   }))}
                 />
               </div>
 
               {/* Upsell Section */}
               <div className="mt-8">
-                <CartUpsell />
+                <CartUpsell addItem={addItem} />
               </div>
             </>
           )}
@@ -922,19 +1088,6 @@ export default function CartPage() {
         cancelLabel="Cancel"
         variant="destructive"
       />
-
-      {showShareDialog && (
-        <CartSharing
-          cartId="current-cart"
-          items={cartItems.map(item => ({
-            id: item.id,
-            name: item.product.name,
-            price: item.price.amount,
-            quantity: item.quantity,
-            image: item.product.media.images[0]?.url || '/placeholder.jpg'
-          }))}
-        />
-      )}
 
       {showQuickView && (
         <QuickView
@@ -969,7 +1122,7 @@ export default function CartPage() {
       )}
 
       {/* Future Enhancement Components - Now integrated and ready: */}
-      
+
       {/* Component references to satisfy TypeScript - all imported components documented */}
       {false && (
         <>

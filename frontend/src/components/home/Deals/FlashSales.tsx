@@ -33,6 +33,8 @@ import {
   ListBulletIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  HeartIcon,
+  ShoppingCartIcon,
 } from '@heroicons/react/24/outline';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -65,6 +67,8 @@ export interface FlashSalesProps {
   refreshInterval?: number;
   /** Show filters */
   showFilters?: boolean;
+  /** Enable carousel mode */
+  enableCarousel?: boolean;
   /** Additional CSS classes */
   className?: string;
   /** On item click handler */
@@ -100,6 +104,7 @@ export const FlashSales: React.FC<FlashSalesProps> = ({
   itemsPerPage = DEFAULT_ITEMS_PER_PAGE,
   refreshInterval = DEFAULT_REFRESH_INTERVAL,
   showFilters = true,
+  enableCarousel = false,
   className,
   onItemClick,
   onRefresh,
@@ -245,124 +250,212 @@ export const FlashSales: React.FC<FlashSalesProps> = ({
     <motion.div
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="mb-8"
+      className="mb-10"
     >
-      <div className="bg-gradient-to-r from-red-600 via-orange-500 to-yellow-500 rounded-2xl p-8 text-white">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <BoltIcon className="w-10 h-10" />
-              <h2 className="text-4xl md:text-5xl font-black uppercase">Flash Sale</h2>
+      {/* Timer and Stats Card */}
+      <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/10">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+          {/* Stats */}
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse" />
+              <span className="text-white font-medium">{stats.availableItems} items available</span>
             </div>
-            <p className="text-xl font-semibold">Limited quantities available - Act fast!</p>
+            <div className="h-6 w-px bg-white/20" />
+            <span className="text-white/60">{stats.totalSold} sold</span>
           </div>
 
-          <div className="flex flex-col items-end gap-2">
-            <Badge variant="default" size="lg" className="bg-white text-red-600 text-lg px-6 py-3 font-bold">
-              {stats.availableItems} / {stats.totalItems} Items Available
-            </Badge>
-            <p className="text-sm opacity-90">{stats.totalSold} items sold</p>
+          {/* Countdown Timer */}
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <ClockIcon className="w-5 h-5 text-yellow-400" />
+              <span className="text-white font-medium uppercase tracking-wide text-sm">Ends in</span>
+            </div>
+            <CountdownTimer
+              endDate={saleEndDate}
+              variant="large"
+              showLabels={true}
+              showIcon={false}
+            />
           </div>
-        </div>
-
-        {/* Countdown Timer */}
-        <div className="mt-6 pt-6 border-t border-white/20">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <ClockIcon className="w-6 h-6" />
-            <p className="text-xl font-bold uppercase">Sale Ends In:</p>
-          </div>
-          <CountdownTimer
-            endDate={saleEndDate}
-            variant="large"
-            showLabels={true}
-            showIcon={false}
-          />
         </div>
       </div>
     </motion.div>
   );
 
-  const renderControls = () => (
-    <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
-      <div className="flex items-center gap-4">
-        {/* Sort */}
-        {showFilters && (
-          <select
-            value={sortBy}
-            onChange={(e) => handleSortChange(e.target.value as SortBy)}
-            className="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-red-500 outline-none"
-            aria-label="Sort flash sale items"
+  const renderControls = () => {
+    if (!showFilters || enableCarousel) return null;
+    return (
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+
+        <div className="flex items-center gap-4">
+          {/* Sort */}
+          {showFilters && (
+            <select
+              value={sortBy}
+              onChange={(e) => handleSortChange(e.target.value as SortBy)}
+              className="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-red-500 outline-none"
+              aria-label="Sort flash sale items"
+            >
+              {SORT_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          )}
+
+          {/* Show Sold Out Toggle */}
+          <Button
+            variant="outline"
+            size="sm"
+            className={cn(showSoldOut && 'bg-gray-100 dark:bg-gray-700')}
+            onClick={() => {
+              setShowSoldOut((prev: boolean) => !prev);
+              console.log('Show sold out toggled:', !showSoldOut);
+            }}
           >
-            {SORT_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        )}
+            {showSoldOut ? 'Hide' : 'Show'} Sold Out
+          </Button>
 
-        {/* Show Sold Out Toggle */}
-        <Button
-          variant="outline"
-          size="sm"
-          className={cn(showSoldOut && 'bg-gray-100 dark:bg-gray-700')}
-          onClick={() => {
-            setShowSoldOut((prev: boolean) => !prev);
-            console.log('Show sold out toggled:', !showSoldOut);
-          }}
-        >
-          {showSoldOut ? 'Hide' : 'Show'} Sold Out
-        </Button>
+          {/* Refresh Button */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleRefresh}
+            disabled={loading}
+            className={cn(loading && 'opacity-50 cursor-not-allowed')}
+          >
+            <ArrowPathIcon className={cn('w-4 h-4 mr-2', loading && 'animate-spin')} />
+            Refresh
+          </Button>
 
-        {/* Refresh Button */}
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleRefresh}
-          disabled={loading}
-          className={cn(loading && 'opacity-50 cursor-not-allowed')}
-        >
-          <ArrowPathIcon className={cn('w-4 h-4 mr-2', loading && 'animate-spin')} />
-          Refresh
-        </Button>
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            Last updated: {lastRefresh.toLocaleTimeString()}
+          </p>
+        </div>
 
-        <p className="text-xs text-gray-500 dark:text-gray-400">
-          Last updated: {lastRefresh.toLocaleTimeString()}
-        </p>
+        {/* View Toggle */}
+        <div className="flex items-center gap-1 border border-gray-300 dark:border-gray-700 rounded-lg p-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleViewModeChange('grid')}
+            className={cn(viewMode === 'grid' && 'bg-gray-100 dark:bg-gray-700')}
+          >
+            <Squares2X2Icon className="w-5 h-5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleViewModeChange('list')}
+            className={cn(viewMode === 'list' && 'bg-gray-100 dark:bg-gray-700')}
+          >
+            <ListBulletIcon className="w-5 h-5" />
+          </Button>
+        </div>
       </div>
-
-      {/* View Toggle */}
-      <div className="flex items-center gap-1 border border-gray-300 dark:border-gray-700 rounded-lg p-1">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => handleViewModeChange('grid')}
-          className={cn(viewMode === 'grid' && 'bg-gray-100 dark:bg-gray-700')}
-        >
-          <Squares2X2Icon className="w-5 h-5" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => handleViewModeChange('list')}
-          className={cn(viewMode === 'list' && 'bg-gray-100 dark:bg-gray-700')}
-        >
-          <ListBulletIcon className="w-5 h-5" />
-        </Button>
-      </div>
-    </div>
-  );
+    );
+  };
 
   const renderItems = () => {
-    if (loading) {
+    // Skip loading skeleton to prevent flash - show cards directly
+    if (enableCarousel) {
+      if (filteredItems.length === 0) {
+        return (
+          <div className="text-center py-12">
+            <BoltIcon className="w-12 h-12 text-white/40 mx-auto mb-4" />
+            <p className="text-white/60">No flash deals available right now</p>
+          </div>
+        );
+      }
+
       return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {Array.from({ length: itemsPerPage }).map((_, i) => (
-            <div
-              key={i}
-              className="h-[500px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse"
-            />
-          ))}
+        <div className="overflow-x-auto pb-4 -mx-4 px-4 scrollbar-hide">
+          <div className="flex gap-5">
+            {filteredItems.map((item, index) => {
+              const stockPercent = calculateStockPercent(item);
+              return (
+                <div
+                  key={item.product.id || `flash-sale-${index}`}
+                  className="w-[280px] flex-shrink-0 bg-white rounded-2xl shadow-xl overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
+                >
+                  {/* Image Section */}
+                  <div className="relative aspect-square bg-gray-50 overflow-hidden">
+                    {item.product.images && item.product.images.length > 0 ? (
+                      <img
+                        src={typeof item.product.images[0] === 'string' ? item.product.images[0] : (item.product.images[0] as { url?: string })?.url || ''}
+                        alt={item.product.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <span className="text-gray-300 text-sm">No Image</span>
+                      </div>
+                    )}
+                    {/* Discount Badge */}
+                    <div className="absolute top-3 left-3">
+                      <span className="bg-red-500 text-white text-sm font-bold px-3 py-1 rounded-full shadow-lg">
+                        {item.discountPercent}% OFF
+                      </span>
+                    </div>
+                    {/* Wishlist Button */}
+                    <button className="absolute top-3 right-3 w-9 h-9 bg-white/90 rounded-full flex items-center justify-center shadow-md hover:bg-white transition-colors">
+                      <HeartIcon className="w-5 h-5 text-gray-400 hover:text-red-500 transition-colors" />
+                    </button>
+                  </div>
+
+                  {/* Content Section */}
+                  <div className="p-5">
+                    {/* Product Name */}
+                    <h3 className="font-semibold text-gray-900 text-base mb-2 line-clamp-2 min-h-[48px]">
+                      {item.product.name}
+                    </h3>
+
+                    {/* Price Row */}
+                    <div className="flex items-baseline gap-2 mb-4">
+                      <span className="text-2xl font-bold text-purple-600">
+                        ₹{item.product.price?.toLocaleString() || 'N/A'}
+                      </span>
+                      {(item.product as { originalPrice?: number }).originalPrice && (
+                        <span className="text-sm text-gray-400 line-through">
+                          ₹{(item.product as { originalPrice?: number }).originalPrice?.toLocaleString()}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Stock Progress */}
+                    <div className="mb-4">
+                      <div className="flex items-center justify-between text-xs mb-1.5">
+                        <span className="text-gray-500">{item.soldCount} sold</span>
+                        <span className="font-medium text-gray-700">{item.remainingStock} left</span>
+                      </div>
+                      <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${stockPercent}%` }}
+                          transition={{ duration: 0.8, ease: 'easeOut' }}
+                          className={cn(
+                            'h-full rounded-full',
+                            stockPercent <= 20 ? 'bg-red-500' : stockPercent <= 50 ? 'bg-yellow-500' : 'bg-green-500'
+                          )}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Add to Cart Button */}
+                    <Button
+                      className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2.5 rounded-xl transition-colors"
+                      onClick={() => onItemClick?.(item.product)}
+                    >
+                      <ShoppingCartIcon className="w-4 h-4 mr-2" />
+                      Add to Cart
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       );
     }
@@ -436,8 +529,8 @@ export const FlashSales: React.FC<FlashSalesProps> = ({
                         stockPercent <= 10
                           ? 'bg-red-600'
                           : stockPercent <= 30
-                          ? 'bg-orange-500'
-                          : 'bg-green-600'
+                            ? 'bg-orange-500'
+                            : 'bg-green-600'
                       )}
                     />
                   </div>

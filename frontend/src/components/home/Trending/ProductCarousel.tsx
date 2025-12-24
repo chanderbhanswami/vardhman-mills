@@ -391,16 +391,20 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
               )}
               style={{ gap: `${gap}px` }}
             >
-              {visibleProducts.map((product) => (
-                <TrendingCard
-                  key={product.id}
-                  product={product}
-                  onProductClick={onProductClick}
-                  onAddToCart={onAddToCart}
-                  onAddToWishlist={onAddToWishlist}
-                  onQuickView={onQuickView}
-                />
-              ))}
+              {visibleProducts.map((product, index) => {
+                if (!product) return null;
+                return (
+                  <div key={product.id || `trending-${index}`}>
+                    <TrendingCard
+                      product={product}
+                      onProductClick={onProductClick}
+                      onAddToCart={onAddToCart}
+                      onAddToWishlist={onAddToWishlist}
+                      onQuickView={onQuickView}
+                    />
+                  </div>
+                );
+              })}
             </motion.div>
           </AnimatePresence>
         </motion.div>

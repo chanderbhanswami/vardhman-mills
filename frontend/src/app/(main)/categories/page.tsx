@@ -87,16 +87,13 @@ interface FilterState {
 }
 
 type ViewMode = 'grid' | 'list' | 'masonry';
-type SortOption = 'name' | 'products' | 'popular' | 'newest';
+type SortOption = 'name-asc' | 'name-desc' | 'count-asc' | 'count-desc' | 'popular';
 
 // ============================================================================
 // CONSTANTS
 // ============================================================================
 
-const BREADCRUMB_ITEMS = [
-  { label: 'Home', href: '/' },
-  { label: 'Categories', href: '/categories' },
-];
+
 
 const STATS_CARDS: StatsCard[] = [
   {
@@ -134,10 +131,11 @@ const STATS_CARDS: StatsCard[] = [
 ];
 
 const SORT_OPTIONS: Array<{ value: SortOption; label: string }> = [
-  { value: 'name', label: 'Name (A-Z)' },
-  { value: 'products', label: 'Most Products' },
+  { value: 'name-asc', label: 'Name (A-Z)' },
+  { value: 'name-desc', label: 'Name (Z-A)' },
+  { value: 'count-desc', label: 'Most Products' },
+  { value: 'count-asc', label: 'Least Products' },
   { value: 'popular', label: 'Most Popular' },
-  { value: 'newest', label: 'Newest First' },
 ];
 
 // ============================================================================
@@ -153,10 +151,10 @@ export default function CategoriesPage() {
   // ============================================================================
 
   // Fetch categories from API
-  const { 
-    data: categoriesResponse, 
+  const {
+    data: categoriesResponse,
     isLoading: isLoadingCategories,
-    isError: isErrorCategories 
+    isError: isErrorCategories
   } = useCategories();
 
   const categories = useMemo(() => categoriesResponse?.data?.categories || [], [categoriesResponse]);
@@ -164,7 +162,7 @@ export default function CategoriesPage() {
   const isLoadingFeatured = isLoadingCategories;
 
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
-  const [sortBy, setSortBy] = useState<SortOption>('name');
+  const [sortBy, setSortBy] = useState<SortOption>('name-asc');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [filters, setFilters] = useState<FilterState>({
     search: '',
@@ -195,7 +193,7 @@ export default function CategoriesPage() {
     // Search filter
     if (filters.search) {
       const searchLower = filters.search.toLowerCase();
-      result = result.filter(cat => 
+      result = result.filter(cat =>
         cat.name.toLowerCase().includes(searchLower) ||
         cat.description?.toLowerCase().includes(searchLower)
       );
@@ -231,14 +229,16 @@ export default function CategoriesPage() {
     // Sort
     result.sort((a, b) => {
       switch (sortBy) {
-        case 'name':
+        case 'name-asc':
           return a.name.localeCompare(b.name);
-        case 'products':
+        case 'name-desc':
+          return b.name.localeCompare(a.name);
+        case 'count-asc':
+          return (a.productCount || 0) - (b.productCount || 0);
+        case 'count-desc':
           return (b.productCount || 0) - (a.productCount || 0);
         case 'popular':
           return (b.viewCount || 0) - (a.viewCount || 0);
-        case 'newest':
-          return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
         default:
           return 0;
       }
@@ -297,7 +297,7 @@ export default function CategoriesPage() {
     setViewMode(mode);
   }, []);
 
-  const handleCategoryClick = useCallback((category: { slug: string; [key: string]: unknown }) => {
+  const handleCategoryClick = useCallback((category: { slug: string;[key: string]: unknown }) => {
     router.push(`/categories/${category.slug}`);
   }, [router]);
 
@@ -322,39 +322,19 @@ export default function CategoriesPage() {
   // RENDER FUNCTIONS
   // ============================================================================
 
-  const renderBreadcrumbs = () => (
-    <nav className="flex items-center space-x-2 text-sm mb-6">
-      {BREADCRUMB_ITEMS.map((item, index) => (
-        <React.Fragment key={item.href}>
-          {index > 0 && <span className="text-gray-400">/</span>}
-          <a
-            href={item.href}
-            className={cn(
-              'hover:text-blue-600 transition-colors',
-              index === BREADCRUMB_ITEMS.length - 1
-                ? 'text-gray-900 dark:text-white font-semibold'
-                : 'text-gray-600 dark:text-gray-400'
-            )}
-          >
-            {item.label}
-          </a>
-        </React.Fragment>
-      ))}
-    </nav>
-  );
+
 
   const renderHeader = () => (
-    <div className="space-y-6">
-      {renderBreadcrumbs()}
+    <div className="space-y-6 mb-6">
 
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl p-12 text-white">
+      <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl p-12 text-white mb-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white">
             Shop by Category
           </h1>
           <p className="text-xl text-purple-100 mb-6 max-w-2xl">
@@ -382,7 +362,40 @@ export default function CategoriesPage() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {STATS_CARDS.map((stat, index) => {
+        {[
+          {
+            icon: FolderIcon,
+            label: 'Total Categories',
+            value: categories?.length || 0,
+            trend: '+5%',
+            trendUp: true,
+            color: 'from-blue-500 to-cyan-500',
+          },
+          {
+            icon: TagIcon,
+            label: 'Subcategories',
+            value: categories?.reduce((sum, cat) => sum + (cat.subcategories && Array.isArray(cat.subcategories) ? cat.subcategories.length : 0), 0) || 0,
+            trend: '+15%',
+            trendUp: true,
+            color: 'from-purple-500 to-pink-500',
+          },
+          {
+            icon: FireIcon,
+            label: 'Trending',
+            value: categories?.filter(cat => cat.isFeatured || cat.trending).length || 0,
+            trend: 'Hot',
+            trendUp: true,
+            color: 'from-red-500 to-orange-500',
+          },
+          {
+            icon: SparklesIcon,
+            label: 'New Arrivals',
+            value: categories?.filter(cat => cat.isNew).length || 0,
+            trend: 'This Week',
+            trendUp: true,
+            color: 'from-green-500 to-emerald-500',
+          },
+        ].map((stat, index) => {
           const Icon = stat.icon;
           return (
             <motion.div
@@ -395,10 +408,10 @@ export default function CategoriesPage() {
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                      <p className="text-sm text-gray-600  mb-1">
                         {stat.label}
                       </p>
-                      <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                      <p className="text-2xl font-bold text-gray-900 ">
                         {stat.value}
                       </p>
                       <div className="flex items-center gap-1 mt-2">
@@ -434,11 +447,11 @@ export default function CategoriesPage() {
     if (isLoadingFeatured) {
       return (
         <section className="my-12">
-          <div className="h-8 w-48 bg-gray-200 dark:bg-gray-700 rounded mb-4 animate-pulse" />
-          <div className="h-4 w-64 bg-gray-200 dark:bg-gray-700 rounded mb-6 animate-pulse" />
+          <div className="h-8 w-48 bg-gray-200  rounded mb-4 animate-pulse" />
+          <div className="h-4 w-64 bg-gray-200  rounded mb-6 animate-pulse" />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse" />
-            <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse" />
+            <div className="h-64 bg-gray-200  rounded-xl animate-pulse" />
+            <div className="h-64 bg-gray-200  rounded-xl animate-pulse" />
           </div>
         </section>
       );
@@ -449,10 +462,10 @@ export default function CategoriesPage() {
     return (
       <section className="my-12">
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+          <h2 className="text-2xl font-bold text-gray-900  mb-2">
             Featured Categories
           </h2>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-gray-600 ">
             Explore our most popular product categories
           </p>
         </div>
@@ -461,7 +474,7 @@ export default function CategoriesPage() {
           layout="grid"
           animated
         />
-        
+
         {/* Featured Category Carousel for mobile */}
         {featuredCategories.length > 3 && (
           <div className="mt-8 lg:hidden">
@@ -473,7 +486,7 @@ export default function CategoriesPage() {
             />
           </div>
         )}
-        
+
         {/* Individual Featured Category Cards */}
         {featuredCategories.length > 0 && (
           <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -492,103 +505,27 @@ export default function CategoriesPage() {
     );
   };
 
-  const renderSearchAndFilters = () => (
-    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
-      {/* Left side - Search and results count */}
-      <div className="flex-1 flex items-center gap-4 w-full sm:w-auto">
-        <div className="relative flex-1 max-w-md">
-          <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-          <Input
-            type="text"
-            placeholder="Search categories..."
-            value={filters.search}
-            onChange={(e) => handleSearchChange(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-        <p className="text-sm text-gray-600 dark:text-gray-400 hidden sm:block">
-          <span className="font-semibold text-gray-900 dark:text-white">
-            {formatNumber(filteredCategories.length)}
-          </span>{' '}
-          categories
-        </p>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setIsFilterOpen(!isFilterOpen)}
-          className="lg:hidden"
-        >
-          <FunnelIcon className="w-4 h-4 mr-2" />
-          Filters
-        </Button>
-      </div>
-
-      {/* Right side - View mode and sort */}
-      <div className="flex items-center gap-3">
-        {/* View Mode Toggle */}
-        <div className="flex items-center gap-1 border border-gray-300 dark:border-gray-600 rounded-lg p-1">
-          <Button
-            variant={viewMode === 'grid' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => handleViewModeChange('grid')}
-            className="px-3"
-          >
-            <Squares2X2Icon className="w-4 h-4" />
-          </Button>
-          <Button
-            variant={viewMode === 'list' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => handleViewModeChange('list')}
-            className="px-3"
-          >
-            <ListBulletIcon className="w-4 h-4" />
-          </Button>
-          <Button
-            variant={viewMode === 'masonry' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => handleViewModeChange('masonry')}
-            className="px-3"
-          >
-            <ViewColumnsIcon className="w-4 h-4" />
-          </Button>
-        </div>
-
-        {/* Sort Dropdown */}
-        <select
-          value={sortBy}
-          onChange={(e) => handleSortChange(e.target.value as SortOption)}
-          className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-          aria-label="Sort categories"
-        >
-          {SORT_OPTIONS.map(option => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      </div>
-    </div>
-  );
+  // renderSearchAndFilters removed
 
   const renderFiltersSidebar = () => (
     <Card>
-      <CardHeader>
+      <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
           <h3 className="font-semibold text-lg flex items-center gap-2">
             <AdjustmentsHorizontalIcon className="w-5 h-5" />
             Filters
           </h3>
           <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
             onClick={handleResetFilters}
-            className="text-xs"
+            className="text-xs border-gray-300 text-gray-700 hover:bg-gray-50"
           >
             Reset
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6 p-5">
         {/* Quick Filters */}
         <div className="space-y-3">
           <label className="flex items-center gap-2 cursor-pointer">
@@ -598,7 +535,7 @@ export default function CategoriesPage() {
               onChange={(e) => handleFilterChange({ featured: e.target.checked })}
               className="w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
             />
-            <span className="text-sm text-gray-700 dark:text-gray-300">
+            <span className="text-sm text-gray-700 ">
               Featured Only
             </span>
           </label>
@@ -610,7 +547,7 @@ export default function CategoriesPage() {
               onChange={(e) => handleFilterChange({ hot: e.target.checked })}
               className="w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
             />
-            <span className="text-sm text-gray-700 dark:text-gray-300">
+            <span className="text-sm text-gray-700 ">
               Hot Categories
             </span>
           </label>
@@ -622,7 +559,7 @@ export default function CategoriesPage() {
               onChange={(e) => handleFilterChange({ new: e.target.checked })}
               className="w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
             />
-            <span className="text-sm text-gray-700 dark:text-gray-300">
+            <span className="text-sm text-gray-700 ">
               New Arrivals
             </span>
           </label>
@@ -630,7 +567,7 @@ export default function CategoriesPage() {
 
         {/* Minimum Products */}
         <div>
-          <label htmlFor="cat-min-products" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label htmlFor="cat-min-products" className="block text-sm font-medium text-gray-700  mb-2">
             Minimum Products: {filters.minProducts}
           </label>
           <input
@@ -641,7 +578,7 @@ export default function CategoriesPage() {
             step="10"
             value={filters.minProducts}
             onChange={(e) => handleFilterChange({ minProducts: parseInt(e.target.value) })}
-            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer "
             aria-label="Minimum products filter"
           />
           <div className="flex justify-between text-xs text-gray-500 mt-1">
@@ -652,8 +589,8 @@ export default function CategoriesPage() {
 
         {/* Active Filters */}
         {(filters.featured || filters.hot || filters.new || filters.minProducts > 0) && (
-          <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-            <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <div className="pt-4 border-t border-gray-200 ">
+            <p className="text-sm font-medium text-gray-700  mb-2">
               Active Filters:
             </p>
             <div className="flex flex-wrap gap-2">
@@ -717,7 +654,7 @@ export default function CategoriesPage() {
       return (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {Array.from({ length: 8 }).map((_, i) => (
-            <Card key={i} className="h-[300px] animate-pulse bg-gray-100 dark:bg-gray-800" />
+            <Card key={i} className="h-[300px] animate-pulse bg-gray-100 " />
           ))}
         </div>
       );
@@ -734,7 +671,7 @@ export default function CategoriesPage() {
     if (filteredCategories.length === 0) {
       return (
         <Card className="p-12 text-center">
-          <p className="text-gray-600 dark:text-gray-400 text-lg mb-4">
+          <p className="text-gray-600  text-lg mb-4">
             No categories found matching your criteria
           </p>
           <Button onClick={handleResetFilters}>
@@ -747,50 +684,27 @@ export default function CategoriesPage() {
     return (
       <>
         <CategoryGrid
-          categories={paginatedCategories}
+          categories={filteredCategories}
           variant={viewMode}
-          enableFiltering={false}
-          enableSorting={false}
-          showViewToggle={false}
+          enableFiltering={true}
+          enableSorting={true}
+          showViewToggle={true}
+          enableSearch={true}
           animated
           onCategoryClick={handleCategoryClick}
+          searchQuery={filters.search}
+          onSearchChange={handleSearchChange}
+          sortOption={sortBy}
+          onSortChange={handleSortChange}
+          viewMode={viewMode}
+          onViewModeChange={handleViewModeChange}
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
+          itemsPerPage={itemsPerPage}
+          disableInternalProcessing={true}
         />
 
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-center gap-2 mt-8">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-            >
-              Previous
-            </Button>
-            {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-              const page = i + 1;
-              return (
-                <Button
-                  key={page}
-                  variant={page === currentPage ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => handlePageChange(page)}
-                >
-                  {page}
-                </Button>
-              );
-            })}
-            {totalPages > 5 && <span className="text-gray-500">...</span>}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-            >
-              Next
-            </Button>
-          </div>
-        )}
+        {/* Pagination handled by CategoryGrid */}
       </>
     );
   };
@@ -807,7 +721,7 @@ export default function CategoriesPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8"
+        className="min-h-screen bg-gray-50  py-8"
       >
         <Container>
           {renderHeader()}
@@ -817,7 +731,7 @@ export default function CategoriesPage() {
             <div className="flex flex-col lg:flex-row gap-8">
               {/* Sidebar Filters (Desktop) */}
               <aside className="hidden lg:block w-64 flex-shrink-0">
-                <div className="sticky top-24">
+                <div className="sticky top-48">
                   {renderFiltersSidebar()}
                 </div>
               </aside>
@@ -840,7 +754,7 @@ export default function CategoriesPage() {
                       animate={{ x: 0 }}
                       exit={{ x: '-100%' }}
                       transition={{ type: 'tween', duration: 0.3 }}
-                      className="absolute left-0 top-0 bottom-0 w-80 bg-white dark:bg-gray-800 overflow-y-auto p-6"
+                      className="absolute left-0 top-0 bottom-0 w-80 bg-white  overflow-y-auto p-6"
                     >
                       <div className="flex items-center justify-between mb-6">
                         <h3 className="text-lg font-semibold">Filters</h3>
@@ -860,7 +774,7 @@ export default function CategoriesPage() {
 
               {/* Main Content Area */}
               <div className="flex-1 space-y-6">
-                {renderSearchAndFilters()}
+                {/* renderSearchAndFilters removed */}
                 {renderCategories()}
               </div>
             </div>

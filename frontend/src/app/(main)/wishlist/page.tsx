@@ -136,25 +136,25 @@ const MOCK_WISHLIST_ITEMS_DEPRECATED: WishlistItem[] = [
       status: 'active',
       featured: true,
       category: { id: 'cat-1', name: 'Bedsheets', slug: 'bedsheets', description: 'Quality bedsheets', parentId: null, isActive: true, displayOrder: 1 } as unknown as Category,
-      pricing: { 
+      pricing: {
         basePrice: { amount: 2499, currency: 'INR', formatted: '₹2,499' },
         salePrice: { amount: 1999, currency: 'INR', formatted: '₹1,999' },
         compareAtPrice: { amount: 2999, currency: 'INR', formatted: '₹2,999' },
         isDynamicPricing: false,
         taxable: true
       } as unknown as Pricing,
-      inventory: { 
-        isInStock: true, 
-        quantity: 50, 
-        lowStockThreshold: 10, 
+      inventory: {
+        isInStock: true,
+        quantity: 50,
+        lowStockThreshold: 10,
         isLowStock: false,
         availableQuantity: 50,
-        backorderAllowed: false, 
-        sku: 'BED-001' 
+        backorderAllowed: false,
+        sku: 'BED-001'
       } as unknown as StockInfo,
-      media: { 
-        images: [{ url: '/images/products/bedsheet-1.jpg', alt: 'Bedsheet', width: 800, height: 800 }], 
-        videos: [], 
+      media: {
+        images: [{ url: '/images/products/bedsheet-1.jpg', alt: 'Bedsheet', width: 800, height: 800 }],
+        videos: [],
         thumbnail: { url: '/images/products/bedsheet-1-thumb.jpg', alt: 'Bedsheet thumbnail', width: 200, height: 200 }
       } as unknown as Media,
       rating: { average: 4.5, count: 128 } as Rating,
@@ -177,25 +177,25 @@ const MOCK_WISHLIST_ITEMS_DEPRECATED: WishlistItem[] = [
       status: 'active',
       featured: false,
       category: { id: 'cat-2', name: 'Towels', slug: 'towels', description: 'Bath towels', parentId: null, isActive: true, displayOrder: 2 } as unknown as Category,
-      pricing: { 
+      pricing: {
         basePrice: { amount: 1799, currency: 'INR', formatted: '₹1,799' },
         salePrice: { amount: 1499, currency: 'INR', formatted: '₹1,499' },
         compareAtPrice: { amount: 2199, currency: 'INR', formatted: '₹2,199' },
         isDynamicPricing: false,
         taxable: true
       } as unknown as Pricing,
-      inventory: { 
-        isInStock: false, 
-        quantity: 0, 
-        lowStockThreshold: 5, 
+      inventory: {
+        isInStock: false,
+        quantity: 0,
+        lowStockThreshold: 5,
         isLowStock: true,
         availableQuantity: 0,
-        backorderAllowed: true, 
-        sku: 'TWL-002' 
+        backorderAllowed: true,
+        sku: 'TWL-002'
       } as unknown as StockInfo,
-      media: { 
-        images: [{ url: '/images/products/towel-1.jpg', alt: 'Towel', width: 800, height: 800 }], 
-        videos: [], 
+      media: {
+        images: [{ url: '/images/products/towel-1.jpg', alt: 'Towel', width: 800, height: 800 }],
+        videos: [],
         thumbnail: { url: '/images/products/towel-1-thumb.jpg', alt: 'Towel thumbnail', width: 200, height: 200 }
       } as unknown as Media,
       rating: { average: 4.7, count: 95 } as Rating,
@@ -218,25 +218,25 @@ const MOCK_WISHLIST_ITEMS_DEPRECATED: WishlistItem[] = [
       status: 'active',
       featured: true,
       category: { id: 'cat-3', name: 'Table Linen', slug: 'table-linen', description: 'Table accessories', parentId: null, isActive: true, displayOrder: 3 } as unknown as Category,
-      pricing: { 
+      pricing: {
         basePrice: { amount: 3999, currency: 'INR', formatted: '₹3,999' },
         salePrice: { amount: 3299, currency: 'INR', formatted: '₹3,299' },
         compareAtPrice: { amount: 4999, currency: 'INR', formatted: '₹4,999' },
         isDynamicPricing: false,
         taxable: true
       } as unknown as Pricing,
-      inventory: { 
-        isInStock: true, 
-        quantity: 25, 
-        lowStockThreshold: 5, 
+      inventory: {
+        isInStock: true,
+        quantity: 25,
+        lowStockThreshold: 5,
         isLowStock: false,
         availableQuantity: 25,
-        backorderAllowed: false, 
-        sku: 'TBL-003' 
+        backorderAllowed: false,
+        sku: 'TBL-003'
       } as unknown as StockInfo,
-      media: { 
-        images: [{ url: '/images/products/runner-1.jpg', alt: 'Table Runner', width: 800, height: 800 }], 
-        videos: [], 
+      media: {
+        images: [{ url: '/images/products/runner-1.jpg', alt: 'Table Runner', width: 800, height: 800 }],
+        videos: [],
         thumbnail: { url: '/images/products/runner-1-thumb.jpg', alt: 'Runner thumbnail', width: 200, height: 200 }
       } as unknown as Media,
       rating: { average: 4.8, count: 67 } as Rating,
@@ -329,10 +329,10 @@ export default function WishlistPage() {
 
   // Track wishlist analytics
   useEffect(() => {
-    const totalValue = wishlistState.items.reduce((sum, item) => 
+    const totalValue = wishlistState.items.reduce((sum, item) =>
       sum + getPrice(item), 0
     );
-    
+
     if (wishlistState.items.length > 0) {
       console.log('Wishlist analytics:', {
         totalItems: wishlistState.items.length,
@@ -402,7 +402,7 @@ export default function WishlistPage() {
   const selectedCount = wishlistState.selectedItems.size;
   const totalItems = wishlistState.items.length;
   const filteredCount = filteredAndSortedItems.length;
-  const totalValue = wishlistState.items.reduce((sum, item) => 
+  const totalValue = wishlistState.items.reduce((sum, item) =>
     sum + getPrice(item), 0
   );
 
@@ -447,10 +447,10 @@ export default function WishlistPage() {
     try {
       // Log using wishlist context removeItem if available
       console.log('Removing item with wishlist context support:', itemId, 'removeItem available:', typeof removeItem);
-      
+
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 500));
-      
+
       setWishlistState(prev => ({
         ...prev,
         items: prev.items.filter(item => item.id !== itemId),
@@ -491,7 +491,7 @@ export default function WishlistPage() {
 
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 500));
-      
+
       // Add to cart
       addToCart(item.product, 1);
 
@@ -522,7 +522,7 @@ export default function WishlistPage() {
   const handleBulkMoveToCart = useCallback(async () => {
     setIsProcessing(true);
     try {
-      const selectedItemsArray = wishlistState.items.filter(item => 
+      const selectedItemsArray = wishlistState.items.filter(item =>
         wishlistState.selectedItems.has(item.id)
       );
 
@@ -577,7 +577,7 @@ export default function WishlistPage() {
       await new Promise(resolve => setTimeout(resolve, 500));
 
       const count = wishlistState.selectedItems.size;
-      
+
       setWishlistState(prev => ({
         ...prev,
         items: prev.items.filter(item => !prev.selectedItems.has(item.id)),
@@ -607,7 +607,7 @@ export default function WishlistPage() {
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 500));
-      
+
       setWishlistState(prev => ({
         ...prev,
         items: [],
@@ -842,35 +842,35 @@ export default function WishlistPage() {
                   <span className="text-sm text-gray-700">Alerts</span>
                 </div>
               </Tooltip>
-              
+
               <Tooltip content="Compare products">
                 <div className="flex items-center gap-2 p-2 bg-purple-50 rounded-lg">
                   <ArrowsRightLeftIcon className="w-4 h-4 text-purple-600" />
                   <span className="text-sm text-gray-700">Compare</span>
                 </div>
               </Tooltip>
-              
+
               <Tooltip content="Analytics & insights">
                 <div className="flex items-center gap-2 p-2 bg-green-50 rounded-lg">
                   <ChartBarIcon className="w-4 h-4 text-green-600" />
                   <span className="text-sm text-gray-700">Analytics</span>
                 </div>
               </Tooltip>
-              
+
               <Tooltip content="Quick preview">
                 <div className="flex items-center gap-2 p-2 bg-indigo-50 rounded-lg">
                   <EyeIcon className="w-4 h-4 text-indigo-600" />
                   <span className="text-sm text-gray-700">Preview</span>
                 </div>
               </Tooltip>
-              
+
               <Tooltip content="Price history">
                 <div className="flex items-center gap-2 p-2 bg-orange-50 rounded-lg">
                   <ClockIcon className="w-4 h-4 text-orange-600" />
                   <span className="text-sm text-gray-700">History</span>
                 </div>
               </Tooltip>
-              
+
               <Tooltip content="Gift options">
                 <div className="flex items-center gap-2 p-2 bg-pink-50 rounded-lg">
                   <GiftIcon className="w-4 h-4 text-pink-600" />
@@ -963,9 +963,9 @@ export default function WishlistPage() {
 
           <select
             value={wishlistState.sortBy}
-            onChange={(e) => setWishlistState(prev => ({ 
-              ...prev, 
-              sortBy: e.target.value as WishlistState['sortBy'] 
+            onChange={(e) => setWishlistState(prev => ({
+              ...prev,
+              sortBy: e.target.value as WishlistState['sortBy']
             }))}
             className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             aria-label="Sort by"
@@ -1162,10 +1162,10 @@ export default function WishlistPage() {
       notes: '',
       priority: item.notifyOnPriceDrop ? 'high' : 'medium' as 'low' | 'medium' | 'high',
       tags: [],
-      discount: item.product.pricing.salePrice ? 
-        Math.round(((item.product.pricing.compareAtPrice?.amount || item.product.pricing.basePrice.amount) - 
-         item.product.pricing.salePrice.amount) / 
-         (item.product.pricing.compareAtPrice?.amount || item.product.pricing.basePrice.amount) * 100) : undefined,
+      discount: item.product.pricing.salePrice ?
+        Math.round(((item.product.pricing.compareAtPrice?.amount || item.product.pricing.basePrice.amount) -
+          item.product.pricing.salePrice.amount) /
+          (item.product.pricing.compareAtPrice?.amount || item.product.pricing.basePrice.amount) * 100) : undefined,
       brand: item.product.brand?.name,
       sku: item.product.sku,
     }));
@@ -1267,7 +1267,7 @@ export default function WishlistPage() {
   };
 
   const renderEmptyWishlist = () => (
-    <EmptyWishlist 
+    <EmptyWishlist
       showRecommendations={true}
       showCategories={true}
       onProductClick={(productId: string) => router.push(`/products/${productId}`)}
@@ -1314,14 +1314,6 @@ export default function WishlistPage() {
 
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Breadcrumbs */}
-          <Breadcrumbs
-            items={[
-              { label: 'Home', href: '/' },
-              { label: 'Wishlist', href: '/wishlist' },
-            ]}
-            className="mb-6"
-          />
 
           {/* Guest User Prompt Banner */}
           {!isAuthenticated && showGuestPrompt && wishlistState.items.length > 0 && (
@@ -1400,7 +1392,7 @@ export default function WishlistPage() {
           ) : (
             <>
               {renderHeader()}
-              
+
               {isEmpty ? (
                 <EmptyState
                   icon={<MagnifyingGlassIcon className="w-16 h-16" />}
@@ -1422,7 +1414,7 @@ export default function WishlistPage() {
               ) : (
                 <>
                   {renderWishlistItems()}
-                  
+
                   {/* Additional Actions Section */}
                   {showBulkActions && selectedCount === 0 && wishlistState.items.length > 0 && (
                     <div className="mt-8 p-6 bg-gray-50 rounded-lg border border-gray-200">
@@ -1464,13 +1456,13 @@ export default function WishlistPage() {
                             }));
                           }}
                           viewMode="grid"
-                          onViewModeChange={() => {}}
+                          onViewModeChange={() => { }}
                           sortBy="newest"
-                          onSortChange={() => {}}
+                          onSortChange={() => { }}
                           sortOrder="desc"
-                          onSortOrderChange={() => {}}
+                          onSortOrderChange={() => { }}
                           filters={{}}
-                          onFiltersChange={() => {}}
+                          onFiltersChange={() => { }}
                         />
                       </div>
                     </div>
@@ -1503,7 +1495,7 @@ export default function WishlistPage() {
                           />
                         </div>
                       </div>
-                      
+
                       {/* Using ProductGrid for future recommendations */}
                       <div className="hidden">
                         <ProductGrid
@@ -1545,7 +1537,7 @@ export default function WishlistPage() {
                       />
                     </div>
                   )}
-                  
+
                   {/* Alternative List View using WishlistItem component */}
                   {wishlistState.view === 'list' && wishlistState.items.length > 0 && (
                     <div className="hidden">
@@ -1631,7 +1623,7 @@ export default function WishlistPage() {
             name: showQuickView.name,
             slug: showQuickView.slug,
             description: showQuickView.description || showQuickView.shortDescription || '',
-            images: showQuickView.media?.images?.map((img: { url?: string } | string) => 
+            images: showQuickView.media?.images?.map((img: { url?: string } | string) =>
               typeof img === 'string' ? img : img.url || '') || [],
             price: showQuickView.pricing.salePrice?.amount || showQuickView.pricing.basePrice.amount,
             originalPrice: showQuickView.pricing.compareAtPrice?.amount,

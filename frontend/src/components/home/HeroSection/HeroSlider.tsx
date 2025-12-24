@@ -169,7 +169,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = ({
   // ============================================================================
 
   const totalSlides = useMemo(() => slides.length, [slides.length]);
-  
+
   const currentSlide = useMemo(() => slides[currentSlideIndex], [slides, currentSlideIndex]);
 
   const canGoPrevious = useMemo(
@@ -189,11 +189,13 @@ export const HeroSlider: React.FC<HeroSliderProps> = ({
   const goToSlide = useCallback(
     (index: number) => {
       if (index < 0 || index >= totalSlides) return;
-      
-      setDirection(index > currentSlideIndex ? 'right' : 'left');
-      setCurrentSlideIndex(index);
+
+      setCurrentSlideIndex((prev) => {
+        setDirection(index > prev ? 'right' : 'left');
+        return index;
+      });
       setProgress(0);
-      
+
       // Preload adjacent slides
       setPreloadedSlides((prev) => {
         const newSet = new Set(prev);
@@ -206,28 +208,42 @@ export const HeroSlider: React.FC<HeroSliderProps> = ({
       onSlideChange?.(index);
       console.log('Slide changed to:', index);
     },
-    [currentSlideIndex, totalSlides, onSlideChange]
+    [totalSlides, onSlideChange]
   );
 
   const goToNext = useCallback(() => {
-    if (!canGoNext) return;
-
-    if (infinite && currentSlideIndex === totalSlides - 1) {
-      goToSlide(0);
-    } else {
-      goToSlide(currentSlideIndex + 1);
-    }
-  }, [canGoNext, infinite, currentSlideIndex, totalSlides, goToSlide]);
+    setCurrentSlideIndex((prev) => {
+      let nextIndex: number;
+      if (infinite && prev === totalSlides - 1) {
+        nextIndex = 0;
+      } else if (prev < totalSlides - 1) {
+        nextIndex = prev + 1;
+      } else {
+        return prev; // Don't change if not infinite and at end
+      }
+      setDirection('right');
+      setProgress(0);
+      console.log('Next: going to slide', nextIndex);
+      return nextIndex;
+    });
+  }, [infinite, totalSlides]);
 
   const goToPrevious = useCallback(() => {
-    if (!canGoPrevious) return;
-
-    if (infinite && currentSlideIndex === 0) {
-      goToSlide(totalSlides - 1);
-    } else {
-      goToSlide(currentSlideIndex - 1);
-    }
-  }, [canGoPrevious, infinite, currentSlideIndex, totalSlides, goToSlide]);
+    setCurrentSlideIndex((prev) => {
+      let prevIndex: number;
+      if (infinite && prev === 0) {
+        prevIndex = totalSlides - 1;
+      } else if (prev > 0) {
+        prevIndex = prev - 1;
+      } else {
+        return prev; // Don't change if not infinite and at start
+      }
+      setDirection('left');
+      setProgress(0);
+      console.log('Previous: going to slide', prevIndex);
+      return prevIndex;
+    });
+  }, [infinite, totalSlides]);
 
   // ============================================================================
   // AUTOPLAY
@@ -264,7 +280,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = ({
 
   const startProgress = useCallback(() => {
     setProgress(0);
-    
+
     if (progressIntervalRef.current) {
       clearInterval(progressIntervalRef.current);
     }
@@ -367,7 +383,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = ({
   const handleDragEnd = useCallback(
     (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
       const { offset, velocity } = info;
-      
+
       const shouldGoNext = offset.x < -SWIPE_THRESHOLD || velocity.x < -SWIPE_VELOCITY_THRESHOLD;
       const shouldGoPrevious = offset.x > SWIPE_THRESHOLD || velocity.x > SWIPE_VELOCITY_THRESHOLD;
 
@@ -441,16 +457,16 @@ export const HeroSlider: React.FC<HeroSliderProps> = ({
   const slideVariants = useMemo(
     () => ({
       enter: (direction: string) => ({
-        x: direction === 'right' ? 1000 : -1000,
-        opacity: 0,
+        x: direction === 'right' ? '100%' : '-100%',
+        opacity: 1,
       }),
       center: {
         x: 0,
         opacity: 1,
       },
       exit: (direction: string) => ({
-        x: direction === 'right' ? -1000 : 1000,
-        opacity: 0,
+        x: direction === 'right' ? '-100%' : '100%',
+        opacity: 1,
       }),
     }),
     []
@@ -533,40 +549,53 @@ export const HeroSlider: React.FC<HeroSliderProps> = ({
         isFullscreen && 'fixed inset-0 z-50 h-screen',
         className
       )}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
       role="region"
       aria-roledescription="carousel"
       aria-label="Hero slider"
     >
-      {/* Slides */}
-      <AnimatePresence initial={false} custom={direction} mode="wait">
-        <motion.div
-          key={currentSlideIndex}
-          custom={direction}
-          variants={getVariants()}
-          initial="enter"
-          animate="center"
-          exit="exit"
-          transition={{
-            x: { type: 'spring', stiffness: 300, damping: 30 },
-            opacity: { duration: 0.5 },
-            scale: { duration: 0.5 },
-            rotateY: { duration: 0.8 },
-          }}
-          drag={swipeEnabled ? 'x' : false}
-          dragConstraints={{ left: 0, right: 0 }}
-          dragElastic={1}
-          onDragEnd={handleDragEnd}
-          style={{ x: dragX }}
-          className="absolute inset-0"
-        >
-          <HeroSlide
-            {...currentSlide}
-            isActive={true}
-          />
-        </motion.div>
-      </AnimatePresence>
+      {/* Slides Container - True Carousel */}
+      <motion.div
+        className="flex h-full"
+        animate={{
+          x: `${-currentSlideIndex * 100}%`,
+        }}
+        transition={{
+          type: 'tween',
+          ease: [0.25, 0.1, 0.25, 1],
+          duration: 0.5,
+        }}
+        drag={swipeEnabled ? 'x' : false}
+        dragConstraints={{ left: 0, right: 0 }}
+        dragElastic={0.9}
+        onDragEnd={(_, info) => {
+          const swipe = info.offset.x;
+          const velocity = info.velocity.x;
+          if (swipe < -50 || velocity < -500) {
+            goToNext();
+          } else if (swipe > 50 || velocity > 500) {
+            goToPrevious();
+          }
+        }}
+        style={{
+          cursor: 'default',
+        }}
+      >
+        {slides.map((slide, index) => (
+          <div
+            key={slide.id}
+            className="flex-shrink-0 w-full h-full"
+          >
+            <HeroSlide
+              {...slide}
+              backgroundImage={slide.imageUrl}
+              backgroundVideo={slide.videoUrl}
+              primaryCTA={slide.ctaPrimary}
+              secondaryCTA={slide.ctaSecondary}
+              isActive={index === currentSlideIndex}
+            />
+          </div>
+        ))}
+      </motion.div>
 
       {/* Preload next slides */}
       <div className="hidden">

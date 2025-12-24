@@ -42,6 +42,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Input } from '@/components/ui/Input';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { cn } from '@/lib/utils/utils';
+import { QuickView } from '@/components/products/QuickView';
 import type { Product } from '@/types/product.types';
 
 // ============================================================================
@@ -148,6 +149,10 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
     onSaleOnly: false,
   });
 
+  // QuickView state
+  const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
+  const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+
   // ============================================================================
   // FILTERED AND SORTED PRODUCTS
   // ============================================================================
@@ -162,7 +167,7 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
         (product) =>
           product.name.toLowerCase().includes(query) ||
           product.description?.toLowerCase().includes(query) ||
-          product.brand?.name?.toLowerCase().includes(query)
+          (typeof product.brand === 'string' ? product.brand : product.brand?.name)?.toLowerCase().includes(query)
       );
     }
 
@@ -298,8 +303,16 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
 
   const handleProductClick = useCallback(
     (product: Product) => {
+      // Debug logging
+      console.log('🔍 QuickView triggered for:', product.name);
+
+      // Open QuickView modal
+      setQuickViewProduct(product);
+      setIsQuickViewOpen(true);
+
+      console.log('🔍 QuickView state set: isOpen=true, product=', product.name);
+
       onProductClick?.(product);
-      console.log('Product clicked:', product.name);
     },
     [onProductClick]
   );
@@ -640,19 +653,20 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
               className="mb-8"
             />
           ) : (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.3 }}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8"
-            >
-              <AnimatePresence mode="wait">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentPage}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8"
+              >
                 {paginatedProducts.map((product, index) => (
                   <motion.div
-                    key={product.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
+                    key={product.id || `featured-product-${index}`}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
                     transition={{ duration: 0.3, delay: index * 0.05 }}
                   >
                     <FeaturedCard
@@ -663,53 +677,55 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
                     />
                   </motion.div>
                 ))}
-              </AnimatePresence>
-            </motion.div>
+              </motion.div>
+            </AnimatePresence>
           )}
 
           {/* Pagination */}
-          {totalPages > 1 && viewMode === 'grid' && (
-            <div className="flex items-center justify-center gap-2 mt-8">
-              <Button
-                variant="outline"
-                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-                disabled={currentPage === 1}
-              >
-                Previous
-              </Button>
+          {
+            totalPages > 1 && viewMode === 'grid' && (
+              <div className="flex items-center justify-center gap-2 mt-8">
+                <Button
+                  variant="outline"
+                  onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                >
+                  Previous
+                </Button>
 
-              {[...Array(totalPages)].map((_, index) => {
-                const page = index + 1;
-                // Show first, last, current, and adjacent pages
-                if (
-                  page === 1 ||
-                  page === totalPages ||
-                  (page >= currentPage - 1 && page <= currentPage + 1)
-                ) {
-                  return (
-                    <Button
-                      key={page}
-                      variant={currentPage === page ? 'default' : 'outline'}
-                      onClick={() => setCurrentPage(page)}
-                    >
-                      {page}
-                    </Button>
-                  );
-                } else if (page === currentPage - 2 || page === currentPage + 2) {
-                  return <span key={page} className="px-2 text-gray-400">...</span>;
-                }
-                return null;
-              })}
+                {[...Array(totalPages)].map((_, index) => {
+                  const page = index + 1;
+                  // Show first, last, current, and adjacent pages
+                  if (
+                    page === 1 ||
+                    page === totalPages ||
+                    (page >= currentPage - 1 && page <= currentPage + 1)
+                  ) {
+                    return (
+                      <Button
+                        key={page}
+                        variant={currentPage === page ? 'default' : 'outline'}
+                        onClick={() => setCurrentPage(page)}
+                      >
+                        {page}
+                      </Button>
+                    );
+                  } else if (page === currentPage - 2 || page === currentPage + 2) {
+                    return <span key={page} className="px-2 text-gray-400">...</span>;
+                  }
+                  return null;
+                })}
 
-              <Button
-                variant="outline"
-                onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
-                disabled={currentPage === totalPages}
-              >
-                Next
-              </Button>
-            </div>
-          )}
+                <Button
+                  variant="outline"
+                  onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                </Button>
+              </div>
+            )
+          }
 
           {/* Results Summary */}
           <div className="text-center text-sm text-gray-600 dark:text-gray-400 mt-6">
@@ -719,7 +735,16 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
           </div>
         </>
       )}
-    </section>
+      {/* QuickView Modal */}
+      <QuickView
+        product={quickViewProduct}
+        isOpen={isQuickViewOpen}
+        onClose={() => {
+          setIsQuickViewOpen(false);
+          setQuickViewProduct(null);
+        }}
+      />
+    </section >
   );
 };
 

@@ -1,4 +1,4 @@
-import { 
+﻿import { 
   useMutation, 
   useQuery, 
   useQueryClient, 
@@ -725,7 +725,7 @@ export interface SaleTemplate {
 // ==================== API SERVICE CLASS ====================
 
 export class SaleApiService {
-  private readonly baseUrl = '/api/v1/sales';
+  private readonly baseUrl = '/sales';
 
   // ==================== CRUD Operations ====================
 

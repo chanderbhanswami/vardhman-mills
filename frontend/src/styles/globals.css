@@ -1879,7 +1879,7 @@ select:focus-visible {
 }
 
 /* Dark Mode Adjustments */
-@media (prefers-color-scheme: dark) {
+@media (max-width: 0px) /* (prefers-color-scheme: dark) disabled */ {
   [data-theme="auto"] {
     --primary-50: #792f10;
     --primary-100: #95370f;
@@ -5258,7 +5258,7 @@ select:focus-visible {
 }
 
 /* Dark Mode Support */
-@media (prefers-color-scheme: dark) {
+@media (max-width: 0px) /* (prefers-color-scheme: dark) disabled */ {
   :root {
     --primary-50: #1e293b;
     --primary-100: #334155;
@@ -9440,7 +9440,7 @@ select:focus-visible {
 }
 
 /* Dark Mode Support */
-@media (prefers-color-scheme: dark) {
+@media (max-width: 0px) /* (prefers-color-scheme: dark) disabled */ {
   .dark\:bg-black {
     background-color: rgb(0 0 0);
   }
@@ -9682,4 +9682,26 @@ select:focus-visible {
 
 .forced-color-adjust-none {
   forced-color-adjust: none;
+}
+/* FORCE LIGHT MODE OVERRIDE - FINAL RESORT */
+:root, .dark, [data-theme='dark'], body, html {
+  --background: 0 0% 100% !important;
+  --foreground: 222.2 84% 4.9% !important;
+  --card: 0 0% 100% !important;
+  --card-foreground: 222.2 84% 4.9% !important;
+  --popover: 0 0% 100% !important;
+  --popover-foreground: 222.2 84% 4.9% !important;
+  --primary: 42 88% 48% !important;
+  --primary-foreground: 0 0% 100% !important;
+  --secondary: 210 40% 96.1% !important;
+  --secondary-foreground: 222.2 47.4% 11.2% !important;
+  --muted: 210 40% 96.1% !important;
+  --muted-foreground: 215.4 16.3% 46.9% !important;
+  --accent: 210 40% 96.1% !important;
+  --accent-foreground: 222.2 47.4% 11.2% !important;
+  --destructive: 0 84.2% 60.2% !important;
+  --destructive-foreground: 210 40% 98% !important;
+  --border: 214.3 31.8% 91.4% !important;
+  --input: 214.3 31.8% 91.4% !important;
+  --ring: 42 88% 48% !important;
 }

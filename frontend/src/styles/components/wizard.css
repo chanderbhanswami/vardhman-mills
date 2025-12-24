@@ -683,7 +683,7 @@
 }
 
 /* Dark Mode Support */
-@media (prefers-color-scheme: dark) {
+@media (max-width: 0px) /* (prefers-color-scheme: dark) disabled */ {
   .wizard {
     background: #1f2937;
     color: #f9fafb;

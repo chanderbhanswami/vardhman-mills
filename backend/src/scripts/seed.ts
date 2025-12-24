@@ -409,7 +409,7 @@ const seedData = async () => {
     console.log(`✅ CMS Widgets: ${cmsWidgets.length}`);
     console.log(`✅ Settings: ${settings.length}`);
     console.log('========================================\n');
-    
+
     console.log('💡 TIP: ALL collections have been fully populated!');
     console.log('📦 SEO Extended: MetaTags, Redirects, SchemaMarkup, SEOAudits, Sitemaps');
     console.log('🏢 About/Company: CompanyInfo, HistoryEntries, TeamMembers, Awards, CompanyLocations, CompanyStats');
@@ -417,7 +417,7 @@ const seedData = async () => {
     console.log('🌍 Regions: India, Maharashtra, Delhi NCR, Karnataka');
     console.log('📁 Uploads: UploadFolders');
     console.log('💳 Payment Methods: Users now have card/UPI/netbanking options\n');
-    
+
     process.exit(0);
   } catch (error) {
     console.error('❌ Error seeding data:', error);
@@ -750,7 +750,7 @@ const createCategories = async () => {
 
   // Create subcategories
   const mainCategories = await Category.insertMany(categories);
-  
+
   const subcategories = [
     {
       name: 'Cotton Bed Sheets',
@@ -801,6 +801,7 @@ const createProducts = async (categories: any[], brands: any[]) => {
         {
           size: 'Single',
           color: 'White',
+          material: 'Cotton',
           sku: 'VM-BS-001-S-W',
           price: 1999,
           comparePrice: 2499,
@@ -811,6 +812,7 @@ const createProducts = async (categories: any[], brands: any[]) => {
         {
           size: 'Double',
           color: 'White',
+          material: 'Cotton',
           sku: 'VM-BS-001-D-W',
           price: 2999,
           comparePrice: 3499,
@@ -821,6 +823,7 @@ const createProducts = async (categories: any[], brands: any[]) => {
         {
           size: 'Single',
           color: 'Blue',
+          material: 'Cotton',
           sku: 'VM-BS-001-S-B',
           price: 1999,
           comparePrice: 2499,
@@ -855,6 +858,7 @@ const createProducts = async (categories: any[], brands: any[]) => {
         {
           size: 'Double',
           color: 'Champagne',
+          material: 'Satin',
           sku: 'VM-BS-002-D-C',
           price: 3499,
           comparePrice: 4299,
@@ -865,6 +869,7 @@ const createProducts = async (categories: any[], brands: any[]) => {
         {
           size: 'King',
           color: 'Champagne',
+          material: 'Satin',
           sku: 'VM-BS-002-K-C',
           price: 4499,
           comparePrice: 5299,
@@ -896,6 +901,7 @@ const createProducts = async (categories: any[], brands: any[]) => {
         {
           size: 'Single',
           color: 'Cream',
+          material: 'Microfiber',
           sku: 'VM-Q-001-S-C',
           price: 2299,
           comparePrice: 2799,
@@ -906,6 +912,7 @@ const createProducts = async (categories: any[], brands: any[]) => {
         {
           size: 'Double',
           color: 'Cream',
+          material: 'Microfiber',
           sku: 'VM-Q-001-D-C',
           price: 3299,
           comparePrice: 3899,
@@ -937,6 +944,7 @@ const createProducts = async (categories: any[], brands: any[]) => {
         {
           size: 'Standard',
           color: 'White',
+          material: 'Memory Foam',
           sku: 'VM-P-001-ST-W',
           price: 1799,
           comparePrice: 2199,
@@ -967,6 +975,7 @@ const createProducts = async (categories: any[], brands: any[]) => {
       variants: [
         {
           color: 'Navy Blue',
+          material: 'Egyptian Cotton',
           sku: 'VM-T-001-NB',
           price: 2499,
           comparePrice: 2999,
@@ -976,6 +985,7 @@ const createProducts = async (categories: any[], brands: any[]) => {
         },
         {
           color: 'Beige',
+          material: 'Egyptian Cotton',
           sku: 'VM-T-001-BE',
           price: 2499,
           comparePrice: 2999,
@@ -1002,12 +1012,12 @@ const createProducts = async (categories: any[], brands: any[]) => {
 
 const createSampleOrders = async (users: any[], products: any[]) => {
   const orders = [];
-  
+
   for (let i = 0; i < 3; i++) {
     const user = users[i % users.length];
     const product = products[i % products.length];
     const variant = product.variants[0];
-    
+
     const order = {
       orderNumber: `VM${Date.now()}${i}`,
       user: user._id,
@@ -1033,10 +1043,10 @@ const createSampleOrders = async (users: any[], products: any[]) => {
       shippingAddress: user.addresses[0],
       billingAddress: user.addresses[0]
     };
-    
+
     orders.push(order);
   }
-  
+
   return await Order.insertMany(orders);
 };
 
@@ -1045,17 +1055,17 @@ const createSampleOrders = async (users: any[], products: any[]) => {
 // ============================================================================
 const createLoyaltyAccounts = async (users: any[]) => {
   const loyaltyAccounts = [];
-  
+
   // Skip admin user, create for regular users
   const regularUsers = users.slice(1); // Skip first user (admin)
-  
+
   for (let i = 0; i < regularUsers.length; i++) {
     const user = regularUsers[i];
-    
+
     // Generate different tier levels
     const tierLevels = ['bronze', 'silver', 'gold', 'platinum'];
     const currentTier = tierLevels[i % tierLevels.length];
-    
+
     // Calculate points based on tier
     const tierPoints = {
       bronze: Math.floor(Math.random() * 900) + 100,
@@ -1063,20 +1073,20 @@ const createLoyaltyAccounts = async (users: any[]) => {
       gold: Math.floor(Math.random() * 9900) + 5100,
       platinum: Math.floor(Math.random() * 20000) + 15100
     };
-    
+
     const lifetimePoints = tierPoints[currentTier as keyof typeof tierPoints];
     const currentBalance = Math.floor(lifetimePoints * 0.7); // 70% of lifetime points available
-    
+
     // Create some transaction history
     const transactions = [];
     const transactionTypes = ['earn', 'redeem'];
     const sources = ['purchase', 'review', 'referral', 'signup', 'birthday'];
-    
+
     for (let j = 0; j < 5; j++) {
       const type = transactionTypes[Math.floor(Math.random() * transactionTypes.length)];
       const source = sources[Math.floor(Math.random() * sources.length)];
       const points = type === 'earn' ? Math.floor(Math.random() * 500) + 50 : -(Math.floor(Math.random() * 300) + 50);
-      
+
       transactions.push({
         type,
         points,
@@ -1086,10 +1096,10 @@ const createLoyaltyAccounts = async (users: any[]) => {
         expiresAt: type === 'earn' ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) : undefined // Expires in 1 year
       });
     }
-    
+
     // Create referral code
     const referralCode = `VM${user._id.toString().slice(-6).toUpperCase()}`;
-    
+
     // Some redemptions
     const redemptions = [];
     if (Math.random() > 0.5) {
@@ -1102,7 +1112,7 @@ const createLoyaltyAccounts = async (users: any[]) => {
         status: Math.random() > 0.7 ? 'used' : 'active'
       });
     }
-    
+
     // Some referrals
     const referrals = [];
     if (i > 0 && Math.random() > 0.6) {
@@ -1114,7 +1124,7 @@ const createLoyaltyAccounts = async (users: any[]) => {
         completedAt: Math.random() > 0.5 ? new Date(Date.now() - Math.floor(Math.random() * 30 * 24 * 60 * 60 * 1000)) : undefined
       });
     }
-    
+
     const loyaltyAccount = {
       user: user._id,
       totalPointsEarned: lifetimePoints,
@@ -1141,10 +1151,10 @@ const createLoyaltyAccounts = async (users: any[]) => {
       isActive: true,
       lastActivityAt: new Date(Date.now() - Math.floor(Math.random() * 7 * 24 * 60 * 60 * 1000))
     };
-    
+
     loyaltyAccounts.push(loyaltyAccount);
   }
-  
+
   return await Loyalty.insertMany(loyaltyAccounts);
 };
 
@@ -1153,19 +1163,19 @@ const createLoyaltyAccounts = async (users: any[]) => {
 // ============================================================================
 const createRefunds = async (users: any[], orders: any[]) => {
   const refunds = [];
-  
+
   // Create refunds for 30% of orders
   const refundOrders = orders.slice(0, Math.ceil(orders.length * 0.3));
-  
+
   for (let i = 0; i < refundOrders.length; i++) {
     const order = refundOrders[i];
     const user = users.find(u => u._id.toString() === order.user.toString());
-    
+
     if (!user) continue;
-    
+
     const types = ['full', 'partial'];
     const type = types[Math.floor(Math.random() * types.length)];
-    
+
     // Valid enum values for main refund reason (from refund.model.ts)
     const refundReasons = [
       'defective',
@@ -1181,7 +1191,7 @@ const createRefunds = async (users: any[], orders: any[]) => {
       'payment_issue',
       'other'
     ];
-    
+
     // Valid enum values for item-level reason (RefundItemSchema)
     const itemReasons = [
       'defective',
@@ -1195,12 +1205,12 @@ const createRefunds = async (users: any[], orders: any[]) => {
       'changed_mind',
       'other'
     ];
-    
+
     const reason = refundReasons[Math.floor(Math.random() * refundReasons.length)];
-    
+
     const statuses = ['pending', 'approved', 'rejected', 'processing', 'completed', 'failed', 'cancelled'];
     const status = statuses[Math.floor(Math.random() * statuses.length)];
-    
+
     const refund = {
       order: order._id,
       user: user._id,
@@ -1281,10 +1291,10 @@ const createRefunds = async (users: any[], orders: any[]) => {
       },
       requestedAt: new Date(Date.now() - Math.floor(Math.random() * 10 * 24 * 60 * 60 * 1000))
     };
-    
+
     refunds.push(refund);
   }
-  
+
   return await Refund.insertMany(refunds);
 };
 
@@ -1395,7 +1405,7 @@ const createDefaultSettings = async () => {
       description: 'Enable automatic backups',
       isGlobal: true
     },
-    
+
     // SEO Settings
     {
       category: 'general',
@@ -2438,7 +2448,7 @@ const createBestsellers = async (products: any[]) => {
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
   const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-  
+
   const bestsellers = [
     {
       productId: products[0]._id,
@@ -2480,7 +2490,7 @@ const createNewArrivals = async (products: any[]) => {
   const launchDate1 = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000); // 3 days ago
   const arrivalDate2 = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000); // 2 days ago
   const launchDate2 = new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000); // 1 day ago
-  
+
   const newArrivals = [
     {
       productId: products[1]._id,
@@ -3202,7 +3212,7 @@ const createNotifications = async (users: any[], orders: any[]) => {
       maxRetries: 3,
       deliveredAt: new Date(now - 10 * 24 * 60 * 60 * 1000 - 1000)
     },
-    
+
     // === UNREAD NOTIFICATIONS ===
     {
       user: users[1]._id,
@@ -3255,7 +3265,7 @@ const createNotifications = async (users: any[], orders: any[]) => {
         stock: 15
       }
     },
-    
+
     // === MULTI-CHANNEL NOTIFICATIONS ===
     {
       user: users[2]._id,
@@ -3278,7 +3288,7 @@ const createNotifications = async (users: any[], orders: any[]) => {
         estimatedDelivery: new Date(now + 3 * 24 * 60 * 60 * 1000)
       }
     },
-    
+
     // === SCHEDULED NOTIFICATION (FUTURE) ===
     {
       user: users[1]._id,
@@ -3300,7 +3310,7 @@ const createNotifications = async (users: any[], orders: any[]) => {
         maxDiscount: 50
       }
     },
-    
+
     // === FAILED NOTIFICATION (FOR RETRY TESTING) ===
     {
       user: users[2]._id,
@@ -3379,7 +3389,7 @@ const createNotificationTemplates = async () => {
 
 const createProductComparisons = async (users: any[], products: any[]) => {
   const crypto = await import('crypto');
-  
+
   const comparisons = [
     {
       user: users[1]._id,
@@ -3508,14 +3518,14 @@ const createProductComparisons = async (users: any[], products: any[]) => {
       }
     }
   ];
-  
+
   // Generate share URLs for public comparisons
   comparisons.forEach((comp: any) => {
     if (comp.isPublic && comp.shareToken) {
       comp.shareUrl = `https://vardhmanmills.com/compare/shared/${comp.shareToken}`;
     }
   });
-  
+
   return await ProductComparison.insertMany(comparisons);
 };
 
@@ -3723,7 +3733,7 @@ const createBlogComments = async (users: any[], blogPosts: any[]) => {
 
 const createNotificationPreferences = async (users: any[]) => {
   const crypto = await import('crypto');
-  
+
   const preferences = [
     // User 1 - Full preferences with FCM tokens and quiet hours
     {
@@ -3816,7 +3826,7 @@ const createNotificationPreferences = async (users: any[]) => {
       phoneVerified: false
     }
   ];
-  
+
   return await NotificationPreference.insertMany(preferences);
 };
 

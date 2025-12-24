@@ -51,8 +51,8 @@ import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { cn } from '@/lib/utils';
 import { formatCurrency } from '@/lib/format';
-import { useCart } from '@/contexts/CartContext';
-import { useWishlist } from '@/contexts/WishlistContext';
+import { useCart } from '@/components/providers/CartProvider';
+import { useWishlist } from '@/components/providers/WishlistProvider';
 import toast from 'react-hot-toast';
 
 // ============================================================================
@@ -113,7 +113,7 @@ export const QuickView: React.FC<QuickViewProps> = ({
   const [quantity, setQuantity] = useState(1);
   const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>({});
   const [adding, setAdding] = useState(false);
-  const { addItem } = useCart();
+  const { addToCart } = useCart();
   const { addToWishlist, isInWishlist } = useWishlist();
 
   // Reset state when product changes
@@ -156,26 +156,16 @@ export const QuickView: React.FC<QuickViewProps> = ({
 
     setAdding(true);
     try {
-      const variantId = Object.keys(selectedVariants).length > 0 
-        ? JSON.stringify(selectedVariants) 
+      const variantData = Object.keys(selectedVariants).length > 0
+        ? selectedVariants
         : undefined;
-      
-      addItem({
-        id: `cart-${product.id}-${variantId || 'default'}`,
-        productId: product.id,
-        quantity,
-        name: product.name,
-        price: product.price,
-        image: product.images[0],
-        slug: product.slug,
-        sku: product.sku || `SKU-${product.id}`,
-        inStock: product.inStock ? 999 : 0,
-        variantId,
-      });
+
+      // Use global CartProvider's addToCart method
+      await addToCart(product.id, quantity, variantData);
 
       toast.success(`${product.name} added to cart!`);
       onAddToCart?.(product.id, quantity, selectedVariants);
-      
+
       // Close modal after brief delay
       setTimeout(() => {
         onClose();
@@ -403,8 +393,8 @@ export const QuickView: React.FC<QuickViewProps> = ({
                                     selectedVariants[variant.name] === option.value
                                       ? 'border-primary bg-primary text-white'
                                       : option.available
-                                      ? 'border-gray-300 hover:border-gray-400'
-                                      : 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
+                                        ? 'border-gray-300 hover:border-gray-400'
+                                        : 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
                                   )}
                                 >
                                   {option.label}

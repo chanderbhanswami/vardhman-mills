@@ -1,7 +1,7 @@
 import type { Config } from 'tailwindcss';
 
 const config: Config = {
-    darkMode: 'class',
+    darkMode: ['class', '.force-light-mode-never-exists'], // Effectively disables dark mode utilities
     content: [
         './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
         './src/components/**/*.{js,ts,jsx,tsx,mdx}',

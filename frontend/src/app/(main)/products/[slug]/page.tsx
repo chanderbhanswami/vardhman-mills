@@ -32,6 +32,7 @@ import {
   ShareButtons,
   ImageGallery,
   OptimizedImage,
+  NotifyMeDialog,
 } from '@/components/common';
 
 // Product Components
@@ -64,7 +65,7 @@ import { useToast } from '@/hooks/useToast';
 import { useAuth } from '@/components/providers';
 import { useCart } from '@/hooks/useCart';
 import { useWishlist } from '@/hooks/useWishlist';
-import { useMediaQuery } from '@/hooks';
+import { useMediaQuery, useRecentlyViewed } from '@/hooks';
 
 // Types
 import type { Product, ProductVariant } from '@/types/product.types';
@@ -84,6 +85,7 @@ import {
   CheckCircleIcon,
   XCircleIcon,
   InformationCircleIcon,
+  BellIcon,
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartIconSolid, StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 
@@ -115,6 +117,7 @@ function ProductPageContent({ initialProduct = null }: ProductPageContentProps) 
   const [pincode, setPincode] = useState('');
   const [deliveryInfo, setDeliveryInfo] = useState<{ available: boolean; estimatedDays: number; cod: boolean; freeShipping: boolean } | null>(null);
   const [isCheckingDelivery, setIsCheckingDelivery] = useState(false);
+  const [showNotifyDialog, setShowNotifyDialog] = useState(false);
 
   // Generate mock product data
   const generateMockProduct = useCallback((productSlug: string): Product => {
@@ -213,7 +216,23 @@ function ProductPageContent({ initialProduct = null }: ProductPageContentProps) 
         id: `variant-${index}-${i}`,
         name: `${color} - ${sizes[index % sizes.length]}`,
         sku: `VAR-${index}-${i}`,
-        price: salePrice + (i * 100),
+        pricing: {
+          basePrice: {
+            amount: salePrice + (i * 100),
+            currency: 'INR',
+            displayAmount: formatCurrency(salePrice + (i * 100)),
+          },
+          salePrice: {
+            amount: salePrice + (i * 100),
+            currency: 'INR',
+            displayAmount: formatCurrency(salePrice + (i * 100)),
+          },
+        },
+        inventory: {
+          isInStock: Math.random() > 0.2,
+          quantity: Math.floor(Math.random() * 50) + 1,
+          isLowStock: Math.random() > 0.8,
+        },
         inStock: Math.random() > 0.2,
         attributes: {
           color,
@@ -318,7 +337,7 @@ function ProductPageContent({ initialProduct = null }: ProductPageContentProps) 
       await new Promise(resolve => setTimeout(resolve, 800));
 
       const mockProduct = generateMockProduct(slug);
-      
+
       if (!mockProduct) {
         notFound();
         return;
@@ -458,6 +477,15 @@ function ProductPageContent({ initialProduct = null }: ProductPageContentProps) 
     }
   }, [initialProduct, fetchProduct]);
 
+  // Track recently viewed product
+  const { addProduct: addToRecentlyViewed } = useRecentlyViewed();
+
+  useEffect(() => {
+    if (product && !isLoading) {
+      addToRecentlyViewed(product);
+    }
+  }, [product, isLoading, addToRecentlyViewed]);
+
   // Loading state
   if (isLoading) {
     return (
@@ -492,6 +520,17 @@ function ProductPageContent({ initialProduct = null }: ProductPageContentProps) 
 
   return (
     <ErrorBoundary>
+      {product && (
+        <NotifyMeDialog
+          isOpen={showNotifyDialog}
+          onClose={() => setShowNotifyDialog(false)}
+          productName={product.name}
+          onSubmit={(email) => {
+            console.log(`Notify request for ${product.name} from ${email}`);
+            // Here you would typically call your API
+          }}
+        />
+      )}
       <SEOHead
         title={(product.seo?.metaTitle as string) || `${product.name} | Vardhman Mills`}
         description={(product.seo?.metaDescription as string) || product.description}
@@ -522,14 +561,14 @@ function ProductPageContent({ initialProduct = null }: ProductPageContentProps) 
 
         {/* Main Product Section */}
         <div className="container mx-auto px-4 py-8">
-          <motion.div 
+          <motion.div
             className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
             {/* Product Gallery */}
-            <motion.div 
+            <motion.div
               className="space-y-4"
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -647,7 +686,7 @@ function ProductPageContent({ initialProduct = null }: ProductPageContentProps) 
             </motion.div>
 
             {/* Product Info */}
-            <motion.div 
+            <motion.div
               className="space-y-6"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -678,7 +717,7 @@ function ProductPageContent({ initialProduct = null }: ProductPageContentProps) 
 
                 {/* Stock Status */}
                 <div className="flex items-center gap-2">
-                  {product.inventory.isInStock ? (
+                  {(product.inventory?.isInStock ?? product.inventory?.inStock) ? (
                     <>
                       <CheckCircleIcon className="w-5 h-5 text-green-600" />
                       <span className="text-green-600 font-medium">
@@ -697,21 +736,24 @@ function ProductPageContent({ initialProduct = null }: ProductPageContentProps) 
                 {/* Rating */}
                 <div className="flex items-center gap-2">
                   <div className="flex items-center">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <StarIconSolid
-                        key={i}
-                        className={cn(
-                          'w-5 h-5',
-                          i < Math.floor(product.rating.average)
-                            ? 'text-yellow-400'
-                            : 'text-gray-300'
-                        )}
-                      />
-                    ))}
+                    {Array.from({ length: 5 }).map((_, i) => {
+                      const rating = product.rating?.average || product.averageRating || 0;
+                      return (
+                        <StarIconSolid
+                          key={i}
+                          className={cn(
+                            'w-5 h-5',
+                            i < Math.floor(rating)
+                              ? 'text-yellow-400'
+                              : 'text-gray-300'
+                          )}
+                        />
+                      );
+                    })}
                   </div>
-                  <span className="text-gray-700 font-medium">{product.rating.average.toFixed(1)}</span>
+                  <span className="text-gray-700 font-medium">{(product.rating?.average || product.averageRating || 0).toFixed(1)}</span>
                   <span className="text-gray-500">
-                    ({product.rating.count} reviews)
+                    ({product.rating?.count || product.reviewCount || product.totalReviews || 0} reviews)
                   </span>
                 </div>
               </div>
@@ -727,17 +769,27 @@ function ProductPageContent({ initialProduct = null }: ProductPageContentProps) 
                   {product.description.substring(0, 150)}...
                 </TabsContent>
                 <TabsContent value="specs" className="text-sm text-gray-600 p-4 bg-gray-50 rounded">
-                  {product.specifications.slice(0, 3).map((spec, i) => (
+                  {Array.isArray(product.specifications) ? product.specifications.slice(0, 3).map((spec: any, i: number) => (
                     <div key={i} className="flex justify-between py-1">
                       <span className="font-medium">{spec.name}:</span>
                       <span>{spec.value}</span>
                     </div>
+                  )) : (Object.entries(product.specifications || {}).length > 0 ? (
+                    // Handle case where specs might be an object
+                    Object.entries(product.specifications || {}).slice(0, 3).map(([key, value], i) => (
+                      <div key={i} className="flex justify-between py-1">
+                        <span className="font-medium">{key}:</span>
+                        <span>{String(value)}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <div>No specifications available</div>
                   ))}
                 </TabsContent>
                 <TabsContent value="shipping" className="text-sm text-gray-600 p-4 bg-gray-50 rounded">
                   <div className="space-y-1">
                     <div>✓ Free shipping on orders above ₹1500</div>
-                    <div>✓ Delivery in {Math.floor(Math.random() * 5) + 3}-{Math.floor(Math.random() * 5) + 7} days</div>
+                    <div>✓ Delivery in 3-7 days</div>
                     <div>✓ Cash on Delivery available</div>
                   </div>
                 </TabsContent>
@@ -758,16 +810,16 @@ function ProductPageContent({ initialProduct = null }: ProductPageContentProps) 
                   value={quantity}
                   onChange={setQuantity}
                   max={product.inventory.quantity}
-                  disabled={!product.inventory.isInStock}
+                  disabled={!(product.inventory?.isInStock ?? product.inventory?.inStock)}
                 />
-                <InformationCircleIcon 
-                  className="w-5 h-5 text-gray-400 cursor-help" 
+                <InformationCircleIcon
+                  className="w-5 h-5 text-gray-400 cursor-help"
                   title={`Maximum available: ${product.inventory.quantity}`}
                 />
               </div>
 
               {/* Stock Level Indicator with StarIcon */}
-              {product.inventory.isInStock && product.inventory.quantity < 10 && (
+              {(product.inventory?.isInStock ?? product.inventory?.inStock) && product.inventory.quantity < 10 && (
                 <div className="flex items-center gap-2 text-orange-600 text-sm">
                   <StarIcon className="w-4 h-4" />
                   <span>Only {product.inventory.quantity} left in stock - order soon!</span>
@@ -777,13 +829,23 @@ function ProductPageContent({ initialProduct = null }: ProductPageContentProps) 
               {/* Action Buttons */}
               <div className="space-y-3">
                 <div className="flex gap-3">
-                  <AddToCart
-                    product={product}
-                    quantity={quantity}
-                    selectedVariant={selectedVariant || undefined}
-                    disabled={!product.inventory.isInStock}
-                    className="flex-1"
-                  />
+                  {product.inventory.isInStock ? (
+                    <AddToCart
+                      product={product}
+                      quantity={quantity}
+                      selectedVariant={selectedVariant || undefined}
+                      disabled={!product.inventory.isInStock}
+                      className="flex-1"
+                    />
+                  ) : (
+                    <Button
+                      className="flex-1 bg-gray-900 hover:bg-gray-800 text-white"
+                      onClick={() => setShowNotifyDialog(true)}
+                    >
+                      <BellIcon className="w-5 h-5 mr-2" />
+                      Notify Me When Available
+                    </Button>
+                  )}
                   <Button
                     variant="outline"
                     size="lg"
@@ -1049,7 +1111,7 @@ function ProductPageContent({ initialProduct = null }: ProductPageContentProps) 
                 <ProductOptions
                   product={product}
                   selectedOptions={{}}
-                  onOptionChange={() => {}}
+                  onOptionChange={() => { }}
                 />
               </CardContent>
             </Card>

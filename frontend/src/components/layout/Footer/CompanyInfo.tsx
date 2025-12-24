@@ -40,7 +40,7 @@ const CompanyInfo: React.FC<CompanyInfoProps> = ({
                 height={32}
                 className="w-8 h-8"
               />
-              <span className="ml-2 text-lg font-bold text-gray-900 dark:text-white">
+              <span className="ml-2 text-lg font-bold text-white">
                 Vardhman Mills
               </span>
             </Link>
@@ -51,7 +51,7 @@ const CompanyInfo: React.FC<CompanyInfoProps> = ({
   }
 
   return (
-    <div className={`space-y-6 ${className}`}>
+    <div className={`space-y-4 ${className}`}>
       {/* Logo and Company Name */}
       {showLogo && (
         <motion.div
@@ -68,10 +68,10 @@ const CompanyInfo: React.FC<CompanyInfoProps> = ({
               className="w-12 h-12"
             />
             <div className="ml-3">
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+              <h3 className="text-xl font-bold text-white">
                 Vardhman Mills
               </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-sm text-gray-400 font-medium">
                 Premium Textiles Since 1965
               </p>
             </div>
@@ -82,26 +82,26 @@ const CompanyInfo: React.FC<CompanyInfoProps> = ({
       {/* Company Description */}
       {showDescription && (
         <div className="space-y-4">
-          <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-            Leading manufacturer and exporter of premium quality fabrics, yarns, and textile products. 
+          <p className="text-gray-300 leading-relaxed font-medium">
+            Leading manufacturer and exporter of premium quality fabrics, yarns, and textile products.
             Committed to sustainability, innovation, and excellence in every thread.
           </p>
-          
+
           {/* Key Features */}
           <div className="space-y-2">
-            <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+            <div className="flex items-center text-sm text-gray-300 font-medium">
               <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
               <span>ISO 9001:2015 Certified</span>
             </div>
-            <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+            <div className="flex items-center text-sm text-gray-300 font-medium">
               <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
               <span>OEKO-TEX Standard 100</span>
             </div>
-            <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+            <div className="flex items-center text-sm text-gray-300 font-medium">
               <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
               <span>Sustainable Manufacturing</span>
             </div>
-            <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+            <div className="flex items-center text-sm text-gray-300 font-medium">
               <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
               <span>Global Export Network</span>
             </div>
@@ -110,30 +110,30 @@ const CompanyInfo: React.FC<CompanyInfoProps> = ({
       )}
 
       {/* Company Stats */}
-      <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+      <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-700">
         <div className="text-center">
-          <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">58+</div>
-          <div className="text-xs text-gray-600 dark:text-gray-400">Years Experience</div>
+          <div className="text-2xl font-bold text-blue-400">58+</div>
+          <div className="text-xs text-gray-400 font-bold">Years Experience</div>
         </div>
         <div className="text-center">
-          <div className="text-2xl font-bold text-green-600 dark:text-green-400">50+</div>
-          <div className="text-xs text-gray-600 dark:text-gray-400">Countries Served</div>
+          <div className="text-2xl font-bold text-green-400">50+</div>
+          <div className="text-xs text-gray-400 font-bold">Countries Served</div>
         </div>
       </div>
 
       {/* Awards and Recognition */}
-      <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-        <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
+      <div className="pt-4 border-t border-gray-700">
+        <h4 className="text-sm font-semibold text-white mb-2">
           Awards & Recognition
         </h4>
         <div className="space-y-1">
-          <p className="text-xs text-gray-600 dark:text-gray-400">
+          <p className="text-xs text-gray-400 font-medium">
             • Best Textile Exporter Award 2023
           </p>
-          <p className="text-xs text-gray-600 dark:text-gray-400">
+          <p className="text-xs text-gray-400 font-medium">
             • Sustainability Excellence Award 2022
           </p>
-          <p className="text-xs text-gray-600 dark:text-gray-400">
+          <p className="text-xs text-gray-400 font-medium">
             • Innovation in Manufacturing 2021
           </p>
         </div>

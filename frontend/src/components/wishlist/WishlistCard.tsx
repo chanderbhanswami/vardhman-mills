@@ -4,7 +4,7 @@ import React, { useState, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-import { 
+import {
   ShoppingCartIcon,
   EyeIcon,
   ShareIcon,
@@ -30,7 +30,7 @@ import { Modal, ModalContent, ModalHeader, ModalTitle, ModalBody } from '@/compo
 import { TextArea } from '@/components/ui/TextArea';
 
 // Hooks and Contexts
-import { useWishlist } from '@/contexts/WishlistContext';
+import { useWishlist } from '@/components/providers/WishlistProvider';
 import { useToast } from '@/hooks/useToast';
 
 // Utils
@@ -125,11 +125,11 @@ interface NotesDisplayProps {
 }
 
 // Price Display Component
-const PriceDisplay: React.FC<PriceDisplayProps> = ({ 
-  price, 
-  originalPrice, 
+const PriceDisplay: React.FC<PriceDisplayProps> = ({
+  price,
+  originalPrice,
   discount,
-  className 
+  className
 }) => {
   const hasDiscount = originalPrice && originalPrice > price;
   const discountPercentage = discount || (hasDiscount ? Math.round(((originalPrice - price) / originalPrice) * 100) : 0);
@@ -139,7 +139,7 @@ const PriceDisplay: React.FC<PriceDisplayProps> = ({
       <span className="text-xl font-bold text-gray-900">
         ${price.toFixed(2)}
       </span>
-      
+
       {hasDiscount && (
         <>
           <span className="text-sm text-gray-500 line-through">
@@ -157,12 +157,12 @@ const PriceDisplay: React.FC<PriceDisplayProps> = ({
 };
 
 // Rating Display Component
-const RatingDisplay: React.FC<RatingDisplayProps> = ({ 
-  rating, 
-  reviewCount, 
+const RatingDisplay: React.FC<RatingDisplayProps> = ({
+  rating,
+  reviewCount,
   size = 'md',
   showCount = true,
-  className 
+  className
 }) => {
   const sizeClasses = {
     sm: 'w-3 h-3',
@@ -185,7 +185,7 @@ const RatingDisplay: React.FC<RatingDisplayProps> = ({
           />
         ))}
       </div>
-      
+
       {showCount && reviewCount > 0 && (
         <span className={cn(
           'text-gray-500',
@@ -199,10 +199,10 @@ const RatingDisplay: React.FC<RatingDisplayProps> = ({
 };
 
 // Priority Indicator Component
-const PriorityIndicator: React.FC<PriorityIndicatorProps> = ({ 
-  priority, 
+const PriorityIndicator: React.FC<PriorityIndicatorProps> = ({
+  priority,
   size = 'md',
-  className 
+  className
 }) => {
   const getPriorityConfig = () => {
     switch (priority) {
@@ -233,12 +233,12 @@ const PriorityIndicator: React.FC<PriorityIndicatorProps> = ({
 };
 
 // Notes Display Component
-const NotesDisplay: React.FC<NotesDisplayProps> = ({ 
-  notes, 
+const NotesDisplay: React.FC<NotesDisplayProps> = ({
+  notes,
   maxLength = 100,
   editable = false,
   onEdit,
-  className 
+  className
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(notes || '');
@@ -257,8 +257,8 @@ const NotesDisplay: React.FC<NotesDisplayProps> = ({
   if (!notes && !editable) return null;
 
   const shouldTruncate = notes && notes.length > maxLength;
-  const displayText = shouldTruncate && !isExpanded 
-    ? `${notes.slice(0, maxLength)}...` 
+  const displayText = shouldTruncate && !isExpanded
+    ? `${notes.slice(0, maxLength)}...`
     : notes;
 
   if (isEditing) {
@@ -307,7 +307,7 @@ const NotesDisplay: React.FC<NotesDisplayProps> = ({
           Add notes...
         </button>
       ) : null}
-      
+
       {editable && notes && (
         <button
           onClick={() => setIsEditing(true)}
@@ -322,9 +322,9 @@ const NotesDisplay: React.FC<NotesDisplayProps> = ({
 };
 
 // Stock Status Component
-const StockStatus: React.FC<{ inStock: boolean; className?: string }> = ({ 
-  inStock, 
-  className 
+const StockStatus: React.FC<{ inStock: boolean; className?: string }> = ({
+  inStock,
+  className
 }) => (
   <div className={cn('flex items-center gap-1', className)}>
     <div className={cn(
@@ -380,7 +380,7 @@ export const WishlistCard: React.FC<WishlistCardProps> = ({
   const cardRef = useRef<HTMLDivElement>(null);
 
   // Computed values
-  const addedDate = useMemo(() => 
+  const addedDate = useMemo(() =>
     new Date(item.addedAt).toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
@@ -392,12 +392,12 @@ export const WishlistCard: React.FC<WishlistCardProps> = ({
   // Event handlers
   const handleMoveToCart = useCallback(async () => {
     if (isLoading) return;
-    
+
     setIsLoading(true);
     try {
       await moveToCart(item.id);
       onMoveToCart?.(item);
-      
+
       toast({
         title: 'Moved to cart',
         description: `${item.name} has been moved to your cart`
@@ -416,12 +416,12 @@ export const WishlistCard: React.FC<WishlistCardProps> = ({
 
   const handleRemove = useCallback(async () => {
     if (isLoading) return;
-    
+
     setIsLoading(true);
     try {
       await removeFromWishlist(item.id);
       onRemove?.(item);
-      
+
       toast({
         title: 'Removed from wishlist',
         description: `${item.name} has been removed from your wishlist`
@@ -442,7 +442,7 @@ export const WishlistCard: React.FC<WishlistCardProps> = ({
   const handleShare = useCallback(() => {
     const shareUrl = `${window.location.origin}/product/${item.productId}`;
     navigator.clipboard.writeText(shareUrl);
-    
+
     onShare?.(item);
     toast({
       title: 'Link copied',
@@ -532,8 +532,8 @@ export const WishlistCard: React.FC<WishlistCardProps> = ({
   // Animation variants
   const cardVariants = {
     initial: { opacity: 0, y: 20 },
-    animate: { 
-      opacity: 1, 
+    animate: {
+      opacity: 1,
       y: 0,
       transition: { duration: 0.3 }
     },
@@ -606,7 +606,7 @@ export const WishlistCard: React.FC<WishlistCardProps> = ({
                       </Button>
                     </Tooltip>
                   ))}
-                  
+
                   <DropdownMenu
                     trigger={
                       <Button
@@ -653,11 +653,11 @@ export const WishlistCard: React.FC<WishlistCardProps> = ({
                     onLoad={() => setIsImageLoaded(true)}
                     loading={lazyLoading ? 'lazy' : 'eager'}
                   />
-                  
+
                   {!isImageLoaded && (
                     <div className="absolute inset-0 bg-gray-200 animate-pulse" />
                   )}
-                  
+
                   {/* Stock overlay */}
                   {!item.inStock && (
                     <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
@@ -679,7 +679,7 @@ export const WishlistCard: React.FC<WishlistCardProps> = ({
               {/* Header */}
               <div className="space-y-2">
                 <div className="flex items-start justify-between gap-2">
-                  <Link 
+                  <Link
                     href={`/product/${item.productId}`}
                     className="flex-1 min-w-0"
                   >
@@ -687,12 +687,12 @@ export const WishlistCard: React.FC<WishlistCardProps> = ({
                       {item.name}
                     </h3>
                   </Link>
-                  
+
                   {showPriority && (
                     <PriorityIndicator priority={item.priority} size="sm" />
                   )}
                 </div>
-                
+
                 {item.brand && (
                   <p className="text-sm text-gray-500">{item.brand}</p>
                 )}
@@ -763,7 +763,7 @@ export const WishlistCard: React.FC<WishlistCardProps> = ({
                   <ShoppingCartIcon className="w-4 h-4 mr-2" />
                   {item.inStock ? 'Add to Cart' : 'Out of Stock'}
                 </Button>
-                
+
                 <Button
                   variant="outline"
                   onClick={() => setShowDeleteConfirm(true)}
@@ -792,7 +792,7 @@ export const WishlistCard: React.FC<WishlistCardProps> = ({
                   <p className="text-sm text-gray-600">{item.name}</p>
                 </div>
               </div>
-              
+
               <div className="flex justify-end gap-2">
                 <Button
                   variant="outline"

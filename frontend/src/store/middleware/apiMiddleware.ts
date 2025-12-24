@@ -10,7 +10,7 @@ declare module 'axios' {
       startTime: number;
     };
   }
-  
+
   interface AxiosResponse {
     metadata?: {
       duration: number;
@@ -21,7 +21,7 @@ declare module 'axios' {
 }
 
 // API configuration
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5000/api/v1';
 
 // Create axios instance
 const apiClient = axios.create({
@@ -41,7 +41,7 @@ const apiMiddleware: Middleware<object, RootState> = (store) => (next) => (actio
   }
 
   const { auth } = store.getState();
-  
+
   // Add auth token to requests
   if (auth.tokens?.accessToken) {
     apiClient.defaults.headers.common['Authorization'] = `Bearer ${auth.tokens.accessToken}`;
@@ -54,10 +54,10 @@ const apiMiddleware: Middleware<object, RootState> = (store) => (next) => (actio
     (config) => {
       // Add request timestamp
       config.metadata = { startTime: Date.now() };
-      
+
       // Add correlation ID for tracking
       config.headers['X-Correlation-ID'] = `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
+
       // Log request in development
       if (process.env.NODE_ENV === 'development') {
         console.log(`🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`);
@@ -76,7 +76,7 @@ const apiMiddleware: Middleware<object, RootState> = (store) => (next) => (actio
     (response: AxiosResponse) => {
       // Calculate request duration
       const duration = Date.now() - (response.config.metadata?.startTime || 0);
-      
+
       // Log successful response in development
       if (process.env.NODE_ENV === 'development') {
         console.log(`✅ API Response: ${response.status} ${response.config.url} (${duration}ms)`);
@@ -93,7 +93,7 @@ const apiMiddleware: Middleware<object, RootState> = (store) => (next) => (actio
     },
     (error: AxiosError) => {
       const duration = Date.now() - (error.config?.metadata?.startTime || 0);
-      
+
       // Log error response
       console.error(`❌ API Error: ${error.response?.status || 'Network'} ${error.config?.url} (${duration}ms)`);
 
@@ -101,10 +101,10 @@ const apiMiddleware: Middleware<object, RootState> = (store) => (next) => (actio
       if (error.response?.status === 401) {
         // Dispatch logout action for unauthorized requests
         store.dispatch(logout());
-        
+
         // Clear token from axios headers
         delete apiClient.defaults.headers.common['Authorization'];
-        
+
         // Redirect to login page
         if (typeof window !== 'undefined') {
           window.location.href = '/auth/login';

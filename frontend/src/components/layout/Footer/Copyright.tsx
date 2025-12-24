@@ -20,7 +20,7 @@ const Copyright: React.FC<CopyrightProps> = ({
   const currentYear = new Date().getFullYear();
 
   const linkVariants = {
-    hover: { 
+    hover: {
       y: -1,
       transition: { duration: 0.2 }
     }
@@ -29,7 +29,7 @@ const Copyright: React.FC<CopyrightProps> = ({
   if (minimal) {
     return (
       <div className={`text-center ${className}`}>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
+        <p className="text-sm text-gray-400 font-medium">
           © {showYear && currentYear} {companyName} All rights reserved.
         </p>
       </div>
@@ -41,11 +41,11 @@ const Copyright: React.FC<CopyrightProps> = ({
       <div className="flex flex-col lg:flex-row items-center justify-between space-y-4 lg:space-y-0">
         {/* Copyright Text */}
         <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-gray-400 font-medium">
             © {showYear && currentYear} {companyName} All rights reserved.
           </p>
-          
-          <div className="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-500">
+
+          <div className="flex items-center space-x-4 text-sm text-gray-500 font-medium">
             <span>•</span>
             <span>Established 1965</span>
             <span>•</span>
@@ -58,29 +58,29 @@ const Copyright: React.FC<CopyrightProps> = ({
           <motion.div variants={linkVariants} whileHover="hover">
             <Link
               href="/sitemap"
-              className="text-gray-500 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors duration-200"
+              className="text-gray-500 hover:text-gray-300 transition-colors duration-200 font-medium"
             >
               Sitemap
             </Link>
           </motion.div>
-          
-          <span className="text-gray-300 dark:text-gray-700">•</span>
-          
+
+          <span className="text-gray-700">•</span>
+
           <motion.div variants={linkVariants} whileHover="hover">
             <Link
               href="/accessibility"
-              className="text-gray-500 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors duration-200"
+              className="text-gray-500 hover:text-gray-300 transition-colors duration-200 font-medium"
             >
               Accessibility
             </Link>
           </motion.div>
-          
-          <span className="text-gray-300 dark:text-gray-700">•</span>
-          
+
+          <span className="text-gray-700">•</span>
+
           <motion.div variants={linkVariants} whileHover="hover">
             <Link
               href="/modern-slavery"
-              className="text-gray-500 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors duration-200"
+              className="text-gray-500 hover:text-gray-300 transition-colors duration-200 font-medium"
             >
               Modern Slavery Statement
             </Link>
@@ -89,13 +89,13 @@ const Copyright: React.FC<CopyrightProps> = ({
       </div>
 
       {/* Developer Credit */}
-      <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+      <div className="mt-4 pt-4 border-t border-gray-800">
         <div className="flex flex-col sm:flex-row items-center justify-between space-y-2 sm:space-y-0">
-          <p className="text-xs text-gray-500 dark:text-gray-500">
+          <p className="text-xs text-gray-500 font-medium">
             Website powered by Next.js, designed with sustainability in mind.
           </p>
-          
-          <div className="flex items-center space-x-4 text-xs text-gray-500 dark:text-gray-500">
+
+          <div className="flex items-center space-x-4 text-xs text-gray-500 font-medium">
             <span>Version 2.1.0</span>
             <span>•</span>
             <span>Updated {new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</span>
@@ -104,10 +104,10 @@ const Copyright: React.FC<CopyrightProps> = ({
       </div>
 
       {/* Legal Disclaimer */}
-      <div className="mt-3 text-xs text-gray-500 dark:text-gray-500 leading-relaxed">
+      <div className="mt-3 text-xs text-gray-500 leading-relaxed font-medium">
         <p>
-          Vardhman Mills Ltd. is committed to sustainable manufacturing and ethical business practices. 
-          All product specifications, certifications, and company information are subject to verification. 
+          Vardhman Mills Ltd. is committed to sustainable manufacturing and ethical business practices.
+          All product specifications, certifications, and company information are subject to verification.
           Prices and availability may vary by region and are subject to change without notice.
         </p>
       </div>

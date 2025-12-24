@@ -233,7 +233,7 @@ export async function GET(request: NextRequest) {
 
     // Build backend URL with query parameters
     const backendUrl = new URL(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/products/new-arrivals`
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/new-arrivals`
     );
 
     Object.entries(queryParams).forEach(([key, value]) => {
@@ -284,7 +284,7 @@ export async function GET(request: NextRequest) {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      
+
       return NextResponse.json<ErrorResponse>(
         {
           success: false,
@@ -385,7 +385,7 @@ export async function POST(request: NextRequest) {
   try {
     // Check authentication (Admin only)
     const authHeader = request.headers.get('Authorization');
-    
+
     if (!authHeader) {
       return NextResponse.json<ErrorResponse>(
         {
@@ -417,8 +417,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Make request to backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/products/new-arrivals`;
-    
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/new-arrivals`;
+
     const response = await fetch(backendUrl, {
       method: 'POST',
       headers: {
@@ -431,7 +431,7 @@ export async function POST(request: NextRequest) {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      
+
       if (response.status === 403) {
         return NextResponse.json<ErrorResponse>(
           {
@@ -533,7 +533,7 @@ export async function DELETE(request: NextRequest) {
   try {
     // Check authentication (Admin only)
     const authHeader = request.headers.get('Authorization');
-    
+
     if (!authHeader) {
       return NextResponse.json<ErrorResponse>(
         {
@@ -565,8 +565,8 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Make request to backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/products/new-arrivals`;
-    
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/new-arrivals`;
+
     const response = await fetch(backendUrl, {
       method: 'DELETE',
       headers: {
@@ -579,7 +579,7 @@ export async function DELETE(request: NextRequest) {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      
+
       if (response.status === 403) {
         return NextResponse.json<ErrorResponse>(
           {

@@ -59,8 +59,8 @@ import { Separator } from '@/components/ui/Separator';
 import { cn } from '@/lib/utils';
 import { formatCurrency } from '@/lib/format';
 import { useAuth } from '@/components/providers';
-import { useCart } from '@/contexts/CartContext';
-import { useWishlist } from '@/contexts/WishlistContext';
+import { useCart } from '@/components/providers/CartProvider';
+import { useWishlist } from '@/components/providers/WishlistProvider';
 import { selectUserProfile } from '@/store/slices/userSlice';
 
 // Types
@@ -110,13 +110,13 @@ export const AccountSidebar: React.FC<AccountSidebarProps> = ({
   const { user, logout } = useAuth();
   const { getTotalQuantity: getCartItems, state: cartState } = useCart();
   const { state: wishlistState } = useWishlist();
-  
+
   // Calculate totals (using cartState for consistency check)
   const cartItems = getCartItems();
   const cartItemsFromState = cartState?.items?.length || 0;
   const wishlistItems = wishlistState.items.length;
   const userProfile = useSelector(selectUserProfile);
-  
+
   // Log cart consistency for debugging
   if (cartItems !== cartItemsFromState) {
     console.debug('Cart count mismatch:', { cartItems, cartItemsFromState });
@@ -407,7 +407,7 @@ export const AccountSidebar: React.FC<AccountSidebarProps> = ({
             <div key={section.id}>
               {/* Add separator between sections except first */}
               {sectionIndex > 0 && showSection && <Separator className="my-4" />}
-              
+
               {showSection && (
                 <div
                   className="flex items-center justify-between mb-3 cursor-pointer"
@@ -465,14 +465,14 @@ export const AccountSidebar: React.FC<AccountSidebarProps> = ({
                           {(!collapsed || variant === 'mobile') && (
                             <>
                               <span className="flex-1 truncate">{item.label}</span>
-                              
+
                               <div className="flex items-center gap-1">
                                 {item.isNew && (
                                   <Badge variant="secondary" size="sm">
                                     New
                                   </Badge>
                                 )}
-                                
+
                                 {item.badge && (
                                   <Badge
                                     variant={item.isActive ? 'default' : 'secondary'}
@@ -481,7 +481,7 @@ export const AccountSidebar: React.FC<AccountSidebarProps> = ({
                                     {typeof item.badge === 'number' && item.badge > 99 ? '99+' : item.badge}
                                   </Badge>
                                 )}
-                                
+
                                 {item.shortcut && (
                                   <kbd className="hidden lg:inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
                                     {item.shortcut}

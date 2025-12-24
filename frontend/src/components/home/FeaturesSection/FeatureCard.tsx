@@ -206,7 +206,7 @@ export const FeatureCard: React.FC<FeatureCardProps> = ({
   // ============================================================================
 
   const containerClasses = cn(
-    'transition-all duration-300',
+    'transition-all duration-300 h-full',
     layout === 'icon-left' && 'flex items-start gap-4',
     layout === 'icon-top' && 'flex flex-col items-center text-center',
     layout === 'icon-background' && 'relative overflow-hidden',
@@ -260,7 +260,7 @@ export const FeatureCard: React.FC<FeatureCardProps> = ({
             <div className="flex items-start justify-between gap-2 mb-2">
               <div className="flex-1">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  <h3 className="text-lg font-semibold text-gray-900">
                     {title}
                   </h3>
                   {badge && (
@@ -278,7 +278,7 @@ export const FeatureCard: React.FC<FeatureCardProps> = ({
                       e.stopPropagation();
                       handleExpandToggle();
                     }}
-                    className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                    className="text-gray-500 hover:text-gray-700 transition-colors"
                     aria-label={isExpanded ? 'Collapse details' : 'Expand details'}
                     {...(expandable ? { 'aria-expanded': isExpanded } : {})}
                   >
@@ -294,7 +294,7 @@ export const FeatureCard: React.FC<FeatureCardProps> = ({
             </div>
 
             {/* Description */}
-            <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">
+            <p className="text-gray-700 text-sm mb-3">
               {description}
             </p>
 
@@ -308,7 +308,7 @@ export const FeatureCard: React.FC<FeatureCardProps> = ({
                   transition={{ duration: 0.3 }}
                   className="overflow-hidden"
                 >
-                  <p className="text-gray-700 dark:text-gray-300 text-sm mb-3 pt-2 border-t border-gray-200 dark:border-gray-700">
+                  <p className="text-gray-700 text-sm mb-3 pt-2 border-t border-gray-200">
                     {details}
                   </p>
                 </motion.div>

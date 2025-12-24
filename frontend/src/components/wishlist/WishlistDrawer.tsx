@@ -4,7 +4,7 @@ import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-import { 
+import {
   XMarkIcon,
   HeartIcon,
   ShoppingCartIcon,
@@ -39,7 +39,7 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { DropdownMenu } from '@/components/ui/DropdownMenu';
 
 // Hooks and Contexts
-import { useWishlist } from '@/contexts/WishlistContext';
+import { useWishlist } from '@/components/providers/WishlistProvider';
 import { useToast } from '@/hooks/useToast';
 
 // Utils
@@ -127,7 +127,7 @@ const WishlistStats: React.FC<WishlistStatsProps> = ({ items, className }) => {
     const totalValue = items.reduce((sum, item) => sum + item.price, 0);
     const inStockItems = items.filter(item => item.inStock).length;
     const highPriorityItems = items.filter(item => item.priority === 'high').length;
-    
+
     return {
       totalItems,
       totalValue,
@@ -160,10 +160,10 @@ const WishlistStats: React.FC<WishlistStatsProps> = ({ items, className }) => {
 };
 
 // Empty State Component
-const EmptyState: React.FC<EmptyStateProps> = ({ 
-  message = "Your wishlist is empty", 
+const EmptyState: React.FC<EmptyStateProps> = ({
+  message = "Your wishlist is empty",
   action,
-  className 
+  className
 }) => (
   <div className={cn('flex flex-col items-center justify-center py-12 px-6 text-center', className)}>
     <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
@@ -231,7 +231,7 @@ const DrawerItem: React.FC<DrawerItemProps> = ({
             aria-label={`Select ${item.name}`}
           />
         )}
-        
+
         <div className="relative w-12 h-12 flex-shrink-0">
           <Image
             src={item.image}
@@ -250,7 +250,7 @@ const DrawerItem: React.FC<DrawerItemProps> = ({
             </div>
           )}
         </div>
-        
+
         <div className="flex-1 min-w-0">
           <h4 className="font-medium text-sm text-gray-900 truncate">{item.name}</h4>
           <div className="flex items-center gap-2 mt-1">
@@ -262,7 +262,7 @@ const DrawerItem: React.FC<DrawerItemProps> = ({
             )}
           </div>
         </div>
-        
+
         {showQuickActions && (
           <div className="flex gap-1">
             <Tooltip content="Add to cart">
@@ -315,7 +315,7 @@ const DrawerItem: React.FC<DrawerItemProps> = ({
             />
           </div>
         )}
-        
+
         <div className="relative w-20 h-20 flex-shrink-0">
           <Image
             src={item.image}
@@ -334,7 +334,7 @@ const DrawerItem: React.FC<DrawerItemProps> = ({
             </div>
           )}
         </div>
-        
+
         <div className="flex-1 min-w-0 space-y-2">
           <div>
             <Link href={`/product/${item.productId}`} onClick={onView}>
@@ -349,8 +349,8 @@ const DrawerItem: React.FC<DrawerItemProps> = ({
               )}
               <div className={cn(
                 "flex items-center gap-1 text-xs px-2 py-1 rounded-full",
-                item.inStock 
-                  ? "bg-green-100 text-green-700" 
+                item.inStock
+                  ? "bg-green-100 text-green-700"
                   : "bg-red-100 text-red-700"
               )}>
                 {item.inStock ? (
@@ -367,7 +367,7 @@ const DrawerItem: React.FC<DrawerItemProps> = ({
               </div>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-2">
             <span className="text-lg font-semibold text-gray-900">${item.price.toFixed(2)}</span>
             {item.originalPrice && item.originalPrice > item.price && (
@@ -381,7 +381,7 @@ const DrawerItem: React.FC<DrawerItemProps> = ({
               </>
             )}
           </div>
-          
+
           <div className="flex items-center gap-2">
             <div className="flex items-center">
               {[1, 2, 3, 4, 5].map((star) => (
@@ -399,7 +399,7 @@ const DrawerItem: React.FC<DrawerItemProps> = ({
               ))}
             </div>
             <span className="text-xs text-gray-500">({item.reviewCount})</span>
-            
+
             <div className={cn(
               'ml-auto px-2 py-1 rounded-full text-xs font-medium border',
               getPriorityColor(item.priority)
@@ -407,7 +407,7 @@ const DrawerItem: React.FC<DrawerItemProps> = ({
               {item.priority}
             </div>
           </div>
-          
+
           {showQuickActions && (
             <div className="space-y-2 pt-2">
               {/* Quantity Selector */}
@@ -437,41 +437,41 @@ const DrawerItem: React.FC<DrawerItemProps> = ({
                   </Button>
                 </div>
               </div>
-              
+
               {/* Action Buttons */}
               <div className="flex gap-2">
-              <Button
-                size="sm"
-                onClick={handleMoveToCart}
-                disabled={!item.inStock || isLoading}
-                className="flex-1"
-              >
-                <ShoppingCartIcon className="w-4 h-4 mr-2" />
-                {item.inStock ? 'Add to Cart' : 'Out of Stock'}
-              </Button>
-              
-              <Tooltip content="Quick View">
-                <Button size="sm" variant="outline" onClick={onView} className="px-3">
-                  <EyeIcon className="w-4 h-4" />
-                </Button>
-              </Tooltip>
-              
-              <Tooltip content="Share">
-                <Button size="sm" variant="outline" onClick={onShare} className="px-3">
-                  <ShareIcon className="w-4 h-4" />
-                </Button>
-              </Tooltip>
-              
-              <Tooltip content="Remove">
                 <Button
                   size="sm"
-                  variant="outline"
-                  onClick={onRemove}
-                  className="px-3 text-red-600 hover:text-red-700 border-red-200 hover:border-red-300"
+                  onClick={handleMoveToCart}
+                  disabled={!item.inStock || isLoading}
+                  className="flex-1"
                 >
-                  <TrashIcon className="w-4 h-4" />
+                  <ShoppingCartIcon className="w-4 h-4 mr-2" />
+                  {item.inStock ? 'Add to Cart' : 'Out of Stock'}
                 </Button>
-              </Tooltip>
+
+                <Tooltip content="Quick View">
+                  <Button size="sm" variant="outline" onClick={onView} className="px-3">
+                    <EyeIcon className="w-4 h-4" />
+                  </Button>
+                </Tooltip>
+
+                <Tooltip content="Share">
+                  <Button size="sm" variant="outline" onClick={onShare} className="px-3">
+                    <ShareIcon className="w-4 h-4" />
+                  </Button>
+                </Tooltip>
+
+                <Tooltip content="Remove">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={onRemove}
+                    className="px-3 text-red-600 hover:text-red-700 border-red-200 hover:border-red-300"
+                  >
+                    <TrashIcon className="w-4 h-4" />
+                  </Button>
+                </Tooltip>
               </div>
             </div>
           )}
@@ -513,25 +513,33 @@ export const WishlistDrawer: React.FC<WishlistDrawerProps> = ({
   persistent = false
 }) => {
   // Hooks
-  const { state: { items: contextItems }, removeFromWishlist, moveToCart } = useWishlist();
+  const { items: contextItems, removeFromWishlist, addToCart: moveToCart } = useWishlist();
   const { toast } = useToast();
 
   // Enhanced items with additional properties for full functionality
-  const enhancedItems: WishlistItem[] = useMemo(() => 
+  // Map provider's WishlistItem to local WishlistItem interface
+  const enhancedItems: WishlistItem[] = useMemo(() =>
     contextItems.map(item => ({
-      ...item,
+      id: item.id,
+      productId: item.productId,
+      name: item.title, // Provider uses 'title', local interface uses 'name'
+      price: item.price,
+      originalPrice: item.originalPrice,
+      image: item.images?.[0] || '', // Provider uses 'images' array, local uses single 'image'
+      category: item.category || '',
+      rating: item.rating || 0,
+      reviewCount: item.reviewCount || 0,
+      inStock: item.inStock,
+      addedAt: typeof item.addedAt === 'string' ? item.addedAt : new Date(item.addedAt).toISOString(),
+      notes: item.notes || '',
       priority: ('priority' in item ? item.priority : 'medium') as 'low' | 'medium' | 'high',
-      notes: ('notes' in item ? item.notes : '') as string,
-      rating: ('rating' in item ? item.rating : 0) as number,
-      reviewCount: ('reviewCount' in item ? item.reviewCount : 0) as number,
-      tags: ('tags' in item ? item.tags : []) as string[],
-      originalPrice: ('originalPrice' in item ? item.originalPrice : undefined) as number | undefined,
-      addedAt: item.addedAt.toISOString(),
-      discount: ('discount' in item ? item.discount : undefined) as number | undefined,
+      tags: item.tags || [],
+      brand: item.brand,
+      discount: item.discount,
     })),
     [contextItems]
   );
-  
+
   const wishlistItems = enhancedItems;
 
   // State
@@ -588,7 +596,7 @@ export const WishlistDrawer: React.FC<WishlistDrawerProps> = ({
     // Apply sorting
     filtered.sort((a, b) => {
       let comparison = 0;
-      
+
       switch (sortBy) {
         case 'name':
           comparison = a.name.localeCompare(b.name);
@@ -606,7 +614,7 @@ export const WishlistDrawer: React.FC<WishlistDrawerProps> = ({
         default:
           comparison = 0;
       }
-      
+
       return sortOrder === 'asc' ? comparison : -comparison;
     });
 
@@ -665,7 +673,7 @@ export const WishlistDrawer: React.FC<WishlistDrawerProps> = ({
     try {
       await removeFromWishlist(item.id);
       onItemRemove?.(item);
-      
+
       toast({
         title: 'Removed from wishlist',
         description: `${item.name} has been removed`
@@ -684,7 +692,7 @@ export const WishlistDrawer: React.FC<WishlistDrawerProps> = ({
     try {
       await moveToCart(item.id);
       onItemMoveToCart?.(item);
-      
+
       toast({
         title: 'Moved to cart',
         description: `${item.name} has been added to your cart`
@@ -703,7 +711,7 @@ export const WishlistDrawer: React.FC<WishlistDrawerProps> = ({
     try {
       await Promise.all(selectedItemsArray.map(item => removeFromWishlist(item.id)));
       onBulkAction?.('remove', selectedItemsArray);
-      
+
       setSelectedItems(new Set());
       toast({
         title: 'Items removed',
@@ -721,11 +729,11 @@ export const WishlistDrawer: React.FC<WishlistDrawerProps> = ({
 
   const handleBulkMoveToCart = useCallback(async () => {
     const inStockItems = selectedItemsArray.filter(item => item.inStock);
-    
+
     try {
       await Promise.all(inStockItems.map(item => moveToCart(item.id)));
       onBulkAction?.('moveToCart', inStockItems);
-      
+
       setSelectedItems(new Set());
       toast({
         title: 'Items moved to cart',
@@ -744,7 +752,7 @@ export const WishlistDrawer: React.FC<WishlistDrawerProps> = ({
   const handleItemShare = useCallback((item: WishlistItem) => {
     const shareUrl = `${window.location.origin}/product/${item.productId}`;
     navigator.clipboard.writeText(shareUrl);
-    
+
     toast({
       title: 'Link copied',
       description: 'Product link copied to clipboard'
@@ -838,7 +846,7 @@ export const WishlistDrawer: React.FC<WishlistDrawerProps> = ({
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center gap-2">
                   {enableSorting && (
                     <DropdownMenu
@@ -882,7 +890,7 @@ export const WishlistDrawer: React.FC<WishlistDrawerProps> = ({
                       ]}
                     />
                   )}
-                  
+
                   <Button variant="ghost" size="sm" onClick={handleClose}>
                     <XMarkIcon className="w-5 h-5" />
                   </Button>
@@ -920,7 +928,7 @@ export const WishlistDrawer: React.FC<WishlistDrawerProps> = ({
                       {showFiltersPanel ? 'Hide' : 'Show'}
                     </Button>
                   </div>
-                  
+
                   {showFiltersPanel && (
                     <div className="space-y-3">
                       <div>
@@ -937,7 +945,7 @@ export const WishlistDrawer: React.FC<WishlistDrawerProps> = ({
                           ))}
                         </select>
                       </div>
-                      
+
                       <div>
                         <label id="priority-filter-label" className="block text-xs font-medium text-gray-700 mb-1">Priority</label>
                         <select
@@ -952,7 +960,7 @@ export const WishlistDrawer: React.FC<WishlistDrawerProps> = ({
                           <option value="low">Low</option>
                         </select>
                       </div>
-                      
+
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-medium text-gray-700">In Stock Only</span>
                         <Switch
@@ -986,7 +994,7 @@ export const WishlistDrawer: React.FC<WishlistDrawerProps> = ({
                       <Squares2X2Icon className="w-4 h-4" />
                     </Button>
                   </div>
-                  
+
                   {enableBulkActions && filteredAndSortedItems.length > 0 && (
                     <div className="flex items-center gap-2">
                       <input
@@ -1074,7 +1082,7 @@ export const WishlistDrawer: React.FC<WishlistDrawerProps> = ({
                     ${filteredAndSortedItems.reduce((sum, item) => sum + item.price, 0).toFixed(2)}
                   </span>
                 </div>
-                
+
                 <Button
                   onClick={() => {
                     const inStockItems = filteredAndSortedItems.filter(item => item.inStock);

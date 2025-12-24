@@ -2,7 +2,7 @@
 
 import React, { forwardRef, useState, useCallback, useEffect, useId, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
+import {
   ChevronDownIcon,
   XMarkIcon,
   CheckIcon,
@@ -22,10 +22,10 @@ const selectVariants = cva(
   {
     variants: {
       variant: {
-        default: 'border-border bg-background hover:border-muted-foreground',
-        filled: 'border-0 bg-muted hover:bg-muted/80',
-        outlined: 'border-2 border-border bg-transparent hover:border-primary',
-        ghost: 'border-0 bg-transparent hover:bg-muted'
+        default: 'border-border bg-background text-gray-900 hover:border-muted-foreground',
+        filled: 'border-0 bg-muted text-gray-900 hover:bg-muted/80',
+        outlined: 'border-2 border-border bg-transparent text-gray-900 hover:border-primary',
+        ghost: 'border-0 bg-transparent text-gray-900 hover:bg-muted'
       },
       size: {
         sm: 'px-2 py-1 text-xs',
@@ -49,7 +49,7 @@ const selectVariants = cva(
 const dropdownVariants = cva(
   [
     'absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border border-border',
-    'bg-popover text-popover-foreground shadow-md'
+    'bg-white text-gray-900 shadow-md'
   ],
   {
     variants: {
@@ -98,9 +98,9 @@ export interface SelectOption {
   group?: string;
 }
 
-export interface SelectProps 
+export interface SelectProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange'>,
-    Omit<VariantProps<typeof selectVariants>, 'error'> {
+  Omit<VariantProps<typeof selectVariants>, 'error'> {
   options: SelectOption[];
   value?: string | number | null;
   defaultValue?: string | number;
@@ -160,7 +160,7 @@ export interface SelectOptionProps extends React.HTMLAttributes<HTMLDivElement> 
 export const SelectOptionComponent = forwardRef<HTMLDivElement, SelectOptionProps>(
   ({ option, className, ...props }, ref) => {
     const { selectedValue, onSelect, multiple, renderOption } = useSelect();
-    
+
     const isSelected = multiple
       ? Array.isArray(selectedValue) && selectedValue.includes(option.value)
       : selectedValue === option.value;
@@ -219,7 +219,7 @@ SelectOptionComponent.displayName = 'SelectOption';
 
 // Main Select Component
 export const Select = forwardRef<HTMLDivElement, CombinedSelectProps>(
-  ({ 
+  ({
     className,
     variant,
     size,
@@ -245,7 +245,7 @@ export const Select = forwardRef<HTMLDivElement, CombinedSelectProps>(
     maxSelections,
     emptyMessage = 'No options found',
     loadingMessage = 'Loading...',
-    ...props 
+    ...props
   }, ref) => {
     const selectId = useId();
     const [isOpen, setIsOpen] = useState(false);
@@ -254,7 +254,7 @@ export const Select = forwardRef<HTMLDivElement, CombinedSelectProps>(
       multiple ? (value as (string | number)[]) || [] : value || defaultValue || null
     );
     const [dropdownPosition, setDropdownPosition] = useState<'top' | 'bottom'>('bottom');
-    
+
     const selectRef = useRef<HTMLDivElement>(null);
     const dropdownRef = useRef<HTMLDivElement>(null);
     const searchInputRef = useRef<HTMLInputElement>(null);
@@ -273,7 +273,7 @@ export const Select = forwardRef<HTMLDivElement, CombinedSelectProps>(
     // Filter options based on search query
     const filteredOptions = useMemo(() => {
       if (!searchable || !searchQuery) return options;
-      
+
       return options.filter(option =>
         option.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
         option.description?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -283,7 +283,7 @@ export const Select = forwardRef<HTMLDivElement, CombinedSelectProps>(
     // Group options if needed
     const groupedOptions = useMemo(() => {
       const groups: Record<string, SelectOption[]> = {};
-      
+
       filteredOptions.forEach((option: SelectOption) => {
         const group = option.group || 'default';
         if (!groups[group]) {
@@ -291,7 +291,7 @@ export const Select = forwardRef<HTMLDivElement, CombinedSelectProps>(
         }
         groups[group].push(option);
       });
-      
+
       return groups;
     }, [filteredOptions]);
 
@@ -300,7 +300,7 @@ export const Select = forwardRef<HTMLDivElement, CombinedSelectProps>(
       if (multiple) {
         const currentValues = selectedValue as (string | number)[] || [];
         let newValues: (string | number)[];
-        
+
         if (currentValues.includes(optionValue)) {
           newValues = currentValues.filter(v => v !== optionValue);
         } else {
@@ -309,7 +309,7 @@ export const Select = forwardRef<HTMLDivElement, CombinedSelectProps>(
           }
           newValues = [...currentValues, optionValue];
         }
-        
+
         setSelectedValue(newValues);
         (onValueChange as MultiSelectProps['onValueChange'])?.(newValues);
       } else {
@@ -324,7 +324,7 @@ export const Select = forwardRef<HTMLDivElement, CombinedSelectProps>(
     // Handle clear
     const handleClear = useCallback((e: React.MouseEvent) => {
       e.stopPropagation();
-      
+
       if (multiple) {
         const newValue: (string | number)[] = [];
         setSelectedValue(newValue);
@@ -333,7 +333,7 @@ export const Select = forwardRef<HTMLDivElement, CombinedSelectProps>(
         setSelectedValue(null);
         // Don't call onValueChange for null values in single select
       }
-      
+
       onClear?.();
     }, [multiple, onValueChange, onClear]);
 
@@ -346,11 +346,11 @@ export const Select = forwardRef<HTMLDivElement, CombinedSelectProps>(
     // Calculate dropdown position
     const calculateDropdownPosition = useCallback(() => {
       if (!selectRef.current) return;
-      
+
       const rect = selectRef.current.getBoundingClientRect();
       const spaceBelow = window.innerHeight - rect.bottom;
       const spaceAbove = rect.top;
-      
+
       setDropdownPosition(spaceBelow < 200 && spaceAbove > 200 ? 'top' : 'bottom');
     }, []);
 
@@ -379,12 +379,12 @@ export const Select = forwardRef<HTMLDivElement, CombinedSelectProps>(
         document.addEventListener('mousedown', handleClickOutside);
         document.addEventListener('keydown', handleEscape);
         calculateDropdownPosition();
-        
+
         // Focus search input if searchable
         if (searchable && searchInputRef.current) {
           setTimeout(() => searchInputRef.current?.focus(), 0);
         }
-        
+
         return () => {
           document.removeEventListener('mousedown', handleClickOutside);
           document.removeEventListener('keydown', handleEscape);
@@ -405,11 +405,11 @@ export const Select = forwardRef<HTMLDivElement, CombinedSelectProps>(
     // Render selected value
     const renderSelectedValue = () => {
       const selectedOptions = getSelectedOptions();
-      
+
       if (renderValue) {
         return renderValue(selectedOptions as SelectOption | SelectOption[]);
       }
-      
+
       if (multiple) {
         const opts = selectedOptions as SelectOption[];
         if (opts.length === 0) return placeholder;
@@ -421,21 +421,21 @@ export const Select = forwardRef<HTMLDivElement, CombinedSelectProps>(
       }
     };
 
-    const hasValue = multiple 
+    const hasValue = multiple
       ? Array.isArray(selectedValue) && selectedValue.length > 0
       : selectedValue !== null && selectedValue !== undefined;
 
     return (
-      <SelectContext.Provider value={{ 
-        selectedValue, 
-        onSelect: handleSelect, 
-        multiple, 
+      <SelectContext.Provider value={{
+        selectedValue,
+        onSelect: handleSelect,
+        multiple,
         searchable,
-        renderOption 
+        renderOption
       }}>
         <div className="w-full">
           {label && (
-            <label 
+            <label
               htmlFor={selectId}
               className={cn(
                 'block text-sm font-medium mb-1',
@@ -446,13 +446,13 @@ export const Select = forwardRef<HTMLDivElement, CombinedSelectProps>(
               {label}
             </label>
           )}
-          
+
           {description && (
             <p className="text-xs text-muted-foreground mb-2">
               {description}
             </p>
           )}
-          
+
           <div className="relative">
             <div
               ref={selectRef}
@@ -474,7 +474,7 @@ export const Select = forwardRef<HTMLDivElement, CombinedSelectProps>(
               )}>
                 {loading ? loadingMessage : renderSelectedValue()}
               </span>
-              
+
               <div className="flex items-center space-x-1">
                 {clearable && hasValue && !disabled && (
                   <button
@@ -486,7 +486,7 @@ export const Select = forwardRef<HTMLDivElement, CombinedSelectProps>(
                     <XMarkIcon className="w-4 h-4" />
                   </button>
                 )}
-                
+
                 <motion.div
                   animate={{ rotate: isOpen ? 180 : 0 }}
                   transition={{ duration: 0.2 }}
@@ -495,7 +495,7 @@ export const Select = forwardRef<HTMLDivElement, CombinedSelectProps>(
                 </motion.div>
               </div>
             </div>
-            
+
             <AnimatePresence>
               {isOpen && (
                 <motion.div
@@ -524,7 +524,7 @@ export const Select = forwardRef<HTMLDivElement, CombinedSelectProps>(
                       </div>
                     </div>
                   )}
-                  
+
                   <div className="py-1">
                     {loading ? (
                       <div className="px-3 py-2 text-sm text-muted-foreground">
@@ -563,7 +563,7 @@ export const Select = forwardRef<HTMLDivElement, CombinedSelectProps>(
               )}
             </AnimatePresence>
           </div>
-          
+
           {error && (
             <p className="text-xs text-destructive mt-1">
               {error}

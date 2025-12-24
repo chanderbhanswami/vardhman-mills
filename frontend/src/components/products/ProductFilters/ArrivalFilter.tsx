@@ -50,15 +50,15 @@ const ArrivalFilter: React.FC<ArrivalFilterProps> = ({
 
   const getDateRange = (days: number) => {
     if (days === 0) return 'All time';
-    
+
     const endDate = new Date();
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
-    
+
     const formatDate = (date: Date) => {
       return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     };
-    
+
     return `${formatDate(startDate)} - ${formatDate(endDate)}`;
   };
 
@@ -69,7 +69,7 @@ const ArrivalFilter: React.FC<ArrivalFilterProps> = ({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Sparkles className="h-4 w-4 text-yellow-500" />
-          <h3 className="font-semibold text-gray-900">New Arrivals</h3>
+          <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">New Arrivals</h3>
         </div>
         <div className="flex items-center gap-2">
           {isFiltered && (

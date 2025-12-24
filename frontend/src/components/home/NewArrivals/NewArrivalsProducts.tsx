@@ -133,7 +133,7 @@ export const NewArrivalsProducts: React.FC<NewArrivalsProductsProps> = ({
   const [sortBy, setSortBy] = useState('newest');
   const [currentPage, setCurrentPage] = useState(1);
   const [showFiltersPanel, setShowFiltersPanel] = useState(false);
-  
+
   // Filters
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
@@ -180,34 +180,37 @@ export const NewArrivalsProducts: React.FC<NewArrivalsProductsProps> = ({
 
     // Price filter
     filtered = filtered.filter(
-      (p) => p.pricing.basePrice.amount >= selectedPriceRange.min && p.pricing.basePrice.amount <= selectedPriceRange.max
+      (p) => {
+        const price = p.pricing?.basePrice?.amount ?? 0;
+        return price >= selectedPriceRange.min && price <= selectedPriceRange.max;
+      }
     );
 
     // Rating filter
     if (minRating > 0) {
-      filtered = filtered.filter((p) => (p.rating.average || 0) >= minRating);
+      filtered = filtered.filter((p) => (p.rating?.average || 0) >= minRating);
     }
 
     // Stock filter
     if (showOnlyInStock) {
-      filtered = filtered.filter((p) => (p.inventory.quantity || 0) > 0);
+      filtered = filtered.filter((p) => (p.inventory?.quantity || 0) > 0);
     }
 
     // Sale filter
     if (showOnlySale) {
-      filtered = filtered.filter((p) => p.isOnSale || p.pricing.salePrice !== undefined);
+      filtered = filtered.filter((p) => p.isOnSale || p.pricing?.salePrice !== undefined);
     }
 
     // Sorting
     switch (sortBy) {
       case 'price-asc':
-        filtered.sort((a, b) => a.pricing.basePrice.amount - b.pricing.basePrice.amount);
+        filtered.sort((a, b) => (a.pricing?.basePrice?.amount ?? 0) - (b.pricing?.basePrice?.amount ?? 0));
         break;
       case 'price-desc':
-        filtered.sort((a, b) => b.pricing.basePrice.amount - a.pricing.basePrice.amount);
+        filtered.sort((a, b) => (b.pricing?.basePrice?.amount ?? 0) - (a.pricing?.basePrice?.amount ?? 0));
         break;
       case 'rating':
-        filtered.sort((a, b) => (b.rating.average || 0) - (a.rating.average || 0));
+        filtered.sort((a, b) => (b.rating?.average || 0) - (a.rating?.average || 0));
         break;
       case 'name':
         filtered.sort((a, b) => a.name.localeCompare(b.name));
@@ -267,7 +270,7 @@ export const NewArrivalsProducts: React.FC<NewArrivalsProductsProps> = ({
 
   const activeFilters = useMemo(() => {
     const filters = [];
-    
+
     if (selectedColors.length > 0) {
       selectedColors.forEach((colorId) => {
         const color = availableColors.find((c) => c.id === colorId);
@@ -276,7 +279,7 @@ export const NewArrivalsProducts: React.FC<NewArrivalsProductsProps> = ({
         }
       });
     }
-    
+
     if (selectedSizes.length > 0) {
       selectedSizes.forEach((sizeId) => {
         const size = availableSizes.find((s) => s.id === sizeId);
@@ -285,7 +288,7 @@ export const NewArrivalsProducts: React.FC<NewArrivalsProductsProps> = ({
         }
       });
     }
-    
+
     if (selectedPriceRange.min > priceRange.min || selectedPriceRange.max < priceRange.max) {
       filters.push({
         type: 'price',
@@ -293,19 +296,19 @@ export const NewArrivalsProducts: React.FC<NewArrivalsProductsProps> = ({
         label: `$${selectedPriceRange.min} - $${selectedPriceRange.max}`,
       });
     }
-    
+
     if (minRating > 0) {
       filters.push({ type: 'rating', id: 'rating', label: `${minRating}+ Stars` });
     }
-    
+
     if (showOnlyInStock) {
       filters.push({ type: 'stock', id: 'stock', label: 'In Stock' });
     }
-    
+
     if (showOnlySale) {
       filters.push({ type: 'sale', id: 'sale', label: 'On Sale' });
     }
-    
+
     return filters;
   }, [
     selectedColors,
@@ -612,19 +615,19 @@ export const NewArrivalsProducts: React.FC<NewArrivalsProductsProps> = ({
                 id={product.id}
                 name={product.name}
                 slug={product.slug}
-                image={product.media.images[0]?.url || ''}
-                hoverImage={product.media.images[1]?.url}
-                price={product.pricing.salePrice ? product.pricing.salePrice.amount : product.pricing.basePrice.amount}
-                originalPrice={product.pricing.salePrice ? product.pricing.basePrice.amount : undefined}
-                rating={product.rating.average}
-                reviewCount={product.reviewCount}
-                colors={product.colors.map(c => ({ id: c.id, name: c.name, hex: c.hexCode, image: c.image?.url }))}
-                sizes={product.sizes.map(s => ({ id: s.id, name: s.name, available: s.isAvailable }))}
-                stock={product.inventory.quantity}
-                isNew={product.isNewArrival}
-                isSale={product.isOnSale}
-                isLimited={product.isFeatured}
-                isTrending={product.isBestseller}
+                image={product.media?.images?.[0]?.url || product.image || ''}
+                hoverImage={product.media?.images?.[1]?.url}
+                price={product.pricing?.salePrice ? product.pricing.salePrice.amount : (product.pricing?.basePrice?.amount ?? 0)}
+                originalPrice={product.pricing?.salePrice ? product.pricing.basePrice.amount : undefined}
+                rating={product.rating?.average || 0}
+                reviewCount={product.reviewCount || 0}
+                colors={product.colors?.map(c => ({ id: c.id, name: c.name, hex: c.hexCode, image: c.image?.url })) || []}
+                sizes={product.sizes?.map(s => ({ id: s.id, name: s.name, available: s.isAvailable })) || []}
+                stock={product.inventory?.quantity || 0}
+                isNew={product.isNewArrival || false}
+                isSale={product.isOnSale || false}
+                isLimited={product.isFeatured || false}
+                isTrending={product.isBestseller || false}
               />
             </motion.div>
           ))}
@@ -657,7 +660,7 @@ export const NewArrivalsProducts: React.FC<NewArrivalsProductsProps> = ({
         >
           Previous
         </Button>
-        
+
         {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
           // Show first, last, current, and adjacent pages
           if (
@@ -680,7 +683,7 @@ export const NewArrivalsProducts: React.FC<NewArrivalsProductsProps> = ({
           }
           return null;
         })}
-        
+
         <Button
           variant="outline"
           size="sm"

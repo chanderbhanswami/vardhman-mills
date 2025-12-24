@@ -52,10 +52,10 @@ export const fetchOrders = createAsyncThunk(
     filters?: OrderFilters;
   } = {}) => {
     const queryParams = new URLSearchParams();
-    
+
     if (params.page) queryParams.append('page', params.page.toString());
     if (params.limit) queryParams.append('limit', params.limit.toString());
-    
+
     if (params.filters) {
       if (params.filters.status?.length) {
         queryParams.append('status', params.filters.status.join(','));
@@ -87,7 +87,7 @@ export const fetchOrders = createAsyncThunk(
     if (!response.ok) {
       throw new Error('Failed to fetch orders');
     }
-    
+
     return response.json();
   }
 );
@@ -126,12 +126,12 @@ export const createOrder = createAsyncThunk(
       },
       body: JSON.stringify(orderData),
     });
-    
+
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.message || 'Failed to create order');
     }
-    
+
     return response.json();
   }
 );
@@ -149,11 +149,11 @@ export const updateOrderStatus = createAsyncThunk(
         notes: params.notes,
       }),
     });
-    
+
     if (!response.ok) {
       throw new Error('Failed to update order status');
     }
-    
+
     return response.json();
   }
 );
@@ -168,11 +168,11 @@ export const cancelOrder = createAsyncThunk(
       },
       body: JSON.stringify({ reason: params.reason }),
     });
-    
+
     if (!response.ok) {
       throw new Error('Failed to cancel order');
     }
-    
+
     return response.json();
   }
 );
@@ -195,7 +195,7 @@ export const downloadInvoice = createAsyncThunk(
     if (!response.ok) {
       throw new Error('Failed to download invoice');
     }
-    
+
     const blob = await response.blob();
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -205,7 +205,7 @@ export const downloadInvoice = createAsyncThunk(
     link.click();
     document.body.removeChild(link);
     window.URL.revokeObjectURL(url);
-    
+
     return { orderId, downloaded: true };
   }
 );
@@ -229,11 +229,11 @@ export const requestReturn = createAsyncThunk(
       },
       body: JSON.stringify(params),
     });
-    
+
     if (!response.ok) {
       throw new Error('Failed to request return');
     }
-    
+
     return response.json();
   }
 );
@@ -242,7 +242,7 @@ export const fetchOrderSummary = createAsyncThunk(
   'order/fetchOrderSummary',
   async (params: { dateRange?: { start: string; end: string } } = {}) => {
     const queryParams = new URLSearchParams();
-    
+
     if (params.dateRange) {
       queryParams.append('startDate', params.dateRange.start);
       queryParams.append('endDate', params.dateRange.end);
@@ -252,7 +252,7 @@ export const fetchOrderSummary = createAsyncThunk(
     if (!response.ok) {
       throw new Error('Failed to fetch order summary');
     }
-    
+
     return response.json();
   }
 );
@@ -274,12 +274,12 @@ export const processPayment = createAsyncThunk(
         paymentData: params.paymentData,
       }),
     });
-    
+
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.message || 'Payment processing failed');
     }
-    
+
     return response.json();
   }
 );
@@ -289,18 +289,18 @@ interface OrderState {
   orders: Order[];
   currentOrder: OrderDetails | null;
   recentOrders: Order[];
-  
+
   // Order management
   orderSummary: OrderSummary | null;
   tracking: Record<string, OrderDetails['tracking']>;
-  
+
   // Pagination
   pagination: PaginationMeta;
-  
+
   // Filters and search
   filters: OrderFilters;
   searchQuery: string;
-  
+
   // Loading states
   isLoading: boolean;
   isCreatingOrder: boolean;
@@ -310,23 +310,23 @@ interface OrderState {
   isDownloadingInvoice: boolean;
   isRequestingReturn: boolean;
   isLoadingTracking: boolean;
-  
+
   // UI state
-  selectedOrders: Set<string>;
+  selectedOrders: string[];
   viewMode: 'list' | 'grid' | 'detailed';
   showFilters: boolean;
-  expandedOrders: Set<string>;
-  
+  expandedOrders: string[];
+
   // Error handling
   error: string | null;
   createOrderError: string | null;
   paymentError: string | null;
   trackingError: string | null;
-  
+
   // Cache
   lastFetch: number;
   orderCache: Record<string, { order: OrderDetails; timestamp: number }>;
-  
+
   // Notifications
   pendingNotifications: Array<{
     orderId: string;
@@ -363,10 +363,10 @@ const initialState: OrderState = {
   isDownloadingInvoice: false,
   isRequestingReturn: false,
   isLoadingTracking: false,
-  selectedOrders: new Set<string>(),
+  selectedOrders: [],
   viewMode: 'list',
   showFilters: false,
-  expandedOrders: new Set<string>(),
+  expandedOrders: [],
   error: null,
   createOrderError: null,
   paymentError: null,
@@ -384,105 +384,108 @@ const orderSlice = createSlice({
     setFilters: (state, action: PayloadAction<OrderFilters>) => {
       state.filters = { ...state.filters, ...action.payload };
     },
-    
+
     clearFilters: (state) => {
       state.filters = {
         status: [],
         paymentStatus: [],
       };
     },
-    
+
     // Search
     setSearchQuery: (state, action: PayloadAction<string>) => {
       state.searchQuery = action.payload;
     },
-    
+
     // Selection management
     selectOrder: (state, action: PayloadAction<string>) => {
-      state.selectedOrders.add(action.payload);
-    },
-    
-    deselectOrder: (state, action: PayloadAction<string>) => {
-      state.selectedOrders.delete(action.payload);
-    },
-    
-    selectAllOrders: (state) => {
-      state.orders.forEach(order => {
-        state.selectedOrders.add(order.id);
-      });
-    },
-    
-    deselectAllOrders: (state) => {
-      state.selectedOrders.clear();
-    },
-    
-    toggleOrderSelection: (state, action: PayloadAction<string>) => {
-      const orderId = action.payload;
-      if (state.selectedOrders.has(orderId)) {
-        state.selectedOrders.delete(orderId);
-      } else {
-        state.selectedOrders.add(orderId);
+      if (!state.selectedOrders.includes(action.payload)) {
+        state.selectedOrders.push(action.payload);
       }
     },
-    
+
+    deselectOrder: (state, action: PayloadAction<string>) => {
+      state.selectedOrders = state.selectedOrders.filter(id => id !== action.payload);
+    },
+
+    selectAllOrders: (state) => {
+      const allIds = state.orders.map(order => order.id);
+      state.selectedOrders = Array.from(new Set([...state.selectedOrders, ...allIds]));
+    },
+
+    deselectAllOrders: (state) => {
+      state.selectedOrders = [];
+    },
+
+    toggleOrderSelection: (state, action: PayloadAction<string>) => {
+      const orderId = action.payload;
+      if (state.selectedOrders.includes(orderId)) {
+        state.selectedOrders = state.selectedOrders.filter(id => id !== orderId);
+      } else {
+        state.selectedOrders.push(orderId);
+      }
+    },
+
     // Order expansion
     toggleOrderExpansion: (state, action: PayloadAction<string>) => {
       const orderId = action.payload;
-      if (state.expandedOrders.has(orderId)) {
-        state.expandedOrders.delete(orderId);
+      if (state.expandedOrders.includes(orderId)) {
+        state.expandedOrders = state.expandedOrders.filter(id => id !== orderId);
       } else {
-        state.expandedOrders.add(orderId);
+        state.expandedOrders.push(orderId);
       }
     },
-    
+
     expandOrder: (state, action: PayloadAction<string>) => {
-      state.expandedOrders.add(action.payload);
+      if (!state.expandedOrders.includes(action.payload)) {
+        state.expandedOrders.push(action.payload);
+      }
     },
-    
+
     collapseOrder: (state, action: PayloadAction<string>) => {
-      state.expandedOrders.delete(action.payload);
+      state.expandedOrders = state.expandedOrders.filter(id => id !== action.payload);
     },
-    
+
     // UI state
     setViewMode: (state, action: PayloadAction<'list' | 'grid' | 'detailed'>) => {
       state.viewMode = action.payload;
     },
-    
+
     setShowFilters: (state, action: PayloadAction<boolean>) => {
       state.showFilters = action.payload;
     },
-    
+
     toggleFilters: (state) => {
       state.showFilters = !state.showFilters;
     },
-    
+
     // Order management
     clearCurrentOrder: (state) => {
       state.currentOrder = null;
     },
-    
+
     updateOrderInList: (state, action: PayloadAction<Partial<Order> & { id: string }>) => {
       const index = state.orders.findIndex(order => order.id === action.payload.id);
       if (index !== -1) {
         state.orders[index] = { ...state.orders[index], ...action.payload };
       }
     },
-    
+
     // Notifications
     addNotification: (state, action: PayloadAction<OrderState['pendingNotifications'][0]>) => {
       state.pendingNotifications.push(action.payload);
     },
-    
+
     removeNotification: (state, action: PayloadAction<string>) => {
       state.pendingNotifications = state.pendingNotifications.filter(
         notification => notification.orderId !== action.payload
       );
     },
-    
+
     clearNotifications: (state) => {
       state.pendingNotifications = [];
     },
-    
+
     // Error handling
     clearError: (state) => {
       state.error = null;
@@ -490,13 +493,13 @@ const orderSlice = createSlice({
       state.paymentError = null;
       state.trackingError = null;
     },
-    
+
     // Cache management
     invalidateCache: (state) => {
       state.lastFetch = 0;
       state.orderCache = {};
     },
-    
+
     invalidateOrderCache: (state, action: PayloadAction<string>) => {
       delete state.orderCache[action.payload];
     },
@@ -530,7 +533,7 @@ const orderSlice = createSlice({
         state.isLoading = false;
         const order = action.payload.order || action.payload;
         state.currentOrder = order;
-        
+
         // Cache the order
         if (order?.id) {
           state.orderCache[order.id] = {
@@ -538,7 +541,7 @@ const orderSlice = createSlice({
             timestamp: Date.now(),
           };
         }
-        
+
         state.error = null;
       })
       .addCase(fetchOrderById.rejected, (state, action) => {
@@ -558,7 +561,7 @@ const orderSlice = createSlice({
         state.orders.unshift(newOrder);
         state.currentOrder = newOrder;
         state.createOrderError = null;
-        
+
         // Add success notification
         state.pendingNotifications.push({
           orderId: newOrder.id,
@@ -580,18 +583,18 @@ const orderSlice = createSlice({
       .addCase(updateOrderStatus.fulfilled, (state, action) => {
         state.isUpdatingOrder = false;
         const updatedOrder = action.payload.order || action.payload;
-        
+
         // Update order in list
         const index = state.orders.findIndex(order => order.id === updatedOrder.id);
         if (index !== -1) {
           state.orders[index] = { ...state.orders[index], ...updatedOrder };
         }
-        
+
         // Update current order
         if (state.currentOrder?.id === updatedOrder.id) {
           state.currentOrder = { ...state.currentOrder, ...updatedOrder };
         }
-        
+
         // Add notification
         state.pendingNotifications.push({
           orderId: updatedOrder.id,
@@ -613,13 +616,13 @@ const orderSlice = createSlice({
       .addCase(cancelOrder.fulfilled, (state, action) => {
         state.isCancellingOrder = false;
         const cancelledOrder = action.payload.order || action.payload;
-        
+
         // Update order in list
         const index = state.orders.findIndex(order => order.id === cancelledOrder.id);
         if (index !== -1) {
           state.orders[index] = { ...state.orders[index], status: 'cancelled' };
         }
-        
+
         // Update current order
         if (state.currentOrder?.id === cancelledOrder.id) {
           if (state.currentOrder) {
@@ -642,14 +645,14 @@ const orderSlice = createSlice({
         state.isLoadingTracking = false;
         const { orderId, tracking } = action.payload;
         state.tracking[orderId] = tracking;
-        
+
         // Update current order if it matches
         if (state.currentOrder?.id === orderId) {
           if (state.currentOrder) {
             state.currentOrder.tracking = tracking;
           }
         }
-        
+
         state.trackingError = null;
       })
       .addCase(trackOrder.rejected, (state, action) => {
@@ -678,7 +681,7 @@ const orderSlice = createSlice({
       .addCase(requestReturn.fulfilled, (state, action) => {
         state.isRequestingReturn = false;
         const returnRequest = action.payload;
-        
+
         // Add notification
         state.pendingNotifications.push({
           orderId: returnRequest.orderId,
@@ -708,12 +711,12 @@ const orderSlice = createSlice({
       .addCase(processPayment.fulfilled, (state, action) => {
         state.isProcessingPayment = false;
         const paymentResult = action.payload;
-        
+
         // Update order payment status
         if (state.currentOrder && paymentResult.orderId === state.currentOrder.id) {
           state.currentOrder.payment = { ...state.currentOrder.payment, ...paymentResult.payment };
         }
-        
+
         // Add notification
         state.pendingNotifications.push({
           orderId: paymentResult.orderId,
@@ -721,7 +724,7 @@ const orderSlice = createSlice({
           message: paymentResult.success ? 'Payment processed successfully' : 'Payment failed',
           timestamp: Date.now(),
         });
-        
+
         state.paymentError = null;
       })
       .addCase(processPayment.rejected, (state, action) => {
@@ -801,14 +804,14 @@ export const selectOrderStats = (state: { order: OrderState }) => {
 
 export const selectFilteredOrders = (state: { order: OrderState }) => {
   const { orders, filters, searchQuery } = state.order;
-  
+
   return orders.filter(order => {
     // Status filter
     if (filters.status?.length && !filters.status.includes(order.status)) return false;
-    
+
     // Payment status filter
     if (filters.paymentStatus?.length && !filters.paymentStatus.includes(order.paymentStatus)) return false;
-    
+
     // Date range filter
     if (filters.dateRange) {
       const orderDate = new Date(order.createdAt);
@@ -816,11 +819,11 @@ export const selectFilteredOrders = (state: { order: OrderState }) => {
       const endDate = typeof filters.dateRange.to === 'string' ? new Date(filters.dateRange.to) : filters.dateRange.to;
       if (orderDate < startDate || orderDate > endDate) return false;
     }
-    
+
     // Amount filters
     if (filters.amountRange?.min && order.total.amount < filters.amountRange.min) return false;
     if (filters.amountRange?.max && order.total.amount > filters.amountRange.max) return false;
-    
+
     // Search query
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
@@ -828,10 +831,10 @@ export const selectFilteredOrders = (state: { order: OrderState }) => {
       const customerName = `${order.user?.firstName || ''} ${order.user?.lastName || ''}`.trim();
       const matchesCustomerName = customerName.toLowerCase().includes(query);
       const matchesCustomerEmail = order.user?.email?.toLowerCase().includes(query);
-      
+
       if (!matchesOrderNumber && !matchesCustomerName && !matchesCustomerEmail) return false;
     }
-    
+
     return true;
   });
 };

@@ -1,4 +1,4 @@
-import { 
+﻿import { 
   useMutation, 
   useQuery, 
   useQueryClient, 
@@ -363,7 +363,7 @@ export interface MediaModerationQueue {
 // ==================== API SERVICE CLASS ====================
 
 export class ReviewMediaApiService {
-  private readonly baseUrl = '/api/v1/review-media';
+  private readonly baseUrl = '/review-media';
 
   // ==================== CRUD Operations ====================
 

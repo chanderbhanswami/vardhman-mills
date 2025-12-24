@@ -73,6 +73,9 @@ export {
   PriceFilter,
   MaterialFilter,
   ArrivalFilter,
+  PatternFilter,
+  OccasionFilter,
+  DiscountFilter,
   defaultFilterState,
   defaultFilterConfig,
 } from './ProductFilters';

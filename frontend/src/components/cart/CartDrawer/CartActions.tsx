@@ -30,7 +30,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Tooltip } from '@/components/ui/Tooltip';
 import { Input } from '@/components/ui/Input';
 import toast from 'react-hot-toast';
-import { useCart } from '@/contexts/CartContext';
+import { useCart } from '@/components/providers/CartProvider';
 import { cn } from '@/lib/utils';
 import { formatCurrency } from '@/lib/format';
 

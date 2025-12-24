@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
+import {
   HeartIcon,
   CheckIcon,
   ArrowPathIcon,
@@ -18,7 +18,7 @@ import { Tooltip } from '@/components/ui/Tooltip';
 import { Badge } from '@/components/ui/Badge';
 
 // Hooks and Contexts
-import { useWishlist } from '@/contexts/WishlistContext';
+import { useWishlist } from '@/components/providers/WishlistProvider';
 import { useToast } from '@/hooks/useToast';
 
 // Utils
@@ -102,7 +102,7 @@ const WishlistIcon: React.FC<WishlistIconProps> = ({
 }) => {
   const sizeClasses = {
     sm: 'w-4 h-4',
-    md: 'w-5 h-5', 
+    md: 'w-5 h-5',
     lg: 'w-6 h-6'
   };
 
@@ -127,7 +127,7 @@ const WishlistIcon: React.FC<WishlistIconProps> = ({
     if (customIcon?.active) {
       return <>{customIcon.active}</>;
     }
-    
+
     return (
       <motion.div
         key="filled"
@@ -173,11 +173,11 @@ const WishlistText: React.FC<WishlistTextProps> = ({
     if (isLoading) {
       return customText?.loading || 'Loading...';
     }
-    
+
     if (isInWishlist) {
       return customText?.remove || 'Remove from Wishlist';
     }
-    
+
     return customText?.add || 'Add to Wishlist';
   };
 
@@ -216,9 +216,9 @@ const SuccessAnimation: React.FC<{ size: string }> = ({ size }) => {
 };
 
 // Pulse Animation Component
-const PulseAnimation: React.FC<{ children: React.ReactNode; trigger: boolean }> = ({ 
-  children, 
-  trigger 
+const PulseAnimation: React.FC<{ children: React.ReactNode; trigger: boolean }> = ({
+  children,
+  trigger
 }) => {
   return (
     <motion.div
@@ -258,13 +258,13 @@ export const WishlistButton: React.FC<WishlistButtonProps> = ({
   }
 }) => {
   // Hooks
-  const { 
-    isInWishlist: checkIsInWishlist, 
-    addToWishlist, 
+  const {
+    isInWishlist: checkIsInWishlist,
+    addToWishlist,
     removeFromWishlist
   } = useWishlist();
   const { toast } = useToast();
-  
+
   // State
   const [isLoading, setIsLoading] = useState(loading);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -272,11 +272,11 @@ export const WishlistButton: React.FC<WishlistButtonProps> = ({
   const [confirmingRemoval, setConfirmingRemoval] = useState(false);
 
   // Computed values
-  const isInWishlist = useMemo(() => 
-    checkIsInWishlist(product.id), 
+  const isInWishlist = useMemo(() =>
+    checkIsInWishlist(product.id),
     [checkIsInWishlist, product.id]
   );
-  
+
   const wishlistCount = items?.length || 0;
   const isDisabled = disabled || isLoading;
 
@@ -327,13 +327,13 @@ export const WishlistButton: React.FC<WishlistButtonProps> = ({
     // Handle removal confirmation
     if (isInWishlist && confirmRemoval && !confirmingRemoval) {
       setConfirmingRemoval(true);
-      
+
       toast({
         title: 'Remove from wishlist?',
         description: 'Click again to confirm removal',
         duration: 3000
       });
-      
+
       setTimeout(() => setConfirmingRemoval(false), 3000);
       return;
     }
@@ -345,38 +345,38 @@ export const WishlistButton: React.FC<WishlistButtonProps> = ({
       if (isInWishlist) {
         await removeFromWishlist(product.id);
         trackEvent('remove');
-        
+
         toast({
           title: 'Removed from wishlist',
           description: `${product.name} has been removed from your wishlist`
         });
-        
+
         onToggle?.(false, product);
       } else {
         await addToWishlist(product.id);
-        
+
         trackEvent('add');
         triggerPulse();
         showSuccessAnimation();
-        
+
         toast({
           title: 'Added to wishlist',
           description: `${product.name} has been added to your wishlist`
         });
-        
+
         onToggle?.(true, product);
       }
     } catch (error) {
       console.error('Wishlist operation failed:', error);
-      
+
       const errorMessage = error instanceof Error ? error.message : 'An error occurred';
-      
+
       toast({
         title: 'Operation failed',
         description: errorMessage,
         variant: 'destructive'
       });
-      
+
       onError?.(error instanceof Error ? error : new Error(errorMessage));
     } finally {
       setIsLoading(false);
@@ -400,7 +400,7 @@ export const WishlistButton: React.FC<WishlistButtonProps> = ({
   // Variant styles
   const getVariantStyles = () => {
     const baseStyles = 'transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2';
-    
+
     switch (variant) {
       case 'minimal':
         return cn(
@@ -408,14 +408,14 @@ export const WishlistButton: React.FC<WishlistButtonProps> = ({
           'p-1 rounded-md hover:bg-gray-100 focus:ring-gray-300',
           isInWishlist && 'bg-red-50 hover:bg-red-100'
         );
-      
+
       case 'icon':
         return cn(
           baseStyles,
           'p-2 rounded-full hover:bg-gray-100 focus:ring-gray-300',
           isInWishlist && 'bg-red-50 hover:bg-red-100'
         );
-      
+
       case 'floating':
         return cn(
           baseStyles,
@@ -423,14 +423,14 @@ export const WishlistButton: React.FC<WishlistButtonProps> = ({
           'bg-white border border-gray-200 hover:bg-gray-50 focus:ring-blue-300',
           isInWishlist && 'bg-red-50 border-red-200 hover:bg-red-100'
         );
-      
+
       case 'card':
         return cn(
           baseStyles,
           'p-3 rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-sm focus:ring-blue-300',
           isInWishlist && 'border-red-200 bg-red-50 hover:border-red-300 hover:bg-red-100'
         );
-      
+
       default:
         return cn(
           baseStyles,
@@ -485,7 +485,7 @@ export const WishlistButton: React.FC<WishlistButtonProps> = ({
               />
             )}
           </AnimatePresence>
-          
+
           {confirmingRemoval && (
             <motion.div
               initial={{ scale: 0, opacity: 0 }}
@@ -496,7 +496,7 @@ export const WishlistButton: React.FC<WishlistButtonProps> = ({
             </motion.div>
           )}
         </div>
-        
+
         {shouldShowText && (
           <WishlistText
             isInWishlist={isInWishlist}
@@ -566,10 +566,10 @@ export interface QuickWishlistProps {
   className?: string;
 }
 
-export const QuickWishlist: React.FC<QuickWishlistProps> = ({ 
-  product, 
-  size = 'sm', 
-  className 
+export const QuickWishlist: React.FC<QuickWishlistProps> = ({
+  product,
+  size = 'sm',
+  className
 }) => (
   <WishlistButton
     product={product}

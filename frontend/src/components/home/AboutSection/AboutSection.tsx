@@ -1,694 +1,148 @@
 /**
- * AboutSection Component
+ * AboutSection Component (Simplified)
  * 
- * Main container component for the About section that combines
- * AboutContent and AboutImage components.
- * 
- * Features:
- * - Responsive layout management
- * - Section visibility controls
- * - Animation coordination
- * - Background effects
- * - Scroll-based animations
- * - Section navigation
- * - Content synchronization
- * - Theme support
- * - Accessibility features
- * - SEO optimization
+ * Clean, minimal about section for the homepage.
+ * Full details available on dedicated /about page.
  * 
  * @component
  */
 
 'use client';
 
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { motion, useInView, useScroll, useTransform } from 'framer-motion';
-import {
-  InformationCircleIcon,
-  PhotoIcon,
-  SparklesIcon,
-  ChevronDownIcon,
-  ChevronUpIcon,
-  AdjustmentsHorizontalIcon,
-} from '@heroicons/react/24/outline';
+import React from 'react';
+import { motion, useInView } from 'framer-motion';
+import Link from 'next/link';
+import { ArrowRightIcon } from '@heroicons/react/24/outline';
 import { cn } from '@/lib/utils/utils';
-import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
-import { Tooltip } from '@/components/ui/Tooltip';
-import { Card, CardContent, CardHeader } from '@/components/ui/Card';
-import { AboutContent } from './AboutContent';
-import { AboutImage } from './AboutImage';
 
 // ============================================================================
-// TYPES & INTERFACES
+// TYPES
 // ============================================================================
 
-export interface AboutSectionProps {
-  /** Section layout variant */
-  variant?: 'default' | 'split' | 'stacked' | 'grid' | 'masonry';
-  /** Content alignment */
-  alignment?: 'left' | 'right' | 'center';
-  /** Show section header */
-  showHeader?: boolean;
-  /** Enable animations */
-  animated?: boolean;
-  /** Background style */
-  background?: 'none' | 'gradient' | 'pattern' | 'image';
-  /** Show navigation */
-  showNavigation?: boolean;
-  /** Content first (before images) */
-  contentFirst?: boolean;
-  /** Enable parallax effect */
-  enableParallax?: boolean;
-  /** Custom section ID for navigation */
-  sectionId?: string;
-  /** Additional CSS classes */
+interface AboutSectionProps {
   className?: string;
-  /** Children components */
-  children?: React.ReactNode;
 }
-
-interface SectionConfig {
-  showContent: boolean;
-  showImages: boolean;
-  contentVariant: 'default' | 'compact' | 'detailed';
-  imageVariant: 'default' | 'gallery' | 'collage' | 'slider';
-}
-
-// ============================================================================
-// CONSTANTS
-// ============================================================================
-
-const SECTION_HEADER = {
-  title: 'About Us',
-  subtitle: 'Our Story, Mission & Values',
-  description: 'Learn more about Vardhman Mills - our history, commitment to quality, and dedication to excellence in textile manufacturing.',
-};
-
-const BACKGROUND_PATTERNS = {
-  pattern: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v6h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-};
-
-// Animation variants
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.2,
-      delayChildren: 0.1,
-    },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: {
-    opacity: 1,
-    y: 0,
-  },
-};
-
-const headerVariants = {
-  hidden: { opacity: 0, y: -20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-  },
-};
 
 // ============================================================================
 // COMPONENT
 // ============================================================================
 
-export const AboutSection: React.FC<AboutSectionProps> = ({
-  variant = 'default',
-  alignment = 'left',
-  showHeader = true,
-  animated = true,
-  background = 'none',
-  showNavigation = false,
-  contentFirst = true,
-  enableParallax = false,
-  sectionId = 'about',
-  className,
-  children,
-}) => {
-  // ============================================================================
-  // STATE & REFS
-  // ============================================================================
-
-  const [config, setConfig] = useState<SectionConfig>({
-    showContent: true,
-    showImages: true,
-    contentVariant: 'default',
-    imageVariant: 'default',
-  });
-  const [isExpanded, setIsExpanded] = useState(true);
-  const [activeTab, setActiveTab] = useState<'content' | 'images'>('content');
-  
-  const sectionRef = useRef<HTMLElement>(null);
-  const headerRef = useRef<HTMLDivElement>(null);
-  const isInView = useInView(sectionRef, { once: true, amount: 0.1 });
-  
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ['start end', 'end start'],
-  });
-  
-  const y = useTransform(scrollYProgress, [0, 1], [100, -100]);
-  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0]);
-
-  // ============================================================================
-  // COMPUTED VALUES
-  // ============================================================================
-
-  const backgroundStyle = useMemo(() => {
-    switch (background) {
-      case 'gradient':
-        return {
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          backgroundAttachment: 'fixed',
-        };
-      case 'pattern':
-        return {
-          backgroundImage: BACKGROUND_PATTERNS.pattern,
-        };
-      case 'image':
-        return {
-          backgroundImage: 'url(/images/about/bg-pattern.jpg)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundAttachment: enableParallax ? 'fixed' : 'scroll',
-        };
-      default:
-        return {};
-    }
-  }, [background, enableParallax]);
-
-  const layoutClasses = useMemo(() => {
-    const baseClasses = 'container mx-auto px-4 sm:px-6 lg:px-8';
-    
-    switch (variant) {
-      case 'split':
-        return cn(
-          baseClasses,
-          'grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center'
-        );
-      case 'stacked':
-        return cn(baseClasses, 'space-y-12');
-      case 'grid':
-        return cn(baseClasses, 'grid grid-cols-1 md:grid-cols-2 gap-8');
-      case 'masonry':
-        return cn(
-          baseClasses,
-          'columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8'
-        );
-      default:
-        return cn(baseClasses, 'max-w-7xl');
-    }
-  }, [variant]);
-
-  const alignmentClasses = useMemo(() => {
-    switch (alignment) {
-      case 'center':
-        return 'text-center mx-auto';
-      case 'right':
-        return 'text-right ml-auto';
-      default:
-        return 'text-left';
-    }
-  }, [alignment]);
-
-  // ============================================================================
-  // EFFECTS
-  // ============================================================================
-
-  useEffect(() => {
-    // Update config based on variant
-    if (variant === 'stacked') {
-      setConfig(prev => ({
-        ...prev,
-        showContent: true,
-        showImages: true,
-      }));
-    } else if (variant === 'grid') {
-      setConfig(prev => ({
-        ...prev,
-        contentVariant: 'compact',
-        imageVariant: 'gallery',
-      }));
-    }
-  }, [variant]);
-
-  useEffect(() => {
-    // Intersection Observer for section visibility
-    if (!sectionRef.current) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('section-visible');
-          }
-        });
-      },
-      { threshold: 0.1 }
-    );
-
-    observer.observe(sectionRef.current);
-
-    return () => observer.disconnect();
-  }, []);
-
-  // ============================================================================
-  // HANDLERS
-  // ============================================================================
-
-  const toggleSection = useCallback(() => {
-    setIsExpanded(prev => !prev);
-  }, []);
-
-  const toggleContent = useCallback(() => {
-    setConfig(prev => ({
-      ...prev,
-      showContent: !prev.showContent,
-    }));
-  }, []);
-
-  const toggleImages = useCallback(() => {
-    setConfig(prev => ({
-      ...prev,
-      showImages: !prev.showImages,
-    }));
-  }, []);
-
-  const scrollToSection = useCallback(() => {
-    sectionRef.current?.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start',
-    });
-  }, []);
-
-  const handleTabChange = useCallback((tab: 'content' | 'images') => {
-    setActiveTab(tab);
-    setConfig(prev => ({
-      ...prev,
-      showContent: tab === 'content',
-      showImages: tab === 'images',
-    }));
-  }, []);
-
-  // ============================================================================
-  // RENDER HELPERS
-  // ============================================================================
-
-  const renderHeader = useCallback(() => {
-    if (!showHeader) return null;
-
-    return (
-      <motion.div
-        ref={headerRef}
-        variants={animated ? headerVariants : undefined}
-        className={cn('mb-12', alignmentClasses)}
-      >
-        <div className="inline-flex items-center gap-2 mb-4">
-          <Badge variant="secondary" className="text-sm">
-            <InformationCircleIcon className="w-4 h-4 mr-1" />
-            About
-          </Badge>
-          <Badge variant="outline" className="text-sm">
-            <SparklesIcon className="w-4 h-4 mr-1" />
-            Our Story
-          </Badge>
-        </div>
-        
-        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-          {SECTION_HEADER.title}
-        </h2>
-        
-        <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 mb-2 max-w-2xl">
-          {SECTION_HEADER.subtitle}
-        </p>
-        
-        <p className="text-base text-gray-500 dark:text-gray-400 max-w-3xl">
-          {SECTION_HEADER.description}
-        </p>
-      </motion.div>
-    );
-  }, [showHeader, animated, alignmentClasses]);
-
-  const renderNavigation = useCallback(() => {
-    if (!showNavigation) return null;
-
-    return (
-      <motion.div
-        variants={animated ? itemVariants : undefined}
-        className="flex flex-wrap items-center justify-center gap-4 mb-8"
-      >
-        <Tooltip content="Toggle content visibility">
-          <Button
-            variant={config.showContent ? 'default' : 'outline'}
-            size="sm"
-            onClick={toggleContent}
-          >
-            <InformationCircleIcon className="w-4 h-4 mr-2" />
-            Content
-          </Button>
-        </Tooltip>
-        
-        <Tooltip content="Toggle images visibility">
-          <Button
-            variant={config.showImages ? 'default' : 'outline'}
-            size="sm"
-            onClick={toggleImages}
-          >
-            <PhotoIcon className="w-4 h-4 mr-2" />
-            Images
-          </Button>
-        </Tooltip>
-        
-        <Tooltip content="Section settings">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              // Toggle both content and images
-              setConfig(prev => ({
-                ...prev,
-                showContent: !prev.showContent,
-                showImages: !prev.showImages,
-              }));
-            }}
-          >
-            <AdjustmentsHorizontalIcon className="w-4 h-4" />
-          </Button>
-        </Tooltip>
-        
-        <Tooltip content="Scroll to section">
-          <Button variant="ghost" size="sm" onClick={scrollToSection}>
-            <ChevronDownIcon className="w-4 h-4" />
-          </Button>
-        </Tooltip>
-      </motion.div>
-    );
-  }, [
-    showNavigation,
-    animated,
-    config.showContent,
-    config.showImages,
-    toggleContent,
-    toggleImages,
-    scrollToSection,
-  ]);
-
-  const renderContent = useCallback(() => {
-    if (!config.showContent && !config.showImages) {
-      return (
-        <div className="text-center py-12">
-          <p className="text-gray-500 dark:text-gray-400 mb-4">
-            Select content or images to display
-          </p>
-          <Button onClick={() => setConfig(prev => ({ ...prev, showContent: true, showImages: true }))}>
-            Show All
-          </Button>
-        </div>
-      );
-    }
-
-    // Render based on variant
-    switch (variant) {
-      case 'split':
-        return (
-          <>
-            {contentFirst ? (
-              <>
-                {config.showContent && (
-                  <motion.div variants={animated ? itemVariants : undefined}>
-                    <AboutContent
-                      variant={config.contentVariant}
-                      animated={animated}
-                    />
-                  </motion.div>
-                )}
-                {config.showImages && (
-                  <motion.div variants={animated ? itemVariants : undefined}>
-                    <AboutImage
-                      variant={config.imageVariant}
-                      animated={animated}
-                    />
-                  </motion.div>
-                )}
-              </>
-            ) : (
-              <>
-                {config.showImages && (
-                  <motion.div variants={animated ? itemVariants : undefined}>
-                    <AboutImage
-                      variant={config.imageVariant}
-                      animated={animated}
-                    />
-                  </motion.div>
-                )}
-                {config.showContent && (
-                  <motion.div variants={animated ? itemVariants : undefined}>
-                    <AboutContent
-                      variant={config.contentVariant}
-                      animated={animated}
-                    />
-                  </motion.div>
-                )}
-              </>
-            )}
-          </>
-        );
-
-      case 'stacked':
-        return (
-          <>
-            {config.showContent && (
-              <motion.div variants={animated ? itemVariants : undefined}>
-                <AboutContent
-                  variant={config.contentVariant}
-                  animated={animated}
-                />
-              </motion.div>
-            )}
-            {config.showImages && (
-              <motion.div variants={animated ? itemVariants : undefined}>
-                <AboutImage
-                  variant={config.imageVariant}
-                  animated={animated}
-                />
-              </motion.div>
-            )}
-          </>
-        );
-
-      case 'grid':
-        return (
-          <>
-            {config.showContent && (
-              <motion.div variants={animated ? itemVariants : undefined}>
-                <Card>
-                  <CardHeader>
-                    <h3 className="text-2xl font-bold">Our Story</h3>
-                  </CardHeader>
-                  <CardContent>
-                    <AboutContent
-                      variant="compact"
-                      animated={animated}
-                      showStats={false}
-                    />
-                  </CardContent>
-                </Card>
-              </motion.div>
-            )}
-            {config.showImages && (
-              <motion.div variants={animated ? itemVariants : undefined}>
-                <Card>
-                  <CardHeader>
-                    <h3 className="text-2xl font-bold">Gallery</h3>
-                  </CardHeader>
-                  <CardContent>
-                    <AboutImage
-                      variant="gallery"
-                      animated={animated}
-                      showThumbnails={false}
-                    />
-                  </CardContent>
-                </Card>
-              </motion.div>
-            )}
-          </>
-        );
-
-      case 'masonry':
-        return (
-          <>
-            {config.showContent && (
-              <div className="break-inside-avoid mb-8">
-                <AboutContent
-                  variant="compact"
-                  animated={animated}
-                />
-              </div>
-            )}
-            {config.showImages && (
-              <div className="break-inside-avoid mb-8">
-                <AboutImage
-                  variant="collage"
-                  animated={animated}
-                />
-              </div>
-            )}
-          </>
-        );
-
-      default:
-        return (
-          <div className="space-y-12">
-            {config.showContent && (
-              <motion.div variants={animated ? itemVariants : undefined}>
-                <AboutContent
-                  variant={config.contentVariant}
-                  animated={animated}
-                />
-              </motion.div>
-            )}
-            {config.showImages && (
-              <motion.div variants={animated ? itemVariants : undefined}>
-                <AboutImage
-                  variant={config.imageVariant}
-                  animated={animated}
-                />
-              </motion.div>
-            )}
-          </div>
-        );
-    }
-  }, [
-    config,
-    variant,
-    contentFirst,
-    animated,
-  ]);
-
-  // ============================================================================
-  // RENDER
-  // ============================================================================
+export const AboutSection: React.FC<AboutSectionProps> = ({ className }) => {
+  const ref = React.useRef<HTMLDivElement>(null);
+  const isInView = useInView(ref, { once: true, amount: 0.3 });
 
   return (
-    <motion.section
-      id={sectionId}
-      ref={sectionRef}
-      className={cn(
-        'relative py-16 sm:py-20 lg:py-24 overflow-hidden',
-        background !== 'none' && 'bg-opacity-50',
-        className
-      )}
-      style={backgroundStyle}
-      initial={animated ? 'hidden' : undefined}
-      animate={isInView && animated ? 'visible' : undefined}
-      variants={animated ? containerVariants : undefined}
-    >
-      {/* Background Overlay */}
-      {background !== 'none' && (
-        <div className="absolute inset-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm" />
-      )}
-
-      {/* Parallax Background */}
-      {enableParallax && (
-        <motion.div
-          className="absolute inset-0 pointer-events-none"
-          style={{ y, opacity }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-blue-50/20 to-purple-50/20 dark:via-blue-900/10 dark:to-purple-900/10" />
-        </motion.div>
-      )}
-
-      {/* Content Container */}
-      <div className="relative z-10">
-        {/* Header */}
-        {renderHeader()}
-
-        {/* Navigation */}
-        {renderNavigation()}
-
-        {/* Main Content */}
-        <motion.div
-          className={layoutClasses}
-          variants={animated ? containerVariants : undefined}
-        >
-          {renderContent()}
-        </motion.div>
-
-        {/* Children */}
-        {children && (
-          <motion.div
-            variants={animated ? itemVariants : undefined}
-            className="container mx-auto px-4 sm:px-6 lg:px-8 mt-12"
-          >
-            {children}
-          </motion.div>
-        )}
-
-        {/* Toggle Button */}
-        {showNavigation && (
-          <motion.div
-            variants={animated ? itemVariants : undefined}
-            className="flex justify-center mt-12"
-          >
-            <Tooltip content={isExpanded ? 'Collapse section' : 'Expand section'}>
-              <Button
-                variant="outline"
-                size="lg"
-                onClick={toggleSection}
-                className="group"
-              >
-                {isExpanded ? (
-                  <>
-                    <ChevronUpIcon className="w-5 h-5 mr-2 group-hover:-translate-y-1 transition-transform" />
-                    Show Less
-                  </>
-                ) : (
-                  <>
-                    <ChevronDownIcon className="w-5 h-5 mr-2 group-hover:translate-y-1 transition-transform" />
-                    Show More
-                  </>
-                )}
-              </Button>
-            </Tooltip>
-          </motion.div>
-        )}
-
-        {/* Mobile Tabs */}
-        <div className="block lg:hidden mt-8">
-          <div className="flex gap-2 justify-center">
-            <Button
-              variant={activeTab === 'content' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => handleTabChange('content')}
-            >
-              <InformationCircleIcon className="w-4 h-4 mr-2" />
-              Story
-            </Button>
-            <Button
-              variant={activeTab === 'images' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => handleTabChange('images')}
-            >
-              <PhotoIcon className="w-4 h-4 mr-2" />
-              Gallery
-            </Button>
+    <div ref={ref} className={cn('max-w-6xl mx-auto', className)}>
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        animate={isInView ? { opacity: 1, y: 0 } : {}}
+        transition={{ duration: 0.6 }}
+        className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center"
+      >
+        {/* Left: Image/Visual */}
+        <div className="relative">
+          <div className="aspect-[4/3] rounded-3xl overflow-hidden bg-gradient-to-br from-blue-100 to-purple-100">
+            {/* Decorative Pattern */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="text-center">
+                <div className="text-8xl font-bold text-blue-600/20">50+</div>
+                <div className="text-lg font-medium text-blue-600/40">Years of Excellence</div>
+              </div>
+            </div>
+            {/* Stats Overlay */}
+            <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/70 via-black/40 to-transparent rounded-b-3xl">
+              <div className="grid grid-cols-3 gap-4 text-white text-center">
+                <div>
+                  <div className="text-2xl font-bold">500+</div>
+                  <div className="text-xs opacity-80">Products</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold">100K+</div>
+                  <div className="text-xs opacity-80">Customers</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold">50+</div>
+                  <div className="text-xs opacity-80">Years</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          {/* Floating Badge */}
+          <div className="absolute -top-4 -right-4 bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-semibold shadow-lg">
+            Est. 1975
           </div>
         </div>
-      </div>
 
-      {/* Decorative Elements */}
-      <div className="absolute top-0 left-0 w-72 h-72 bg-blue-100 dark:bg-blue-900 rounded-full filter blur-3xl opacity-20 -z-10" />
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-100 dark:bg-purple-900 rounded-full filter blur-3xl opacity-20 -z-10" />
-    </motion.section>
+        {/* Right: Content */}
+        <div className="space-y-6">
+          <div>
+            <span className="text-blue-600 font-semibold text-sm uppercase tracking-wider">
+              Our Story
+            </span>
+            <h3 className="text-3xl lg:text-4xl font-bold text-gray-900 mt-2">
+              A Legacy of Quality & Trust
+            </h3>
+          </div>
+
+          <p className="text-gray-600 text-lg leading-relaxed mt-4">
+            For over five decades, Vardhman Mills has been at the forefront of textile manufacturing,
+            delivering premium quality fabrics and home textiles to customers across India and beyond.
+          </p>
+
+          <p className="text-gray-500 leading-relaxed">
+            Our commitment to excellence, sustainable practices, and customer satisfaction has made
+            us one of the most trusted names in the industry.
+          </p>
+
+          {/* Key Points */}
+          <div className="grid grid-cols-2 gap-4 pt-2">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+                <svg className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <span className="text-gray-700 font-medium">Premium Quality</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <span className="text-gray-700 font-medium">50+ Years Legacy</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
+                <svg className="w-5 h-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064" />
+                </svg>
+              </div>
+              <span className="text-gray-700 font-medium">Pan-India Delivery</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
+                <svg className="w-5 h-5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                </svg>
+              </div>
+              <span className="text-gray-700 font-medium">5★ Customer Rating</span>
+            </div>
+          </div>
+
+          {/* CTA */}
+          <div className="pt-4">
+            <Link
+              href="/about"
+              className="inline-flex items-center gap-2 text-blue-600 font-semibold hover:text-blue-700 transition-colors group"
+            >
+              Learn more about us
+              <ArrowRightIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </div>
+        </div>
+      </motion.div>
+    </div>
   );
 };
 

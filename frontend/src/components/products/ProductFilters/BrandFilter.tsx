@@ -46,7 +46,7 @@ const BrandFilter: React.FC<BrandFilterProps> = ({
 
   const handleBrandToggle = (brandId: string) => {
     if (disabled) return;
-    
+
     if (selectedBrandIds.includes(brandId)) {
       onBrandChange(selectedBrandIds.filter(id => id !== brandId));
     } else {
@@ -69,7 +69,7 @@ const BrandFilter: React.FC<BrandFilterProps> = ({
   return (
     <div className={cn('space-y-4', className)}>
       <div className="flex items-center justify-between">
-        <h3 className="font-semibold text-gray-900">Brand</h3>
+        <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">Brand</h3>
         {selectedCount > 0 && (
           <button
             onClick={handleClearAll}
@@ -115,10 +115,10 @@ const BrandFilter: React.FC<BrandFilterProps> = ({
             <AnimatePresence mode="popLayout">
               {visibleBrands.map((brand, index) => {
                 const isSelected = selectedBrandIds.includes(brand.id);
-                
+
                 return (
                   <motion.label
-                    key={brand.id}
+                    key={`brand-${brand.id}-${index}`}
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
@@ -130,21 +130,21 @@ const BrandFilter: React.FC<BrandFilterProps> = ({
                       brand.count === 0 && 'opacity-40'
                     )}
                   >
-                    <div className="flex items-center gap-3 flex-1">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
                       <input
                         type="checkbox"
                         checked={isSelected}
                         onChange={() => handleBrandToggle(brand.id)}
                         disabled={disabled || brand.count === 0}
                         className={cn(
-                          'w-4 h-4 rounded border-gray-300 text-primary-600',
+                          'w-4 h-4 rounded border-gray-300 text-primary-600 flex-shrink-0',
                           'focus:ring-2 focus:ring-primary-500',
                           'disabled:cursor-not-allowed'
                         )}
                         aria-label={`Select ${brand.name} brand`}
                         title={brand.name}
                       />
-                      
+
                       {brand.logo && (
                         <div className="relative w-6 h-6 flex-shrink-0">
                           <Image
@@ -155,16 +155,19 @@ const BrandFilter: React.FC<BrandFilterProps> = ({
                           />
                         </div>
                       )}
-                      
-                      <span className={cn(
-                        'text-sm',
-                        isSelected ? 'font-medium text-gray-900' : 'text-gray-700'
-                      )}>
+
+                      <span
+                        className={cn(
+                          'text-sm truncate',
+                          isSelected ? 'font-medium text-gray-900' : 'text-gray-700'
+                        )}
+                        title={brand.name}
+                      >
                         {brand.name}
                       </span>
                     </div>
 
-                    <span className="text-xs text-gray-500 ml-2">
+                    <span className="text-xs text-gray-500 ml-2 flex-shrink-0">
                       ({brand.count})
                     </span>
                   </motion.label>

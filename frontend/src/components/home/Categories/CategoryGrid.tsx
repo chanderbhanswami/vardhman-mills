@@ -35,6 +35,7 @@ import {
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Input } from '@/components/ui/Input';
+import { Select } from '@/components/ui/Select';
 import { cn } from '@/lib/utils/utils';
 import { CategoryCard } from './CategoryCard';
 
@@ -125,6 +126,24 @@ export interface CategoryGridProps {
   className?: string;
   /** On category click */
   onCategoryClick?: (category: Category | CategoryType) => void;
+  /** External search query */
+  searchQuery?: string;
+  /** On search change */
+  onSearchChange?: (query: string) => void;
+  /** External sort option */
+  sortOption?: SortOption;
+  /** On sort change */
+  onSortChange?: (option: SortOption) => void;
+  /** External view mode */
+  viewMode?: ViewMode;
+  /** On view mode change */
+  onViewModeChange?: (mode: ViewMode) => void;
+  /** External current page */
+  currentPage?: number;
+  /** On page change */
+  onPageChange?: (page: number) => void;
+  /** Disable internal filtering/sorting (use provided categories as is) */
+  disableInternalProcessing?: boolean;
 }
 
 // ============================================================================
@@ -163,23 +182,77 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({
   showCount = true,
   className,
   onCategoryClick,
+  searchQuery: externalSearchQuery,
+  onSearchChange,
+  sortOption: externalSortOption,
+  onSortChange,
+  viewMode: externalViewMode,
+  onViewModeChange,
+  currentPage: externalCurrentPage,
+  onPageChange,
+  disableInternalProcessing = false,
 }) => {
   // ============================================================================
   // STATE
   // ============================================================================
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [sortOption, setSortOption] = useState<SortOption>('name-asc');
+  const [internalSearchQuery, setInternalSearchQuery] = useState('');
+  const [internalSortOption, setInternalSortOption] = useState<SortOption>('name-asc');
   const [filterTag, setFilterTag] = useState<FilterTag>('all');
-  const [viewMode, setViewMode] = useState<ViewMode>(defaultView);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [internalViewMode, setInternalViewMode] = useState<ViewMode>(defaultView);
+  const [internalCurrentPage, setInternalCurrentPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
+
+  // Derived state (use external if provided, else internal)
+  const searchQuery = externalSearchQuery !== undefined ? externalSearchQuery : internalSearchQuery;
+  const sortOption = externalSortOption !== undefined ? externalSortOption : internalSortOption;
+  const viewMode = externalViewMode !== undefined ? externalViewMode : internalViewMode;
+  const currentPage = externalCurrentPage !== undefined ? externalCurrentPage : internalCurrentPage;
+
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (onSearchChange) {
+      onSearchChange(value);
+    } else {
+      setInternalSearchQuery(value);
+    }
+    if (onPageChange) {
+      // Do not call onPageChange(1) here if onSearchChange is present, 
+      // as the parent component handles the page reset and we want to avoid scrolling.
+      if (!onSearchChange) {
+        onPageChange(1);
+      }
+    } else {
+      setInternalCurrentPage(1);
+    }
+  }, [onSearchChange, onPageChange]);
+
+  const handleSortChange = useCallback((value: string) => {
+    const option = value as SortOption;
+    if (onSortChange) {
+      onSortChange(option);
+    } else {
+      setInternalSortOption(option);
+    }
+  }, [onSortChange]);
+
+  const handleViewModeChange = useCallback((mode: ViewMode) => {
+    if (onViewModeChange) {
+      onViewModeChange(mode);
+    } else {
+      setInternalViewMode(mode);
+    }
+  }, [onViewModeChange]);
 
   // ============================================================================
   // FILTERED & SORTED CATEGORIES
   // ============================================================================
 
   const processedCategories = useMemo(() => {
+    if (disableInternalProcessing) {
+      return categories;
+    }
+
     let result = [...categories];
 
     // Search filter
@@ -233,7 +306,7 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({
     });
 
     return result;
-  }, [categories, searchQuery, filterTag, sortOption]);
+  }, [categories, searchQuery, filterTag, sortOption, disableInternalProcessing]);
 
   // ============================================================================
   // PAGINATION
@@ -254,46 +327,52 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({
   // HANDLERS
   // ============================================================================
 
-  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-    setCurrentPage(1);
-    console.log('Search:', e.target.value);
-  }, []);
-
-  const handleSortChange = useCallback((value: string) => {
-    setSortOption(value as SortOption);
-    console.log('Sort:', value);
-  }, []);
+  // Handlers replaced by derived state logic above
 
   const handleFilterChange = useCallback((tag: FilterTag) => {
     setFilterTag(tag);
-    setCurrentPage(1);
+    if (onPageChange) {
+      onPageChange(1);
+    } else {
+      setInternalCurrentPage(1);
+    }
     console.log('Filter:', tag);
-  }, []);
+  }, [onPageChange]);
 
-  const handleViewModeChange = useCallback((mode: ViewMode) => {
-    setViewMode(mode);
-    console.log('View mode:', mode);
-  }, []);
 
   const handleLoadMore = useCallback(() => {
-    setCurrentPage((prev) => prev + 1);
+    if (onPageChange) {
+      onPageChange(currentPage + 1);
+    } else {
+      setInternalCurrentPage((prev) => prev + 1);
+    }
     console.log('Loading more...', ArrowsUpDownIcon, FunnelIcon);
-  }, []);
+  }, [currentPage, onPageChange]);
 
   const handlePageChange = useCallback((page: number) => {
-    setCurrentPage(page);
+    if (onPageChange) {
+      onPageChange(page);
+    } else {
+      setInternalCurrentPage(page);
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
     console.log('Page:', page);
-  }, []);
+  }, [onPageChange]);
 
   const handleClearFilters = useCallback(() => {
-    setSearchQuery('');
+    if (onSearchChange) onSearchChange('');
+    else setInternalSearchQuery('');
+
     setFilterTag('all');
-    setSortOption('name-asc');
-    setCurrentPage(1);
+
+    if (onSortChange) onSortChange('name-asc');
+    else setInternalSortOption('name-asc');
+
+    if (onPageChange) onPageChange(1);
+    else setInternalCurrentPage(1);
+
     console.log('Filters cleared');
-  }, []);
+  }, [onSearchChange, onSortChange, onPageChange]);
 
   // ============================================================================
   // RENDER FUNCTIONS
@@ -321,13 +400,29 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({
 
         {/* Right Controls */}
         <div className="flex items-center gap-2">
+          {/* Sort Dropdown - Moved here */}
+          {enableSorting && (
+            <div className="w-48">
+              <Select
+                value={sortOption}
+                onValueChange={(value) => handleSortChange(value as string)}
+                options={SORT_OPTIONS}
+                className="h-10 bg-white text-gray-900 border-gray-300"
+                placeholder="Sort by"
+              />
+            </div>
+          )}
+
           {/* Filter Toggle */}
           {enableFilters && (
             <Button
               variant="outline"
               size="sm"
               onClick={() => setShowFilters(!showFilters)}
-              className={cn(showFilters && 'bg-gray-100')}
+              className={cn(
+                'h-10 bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900',
+                showFilters && 'bg-gray-100 text-gray-900 ring-2 ring-primary-500 ring-offset-1'
+              )}
             >
               <AdjustmentsHorizontalIcon className="w-4 h-4 mr-2" />
               Filters
@@ -336,12 +431,15 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({
 
           {/* View Mode Toggle */}
           {enableViewToggle && (
-            <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+            <div className="flex items-center gap-1 bg-white border border-gray-300 rounded-lg p-1 h-10">
               <Button
                 size="sm"
                 variant={viewMode === 'grid' ? 'default' : 'ghost'}
                 onClick={() => handleViewModeChange('grid')}
-                className="h-8 w-8 p-0"
+                className={cn(
+                  "h-8 w-8 p-0",
+                  viewMode !== 'grid' && "text-gray-600 hover:text-gray-900 hover:bg-gray-200"
+                )}
                 aria-label="Grid view"
               >
                 <Squares2X2Icon className="w-4 h-4" />
@@ -350,10 +448,25 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({
                 size="sm"
                 variant={viewMode === 'list' ? 'default' : 'ghost'}
                 onClick={() => handleViewModeChange('list')}
-                className="h-8 w-8 p-0"
+                className={cn(
+                  "h-8 w-8 p-0",
+                  viewMode !== 'list' && "text-gray-600 hover:text-gray-900 hover:bg-gray-200"
+                )}
                 aria-label="List view"
               >
                 <ListBulletIcon className="w-4 h-4" />
+              </Button>
+              <Button
+                size="sm"
+                variant={viewMode === 'masonry' ? 'default' : 'ghost'}
+                onClick={() => handleViewModeChange('masonry')}
+                className={cn(
+                  "h-8 w-8 p-0",
+                  viewMode !== 'masonry' && "text-gray-600 hover:text-gray-900 hover:bg-gray-200"
+                )}
+                aria-label="Masonry view"
+              >
+                <Squares2X2Icon className="w-4 h-4 rotate-45" />
               </Button>
             </div>
           )}
@@ -407,26 +520,7 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({
               </div>
             )}
 
-            {/* Sort */}
-            {enableSorting && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Sort By
-                </label>
-                <select
-                  value={sortOption}
-                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleSortChange(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  aria-label="Sort categories"
-                >
-                  {SORT_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
+            {/* Sort - Removed from here */}
           </div>
         </motion.div>
       )}
@@ -445,7 +539,7 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({
         <AnimatePresence mode="popLayout">
           {visibleCategories.map((category, index) => (
             <motion.div
-              key={category.id}
+              key={category.id || `category-${index}`}
               layout
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -483,14 +577,14 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({
     } else {
       pages.push(1);
       if (currentPage > 3) pages.push('...');
-      
+
       const start = Math.max(2, currentPage - 1);
       const end = Math.min(totalPages - 1, currentPage + 1);
-      
+
       for (let i = start; i <= end; i++) {
         pages.push(i);
       }
-      
+
       if (currentPage < totalPages - 2) pages.push('...');
       pages.push(totalPages);
     }
@@ -563,7 +657,7 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({
   // ============================================================================
 
   return (
-    <div className={cn('py-6', className)}>
+    <div className={cn('pb-6', className)}>
       {/* Header */}
       {showCount && (
         <div className="mb-6">

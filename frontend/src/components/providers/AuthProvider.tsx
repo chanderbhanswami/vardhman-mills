@@ -261,7 +261,7 @@ const AuthProviderInner: React.FC<AuthProviderProps> = ({ children }) => {
   const heartbeatInterval = useRef<NodeJS.Timeout | null>(null);
 
   // Configuration
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5000/api/v1';
   const SESSION_CHECK_INTERVAL = 5 * 60 * 1000; // 5 minutes
   const HEARTBEAT_INTERVAL = 2 * 60 * 1000; // 2 minutes
   const ENCRYPTION_KEY = process.env.NEXT_PUBLIC_ENCRYPTION_KEY || 'vardhman-mills-2024';

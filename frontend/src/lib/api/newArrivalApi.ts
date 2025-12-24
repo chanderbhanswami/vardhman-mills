@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
+﻿import { useMutation, useQuery, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { httpClient } from './client';
 
 // API Response Type
@@ -891,7 +891,7 @@ class NewArrivalApi {
   // Basic CRUD Operations
   async getNewArrivals(params?: NewArrivalListParams & NewArrivalFilter) {
     const response = await httpClient.get<ApiResponse<{ items: NewArrival[]; pagination: PaginationInfo }>>(
-      '/api/v1/new-arrivals',
+      '/new-arrivals',
       { params }
     );
     return response.data;
@@ -911,7 +911,7 @@ class NewArrivalApi {
 
   async createNewArrival(data: Omit<NewArrival, 'id' | 'createdAt' | 'updatedAt' | 'performance' | 'analytics'>) {
     const response = await httpClient.post<ApiResponse<NewArrival>>(
-      '/api/v1/new-arrivals',
+      '/new-arrivals',
       data
     );
     return response.data!.data;
@@ -958,7 +958,7 @@ class NewArrivalApi {
   // Template Operations
   async getTemplates(category?: string, featured?: boolean) {
     const response = await httpClient.get<ApiResponse<NewArrivalTemplate[]>>(
-      '/api/v1/new-arrivals/templates',
+      '/new-arrivals/templates',
       { params: { category, featured } }
     );
     return response.data!.data;
@@ -1032,14 +1032,14 @@ class NewArrivalApi {
   // Campaign Management
   async getCampaigns() {
     const response = await httpClient.get<ApiResponse<NewArrivalCampaign[]>>(
-      '/api/v1/new-arrivals/campaigns'
+      '/new-arrivals/campaigns'
     );
     return response.data!.data;
   }
 
   async createCampaign(campaignData: Omit<NewArrivalCampaign, 'id' | 'createdAt' | 'updatedAt' | 'metrics'>) {
     const response = await httpClient.post<ApiResponse<NewArrivalCampaign>>(
-      '/api/v1/new-arrivals/campaigns',
+      '/new-arrivals/campaigns',
       campaignData
     );
     return response.data!.data;
@@ -1095,7 +1095,7 @@ class NewArrivalApi {
         actionable: boolean;
       }>;
     }>>(
-      '/api/v1/new-arrivals/performance-report',
+      '/new-arrivals/performance-report',
       { params }
     );
     return response.data!.data;
@@ -1157,7 +1157,7 @@ class NewArrivalApi {
       message: string;
       timestamp: Date;
     }>>>(
-      '/api/v1/new-arrivals/inventory-alerts',
+      '/new-arrivals/inventory-alerts',
       { params: { arrivalId } }
     );
     return response.data!.data;
@@ -1180,7 +1180,7 @@ class NewArrivalApi {
         result?: unknown;
       }>;
     }>>(
-      '/api/v1/new-arrivals/bulk',
+      '/new-arrivals/bulk',
       operation
     );
     return response.data!.data;
@@ -1198,7 +1198,7 @@ class NewArrivalApi {
       facets: Record<string, Array<{ value: string; count: number }>>;
       suggestions: string[];
     }>>(
-      '/api/v1/new-arrivals/search',
+      '/new-arrivals/search',
       { params: { q: query, ...filters } }
     );
     return response.data;
@@ -1212,7 +1212,7 @@ class NewArrivalApi {
     dateRange?: { from: string; to: string };
   }) {
     const response = await httpClient.get(
-      '/api/v1/new-arrivals/export',
+      '/new-arrivals/export',
       {
         params: { arrivalIds, ...options },
         responseType: 'blob'

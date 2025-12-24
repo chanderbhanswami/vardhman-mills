@@ -25,13 +25,13 @@ export const createOrder = catchAsync(async (req: AuthRequest, res: Response, ne
 
   for (const item of items) {
     const product = await Product.findById(item.product);
-    
+
     if (!product) {
       return next(new AppError(`Product with ID ${item.product} not found`, 404));
     }
 
     const variant = product.variants.find(v => v._id?.toString() === item.variant);
-    
+
     if (!variant) {
       return next(new AppError(`Variant not found for product ${product.name}`, 404));
     }
@@ -85,11 +85,15 @@ export const createOrder = catchAsync(async (req: AuthRequest, res: Response, ne
 
   const order = await Order.create(orderData);
 
-  // Update product stock
+  // Update product stock and sales count
   for (const item of items) {
     const product = await Product.findById(item.product);
     const variant = product!.variants.find(v => v._id?.toString() === item.variant);
     variant!.stock -= item.quantity;
+
+    // Increment sales count
+    product!.salesCount = (product!.salesCount || 0) + item.quantity;
+
     await product!.save();
   }
 
@@ -98,7 +102,7 @@ export const createOrder = catchAsync(async (req: AuthRequest, res: Response, ne
     if (!razorpay) {
       return next(new AppError('Payment service is not available', 503));
     }
-    
+
     const razorpayOrder = await razorpay.orders.create({
       amount: Math.round(total * 100), // Convert to paise
       currency: 'INR',
@@ -171,7 +175,7 @@ export const getMyOrders = catchAsync(async (req: AuthRequest, res: Response, ne
 
 export const getOrder = catchAsync(async (req: AuthRequest, res: Response, next: NextFunction) => {
   const query: any = { _id: req.params.id };
-  
+
   // If not admin, restrict to user's own orders or guest orders with email
   if (req.user?.role !== 'admin') {
     if (req.user) {
@@ -207,7 +211,7 @@ export const trackOrder = catchAsync(async (req: Request, res: Response, next: N
   }
 
   const query: any = { orderNumber };
-  
+
   if (email) {
     query.$or = [
       { guestEmail: email },
@@ -238,33 +242,35 @@ export const trackOrder = catchAsync(async (req: Request, res: Response, next: N
 
 export const updateOrderStatus = catchAsync(async (req: AuthRequest, res: Response, next: NextFunction) => {
   const { status, trackingNumber, estimatedDelivery, cancellationReason } = req.body;
-  
+
   const order = await Order.findById(req.params.id);
-  
+
   if (!order) {
     return next(new AppError('Order not found', 404));
   }
 
   const updateData: any = { status };
-  
+
   if (trackingNumber) updateData.trackingNumber = trackingNumber;
   if (estimatedDelivery) updateData.estimatedDelivery = new Date(estimatedDelivery);
-  
+
   if (status === 'delivered') {
     updateData.deliveredAt = new Date();
   }
-  
+
   if (status === 'cancelled') {
     updateData.cancelledAt = new Date();
     if (cancellationReason) updateData.cancellationReason = cancellationReason;
-    
-    // Restore stock
+
+    // Restore stock and decrement sales count
     for (const item of order.items) {
       const product = await Product.findById(item.product);
       if (product) {
         const variant = product.variants.find(v => v._id?.toString() === item.variant);
         if (variant) {
           variant.stock += item.quantity;
+          // Decrement sales count
+          product.salesCount = Math.max(0, (product.salesCount || 0) - item.quantity);
           await product.save();
         }
       }
@@ -278,9 +284,9 @@ export const updateOrderStatus = catchAsync(async (req: AuthRequest, res: Respon
 
   // Send status update email
   try {
-    const emailTo = order.user ? 
+    const emailTo = order.user ?
       (await User.findById(order.user))?.email : order.guestEmail;
-    
+
     if (emailTo) {
       await sendEmail({
         email: emailTo,
@@ -309,9 +315,9 @@ export const updateOrderStatus = catchAsync(async (req: AuthRequest, res: Respon
 
 export const cancelOrder = catchAsync(async (req: AuthRequest, res: Response, next: NextFunction) => {
   const { reason } = req.body;
-  
+
   const order = await Order.findById(req.params.id);
-  
+
   if (!order) {
     return next(new AppError('Order not found', 404));
   }
@@ -326,13 +332,15 @@ export const cancelOrder = catchAsync(async (req: AuthRequest, res: Response, ne
     return next(new AppError('This order cannot be cancelled', 400));
   }
 
-  // Restore stock
+  // Restore stock and decrement sales count
   for (const item of order.items) {
     const product = await Product.findById(item.product);
     if (product) {
       const variant = product.variants.find(v => v._id?.toString() === item.variant);
       if (variant) {
         variant.stock += item.quantity;
+        // Decrement sales count
+        product.salesCount = Math.max(0, (product.salesCount || 0) - item.quantity);
         await product.save();
       }
     }
@@ -341,7 +349,7 @@ export const cancelOrder = catchAsync(async (req: AuthRequest, res: Response, ne
   order.status = 'cancelled';
   order.cancelledAt = new Date();
   if (reason) order.cancellationReason = reason;
-  
+
   await order.save();
 
   res.status(200).json({
@@ -359,15 +367,15 @@ export const getAllOrders = catchAsync(async (req: Request, res: Response, next:
   const skip = (page - 1) * limit;
 
   const query: any = {};
-  
+
   if (req.query.status) {
     query.status = req.query.status;
   }
-  
+
   if (req.query.user) {
     query.user = req.query.user;
   }
-  
+
   if (req.query.startDate || req.query.endDate) {
     query.createdAt = {};
     if (req.query.startDate) query.createdAt.$gte = new Date(req.query.startDate as string);
@@ -479,7 +487,7 @@ export const bulkUpdateOrderStatus = catchAsync(async (req: Request, res: Respon
 
   const result = await Order.updateMany(
     { _id: { $in: orderIds } },
-    { 
+    {
       status,
       updatedAt: new Date()
     }
@@ -594,7 +602,7 @@ export const emailInvoice = catchAsync(async (req: AuthRequest, res: Response, n
 
   const invoiceService = (await import('../services/invoice.service.js')).default;
   const invoicePath = await invoiceService.generateInvoice({ order, user });
-  
+
   await invoiceService.emailInvoice({ order, user }, invoicePath);
 
   res.status(200).json({

@@ -445,35 +445,96 @@ export const TestimonialCard: React.FC<TestimonialCardProps> = ({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      className={className}
+      transition={{ duration: 0.4 }}
+      whileHover={{ y: -4 }}
+      className={cn("group h-full", className)}
     >
-      <Card
-        className={cn(
-          'overflow-hidden transition-shadow duration-300 hover:shadow-lg',
-          isFeatured && 'ring-2 ring-yellow-400'
+      <div className="relative h-full bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md hover:border-gray-200 transition-all duration-300">
+        {/* Top Section: Customer Info + Rating */}
+        <div className="flex items-start gap-4 mb-5">
+          {/* Avatar */}
+          <div className="relative flex-shrink-0">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center shadow-sm">
+              <span className="text-white text-base font-semibold">
+                {customer.name.charAt(0).toUpperCase()}
+              </span>
+            </div>
+            {customer.verified && (
+              <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center ring-2 ring-white">
+                <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+              </div>
+            )}
+          </div>
+
+          {/* Name, Location, Rating */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h4 className="font-semibold text-gray-900 text-[15px]">
+                {customer.name}
+              </h4>
+              {customer.verified && (
+                <span className="text-[10px] font-medium text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">
+                  Verified
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-gray-500 mt-0.5">
+              {customer.location && <span>{customer.location}</span>}
+              {customer.location && <span className="mx-1.5">•</span>}
+              <span>{formattedDate}</span>
+            </p>
+            {/* Stars */}
+            <div className="flex items-center gap-0.5 mt-2">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <StarSolid
+                  key={star}
+                  className={cn(
+                    "h-4 w-4",
+                    star <= rating ? "text-amber-400" : "text-gray-200"
+                  )}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Quote Icon */}
+        <div className="absolute top-5 right-5 opacity-[0.08]">
+          <svg className="w-10 h-10 text-primary-600" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M4.583 17.321C3.553 16.227 3 15 3 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311 1.804.167 3.226 1.648 3.226 3.489a3.5 3.5 0 01-3.5 3.5c-1.073 0-2.099-.49-2.748-1.179zm10 0C13.553 16.227 13 15 13 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311 1.804.167 3.226 1.648 3.226 3.489a3.5 3.5 0 01-3.5 3.5c-1.073 0-2.099-.49-2.748-1.179z" />
+          </svg>
+        </div>
+
+        {/* Review Text */}
+        <p className="text-gray-600 text-sm leading-relaxed mb-4">
+          "{displayReview}"
+          {shouldTruncate && (
+            <button
+              onClick={handleToggleExpand}
+              className="text-primary-600 hover:text-primary-700 text-sm font-medium ml-1"
+            >
+              {isExpanded ? 'less' : 'more'}
+            </button>
+          )}
+        </p>
+
+        {/* Product Tag */}
+        {product && (
+          <div className="pt-4 border-t border-gray-100">
+            <div className="inline-flex items-center gap-2 text-xs text-gray-500 bg-gray-50 px-3 py-1.5 rounded-full">
+              <svg className="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              </svg>
+              <span className="font-medium text-gray-600">{product.name}</span>
+              {product.variant && (
+                <span className="text-gray-400">• {product.variant}</span>
+              )}
+            </div>
+          </div>
         )}
-      >
-        <CardContent className="p-6 space-y-4">
-          {/* Stars */}
-          {renderStars()}
-
-          {/* Customer Info */}
-          {renderCustomerInfo()}
-
-          {/* Product Info */}
-          {renderProductInfo()}
-
-          {/* Review Text */}
-          {renderReviewText()}
-
-          {/* Images */}
-          {renderImages()}
-
-          {/* Actions */}
-          {renderActions()}
-        </CardContent>
-      </Card>
+      </div>
     </motion.div>
   );
 };

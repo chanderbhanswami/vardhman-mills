@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
+﻿import { useMutation, useQuery, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { httpClient } from './client';
 import { endpoints } from './endpoints';
 
@@ -673,7 +673,7 @@ class HeaderLogoApi {
   // Basic CRUD Operations
   async getHeaderLogos(params?: HeaderLogoListParams & HeaderLogoFilter) {
     const response = await httpClient.get<ApiResponse<{ items: HeaderLogo[]; pagination: PaginationInfo }>>(
-      '/api/v1/header-logos',
+      '/header-logos',
       { params }
     );
     return response.data;
@@ -693,7 +693,7 @@ class HeaderLogoApi {
 
   async createHeaderLogo(data: Omit<HeaderLogo, 'id' | 'createdAt' | 'updatedAt' | 'analytics' | 'usage'>) {
     const response = await httpClient.post<ApiResponse<HeaderLogo>>(
-      '/api/v1/header-logos',
+      '/header-logos',
       data
     );
     return response.data!.data;
@@ -737,7 +737,7 @@ class HeaderLogoApi {
         qualityScore: number;
       };
     }>>(
-      '/api/v1/header-logos/upload',
+      '/header-logos/upload',
       formData,
       {
         headers: {
@@ -783,7 +783,7 @@ class HeaderLogoApi {
   // Template Operations
   async getTemplates(category?: string, featured?: boolean) {
     const response = await httpClient.get<ApiResponse<HeaderLogoTemplate[]>>(
-      '/api/v1/header-logos/templates',
+      '/header-logos/templates',
       { params: { category, featured } }
     );
     return response.data!.data;
@@ -888,7 +888,7 @@ class HeaderLogoApi {
         actionable: boolean;
       }>;
     }>>(
-      '/api/v1/header-logos/analytics-report',
+      '/header-logos/analytics-report',
       { params }
     );
     return response.data!.data;

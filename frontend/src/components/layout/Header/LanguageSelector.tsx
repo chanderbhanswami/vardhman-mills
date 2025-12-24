@@ -230,11 +230,11 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
     setSelectedLanguage(language);
     setIsOpen(false);
     onChange?.(language);
-    
+
     // Update document direction for RTL languages
     document.documentElement.dir = language.direction;
     document.documentElement.lang = language.code;
-    
+
     // Store in localStorage
     localStorage.setItem('selectedLanguage', JSON.stringify(language));
   };
@@ -306,9 +306,9 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
       <motion.button
         onClick={() => setIsOpen(!isOpen)}
         className={`
-          flex items-center space-x-2 px-3 py-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white
-          transition-colors duration-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800
-          focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+          flex items-center space-x-2 px-3 py-2 text-gray-900 hover:text-primary
+          transition-colors duration-200 rounded-lg hover:bg-gray-100
+          focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2
           ${compact ? 'px-2 py-1' : ''}
         `}
         whileHover={{ scale: 1.02 }}
@@ -321,19 +321,19 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
             {selectedLanguage.flag}
           </span>
         )}
-        
+
         {showLabel && !compact && (
           <span className="text-sm font-medium">
             {selectedLanguage.name}
           </span>
         )}
-        
+
         {!compact && (
-          <ChevronDownIcon 
-            className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} 
+          <ChevronDownIcon
+            className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
           />
         )}
-        
+
         {compact && (
           <GlobeAltIcon className="w-4 h-4" />
         )}
@@ -347,20 +347,20 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
             initial="hidden"
             animate="visible"
             exit="hidden"
-            className="absolute right-0 top-full mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 z-50 max-h-96 overflow-hidden"
+            className="absolute right-0 top-full mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 z-50 max-h-[80vh] overflow-y-auto"
           >
             {/* Header */}
-            <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+            <div className="p-4 border-b border-gray-200 sticky top-0 bg-white z-10">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+                <h3 className="text-lg font-semibold text-gray-900 flex items-center">
                   <LanguageIcon className="w-5 h-5 mr-2" />
                   Select Language
                 </h3>
-                <span className="text-xs text-gray-500 dark:text-gray-400">
+                <span className="text-xs text-gray-500">
                   {languages.length} languages
                 </span>
               </div>
-              
+
               {/* Search */}
               <div className="relative">
                 <input
@@ -368,7 +368,7 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
                   placeholder="Search languages..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm text-gray-900 placeholder-gray-500"
                 />
                 <GlobeAltIcon className="absolute right-3 top-2.5 w-4 h-4 text-gray-400" />
               </div>
@@ -376,8 +376,8 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
 
             {/* Popular Languages */}
             {!searchTerm && (
-              <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-                <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <div className="p-4 border-b border-gray-200">
+                <h4 className="text-sm font-medium text-gray-700 mb-2">
                   Popular Languages
                 </h4>
                 <div className="grid grid-cols-2 gap-1">
@@ -388,8 +388,8 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
                       className={`
                         flex items-center space-x-2 p-2 rounded-lg text-left transition-colors
                         ${selectedLanguage.code === language.code
-                          ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
-                          : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                          ? 'bg-primary/10 text-primary'
+                          : 'hover:bg-gray-100 text-gray-700'
                         }
                       `}
                       variants={itemVariants}
@@ -401,7 +401,7 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
                         <div className="text-xs text-gray-500 truncate">{language.nativeName}</div>
                       </div>
                       {selectedLanguage.code === language.code && (
-                        <CheckIcon className="w-4 h-4 text-primary-600" />
+                        <CheckIcon className="w-4 h-4 text-primary" />
                       )}
                     </motion.button>
                   ))}
@@ -410,11 +410,11 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
             )}
 
             {/* All Languages */}
-            <div className="overflow-y-auto max-h-64">
+            <div className="">
               {searchTerm ? (
                 <div className="p-2">
                   {filteredLanguages.length === 0 ? (
-                    <div className="p-4 text-center text-gray-500 dark:text-gray-400">
+                    <div className="p-4 text-center text-gray-500">
                       No languages found
                     </div>
                   ) : (
@@ -427,8 +427,8 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
                         className={`
                           w-full flex items-center space-x-3 p-3 rounded-lg text-left transition-all duration-200
                             ${selectedLanguage.code === language.code
-                            ? 'bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300'
-                            : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                            ? 'bg-primary/10 text-primary'
+                            : 'hover:bg-gray-100 text-gray-700'
                           }
                         `}
                         variants={itemVariants}
@@ -442,12 +442,12 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
                             <span className="text-sm font-medium">{language.name}</span>
                             <span className="text-xs text-gray-400 uppercase">{language.code}</span>
                           </div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                          <div className="text-xs text-gray-500 mt-1">
                             {language.nativeName} • {language.region}
                           </div>
                         </div>
                         {selectedLanguage.code === language.code && (
-                          <CheckIcon className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                          <CheckIcon className="w-4 h-4 text-primary flex-shrink-0" />
                         )}
                       </motion.button>
                     ))
@@ -456,7 +456,7 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
               ) : (
                 languageGroups.map((group) => (
                   <div key={group.region} className="p-2">
-                    <h5 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-3 py-2">
+                    <h5 className="text-xs font-semibold text-gray-500 uppercase tracking-wider px-3 py-2">
                       {group.region}
                     </h5>
                     {group.languages.map((language) => (
@@ -468,8 +468,8 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
                         className={`
                           w-full flex items-center space-x-3 p-3 rounded-lg text-left transition-all duration-200
                           ${selectedLanguage.code === language.code
-                            ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
-                            : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                            ? 'bg-primary/10 text-primary'
+                            : 'hover:bg-gray-100 text-gray-700'
                           }
                         `}
                         variants={itemVariants}
@@ -488,12 +488,12 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
                               <span className="text-xs text-gray-400 uppercase">{language.code}</span>
                             </div>
                           </div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                          <div className="text-xs text-gray-500 mt-1">
                             {language.nativeName} • {language.currency}
                           </div>
                         </div>
                         {selectedLanguage.code === language.code && (
-                          <CheckIcon className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                          <CheckIcon className="w-4 h-4 text-primary flex-shrink-0" />
                         )}
                       </motion.button>
                     ))}
@@ -503,8 +503,8 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
             </div>
 
             {/* Footer */}
-            <div className="p-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
-              <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
+            <div className="p-3 border-t border-gray-200 bg-gray-50 sticky bottom-0">
+              <div className="text-xs text-gray-500 text-center">
                 Language preferences are saved automatically
               </div>
             </div>

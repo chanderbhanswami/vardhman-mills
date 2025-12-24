@@ -54,40 +54,40 @@ export interface UIPreferences {
   themeMode: ThemeMode;
   colorScheme: ColorScheme;
   fontSize: 'small' | 'medium' | 'large';
-  
+
   // Layout
   layoutType: LayoutType;
   sidebarCollapsed: boolean;
   sidebarPosition: SidebarPosition;
   headerStyle: HeaderStyle;
-  
+
   // Navigation
   showBreadcrumbs: boolean;
   stickyHeader: boolean;
   stickyFooter: boolean;
-  
+
   // Product display
   productsPerPage: 12 | 24 | 48 | 96;
   productViewMode: 'grid' | 'list';
   showPrices: boolean;
   showRatings: boolean;
   showQuickView: boolean;
-  
+
   // Animations
   enableAnimations: boolean;
   animationSpeed: 'slow' | 'normal' | 'fast';
-  
+
   // Accessibility
   highContrast: boolean;
   reducedMotion: boolean;
   keyboardNavigation: boolean;
   screenReaderMode: boolean;
-  
+
   // Performance
   lazyLoading: boolean;
   preloadImages: boolean;
   cacheEnabled: boolean;
-  
+
   // Notifications
   showNotifications: boolean;
   notificationPosition: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
@@ -132,18 +132,18 @@ export interface FiltersUIState {
 interface UIState {
   // Theme and appearance
   preferences: UIPreferences;
-  
+
   // Device and responsive
   device: DeviceState;
-  
+
   // Navigation
   breadcrumbs: BreadcrumbItem[];
   navigationHistory: string[];
   currentPage: string;
-  
+
   // Modals
   modals: ModalState[];
-  
+
   // Notifications and toasts
   toasts: ToastNotification[];
   notifications: Array<{
@@ -154,17 +154,17 @@ interface UIState {
     read: boolean;
     timestamp: number;
   }>;
-  
+
   // Loading states
   loading: LoadingState;
   globalLoading: boolean;
   pageLoading: boolean;
-  
+
   // Component-specific UI states
   search: SearchUIState;
   cart: CartUIState;
   filters: FiltersUIState;
-  
+
   // Form states
   forms: Record<string, {
     isDirty: boolean;
@@ -172,14 +172,14 @@ interface UIState {
     errors: Record<string, string>;
     touched: Record<string, boolean>;
   }>;
-  
+
   // Page states
   pages: Record<string, {
     scrollPosition: number;
     lastVisited: number;
     data?: Record<string, unknown>;
   }>;
-  
+
   // Error boundaries
   errors: Array<{
     id: string;
@@ -188,7 +188,7 @@ interface UIState {
     timestamp: number;
     recovered: boolean;
   }>;
-  
+
   // Performance monitoring
   performance: {
     pageLoadTime: number;
@@ -196,11 +196,11 @@ interface UIState {
     interactionMetrics: Record<string, number>;
     memoryUsage?: number;
   };
-  
+
   // Keyboard shortcuts
   shortcuts: Record<string, boolean>;
   shortcutsEnabled: boolean;
-  
+
   // Drag and drop
   dragDrop: {
     isDragging: boolean;
@@ -208,7 +208,7 @@ interface UIState {
     dragData?: unknown;
     dropZones: string[];
   };
-  
+
   // Offline state
   isOnline: boolean;
   wasOffline: boolean;
@@ -245,10 +245,20 @@ const defaultPreferences: UIPreferences = {
   soundEnabled: false,
 };
 
+// Safe localStorage access for SSR
+const getSavedPreferences = (): Partial<UIPreferences> => {
+  if (typeof window === 'undefined') return {};
+  try {
+    return JSON.parse(localStorage.getItem('uiPreferences') || '{}');
+  } catch {
+    return {};
+  }
+};
+
 const initialState: UIState = {
   preferences: {
     ...defaultPreferences,
-    ...JSON.parse(localStorage.getItem('uiPreferences') || '{}'),
+    ...getSavedPreferences(),
   },
   device: {
     isMobile: false,
@@ -300,7 +310,7 @@ const initialState: UIState = {
     isDragging: false,
     dropZones: [],
   },
-  isOnline: navigator.onLine,
+  isOnline: typeof navigator !== 'undefined' ? navigator.onLine : true,
   wasOffline: false,
   offlineQueueCount: 0,
 };
@@ -312,77 +322,87 @@ const uiSlice = createSlice({
     // Theme and preferences
     setThemeMode: (state, action: PayloadAction<ThemeMode>) => {
       state.preferences.themeMode = action.payload;
-      localStorage.setItem('uiPreferences', JSON.stringify(state.preferences));
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('uiPreferences', JSON.stringify(state.preferences));
+      }
     },
-    
+
     setColorScheme: (state, action: PayloadAction<ColorScheme>) => {
       state.preferences.colorScheme = action.payload;
-      localStorage.setItem('uiPreferences', JSON.stringify(state.preferences));
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('uiPreferences', JSON.stringify(state.preferences));
+      }
     },
-    
+
     setFontSize: (state, action: PayloadAction<'small' | 'medium' | 'large'>) => {
       state.preferences.fontSize = action.payload;
-      localStorage.setItem('uiPreferences', JSON.stringify(state.preferences));
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('uiPreferences', JSON.stringify(state.preferences));
+      }
     },
-    
+
     updatePreferences: (state, action: PayloadAction<Partial<UIPreferences>>) => {
       state.preferences = { ...state.preferences, ...action.payload };
-      localStorage.setItem('uiPreferences', JSON.stringify(state.preferences));
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('uiPreferences', JSON.stringify(state.preferences));
+      }
     },
-    
+
     resetPreferences: (state) => {
       state.preferences = defaultPreferences;
-      localStorage.setItem('uiPreferences', JSON.stringify(state.preferences));
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('uiPreferences', JSON.stringify(state.preferences));
+      }
     },
-    
+
     // Device state
     updateDeviceState: (state, action: PayloadAction<Partial<DeviceState>>) => {
       state.device = { ...state.device, ...action.payload };
     },
-    
+
     // Navigation
     setBreadcrumbs: (state, action: PayloadAction<BreadcrumbItem[]>) => {
       state.breadcrumbs = action.payload;
     },
-    
+
     addBreadcrumb: (state, action: PayloadAction<BreadcrumbItem>) => {
       state.breadcrumbs.push(action.payload);
     },
-    
+
     clearBreadcrumbs: (state) => {
       state.breadcrumbs = [];
     },
-    
+
     setCurrentPage: (state, action: PayloadAction<string>) => {
       state.currentPage = action.payload;
       state.navigationHistory.push(action.payload);
-      
+
       // Keep only last 50 pages in history
       if (state.navigationHistory.length > 50) {
         state.navigationHistory = state.navigationHistory.slice(-50);
       }
     },
-    
+
     // Modal management
     openModal: (state, action: PayloadAction<ModalState>) => {
       state.modals.push(action.payload);
     },
-    
+
     closeModal: (state, action: PayloadAction<string>) => {
       state.modals = state.modals.filter(modal => modal.id !== action.payload);
     },
-    
+
     closeAllModals: (state) => {
       state.modals = [];
     },
-    
+
     updateModal: (state, action: PayloadAction<{ id: string; updates: Partial<ModalState> }>) => {
       const modal = state.modals.find(m => m.id === action.payload.id);
       if (modal) {
         Object.assign(modal, action.payload.updates);
       }
     },
-    
+
     // Toast notifications
     addToast: (state, action: PayloadAction<Omit<ToastNotification, 'id' | 'timestamp'>>) => {
       const toast: ToastNotification = {
@@ -393,15 +413,15 @@ const uiSlice = createSlice({
       };
       state.toasts.push(toast);
     },
-    
+
     removeToast: (state, action: PayloadAction<string>) => {
       state.toasts = state.toasts.filter(toast => toast.id !== action.payload);
     },
-    
+
     clearToasts: (state) => {
       state.toasts = [];
     },
-    
+
     // Loading states
     setLoading: (state, action: PayloadAction<{ key: string; loading: boolean }>) => {
       const { key, loading } = action.payload;
@@ -411,34 +431,34 @@ const uiSlice = createSlice({
         delete state.loading[key];
       }
     },
-    
+
     setGlobalLoading: (state, action: PayloadAction<boolean>) => {
       state.globalLoading = action.payload;
     },
-    
+
     setPageLoading: (state, action: PayloadAction<boolean>) => {
       state.pageLoading = action.payload;
     },
-    
+
     clearAllLoading: (state) => {
       state.loading = {};
       state.globalLoading = false;
       state.pageLoading = false;
     },
-    
+
     // Component UI states
     updateSearchUI: (state, action: PayloadAction<Partial<SearchUIState>>) => {
       state.search = { ...state.search, ...action.payload };
     },
-    
+
     updateCartUI: (state, action: PayloadAction<Partial<CartUIState>>) => {
       state.cart = { ...state.cart, ...action.payload };
     },
-    
+
     updateFiltersUI: (state, action: PayloadAction<Partial<FiltersUIState>>) => {
       state.filters = { ...state.filters, ...action.payload };
     },
-    
+
     // Form management
     updateFormState: (state, action: PayloadAction<{
       formId: string;
@@ -455,11 +475,11 @@ const uiSlice = createSlice({
       }
       state.forms[formId] = { ...state.forms[formId], ...updates };
     },
-    
+
     clearFormState: (state, action: PayloadAction<string>) => {
       delete state.forms[action.payload];
     },
-    
+
     // Page state management
     updatePageState: (state, action: PayloadAction<{
       page: string;
@@ -474,7 +494,7 @@ const uiSlice = createSlice({
       }
       state.pages[page] = { ...state.pages[page], ...updates };
     },
-    
+
     // Error handling
     addError: (state, action: PayloadAction<{
       component: string;
@@ -487,29 +507,29 @@ const uiSlice = createSlice({
         ...action.payload,
       };
       state.errors.push(error);
-      
+
       // Keep only last 50 errors
       if (state.errors.length > 50) {
         state.errors = state.errors.slice(-50);
       }
     },
-    
+
     markErrorRecovered: (state, action: PayloadAction<string>) => {
       const error = state.errors.find(e => e.id === action.payload);
       if (error) {
         error.recovered = true;
       }
     },
-    
+
     clearErrors: (state) => {
       state.errors = [];
     },
-    
+
     // Performance tracking
     updatePerformance: (state, action: PayloadAction<Partial<UIState['performance']>>) => {
       state.performance = { ...state.performance, ...action.payload };
     },
-    
+
     // Keyboard shortcuts
     setShortcutPressed: (state, action: PayloadAction<{ key: string; pressed: boolean }>) => {
       const { key, pressed } = action.payload;
@@ -519,21 +539,21 @@ const uiSlice = createSlice({
         delete state.shortcuts[key];
       }
     },
-    
+
     setShortcutsEnabled: (state, action: PayloadAction<boolean>) => {
       state.shortcutsEnabled = action.payload;
     },
-    
+
     // Drag and drop
     setDragState: (state, action: PayloadAction<Partial<UIState['dragDrop']>>) => {
       state.dragDrop = { ...state.dragDrop, ...action.payload };
     },
-    
+
     // Offline state
     setOnlineStatus: (state, action: PayloadAction<boolean>) => {
       const wasOnline = state.isOnline;
       state.isOnline = action.payload;
-      
+
       if (!wasOnline && action.payload) {
         // Coming back online
         state.wasOffline = true;
@@ -542,29 +562,31 @@ const uiSlice = createSlice({
         state.wasOffline = false;
       }
     },
-    
+
     setOfflineQueueCount: (state, action: PayloadAction<number>) => {
       state.offlineQueueCount = action.payload;
     },
-    
+
     // Layout toggles
     toggleSidebar: (state) => {
       state.preferences.sidebarCollapsed = !state.preferences.sidebarCollapsed;
-      localStorage.setItem('uiPreferences', JSON.stringify(state.preferences));
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('uiPreferences', JSON.stringify(state.preferences));
+      }
     },
-    
+
     toggleCart: (state) => {
       state.cart.isOpen = !state.cart.isOpen;
     },
-    
+
     toggleFilters: (state) => {
       state.filters.isOpen = !state.filters.isOpen;
     },
-    
+
     toggleSearch: (state) => {
       state.search.isActive = !state.search.isActive;
     },
-    
+
     // Notifications
     addNotification: (state, action: PayloadAction<{
       type: 'info' | 'success' | 'warning' | 'error';
@@ -578,30 +600,30 @@ const uiSlice = createSlice({
         ...action.payload,
       };
       state.notifications.unshift(notification);
-      
+
       // Keep only last 100 notifications
       if (state.notifications.length > 100) {
         state.notifications = state.notifications.slice(0, 100);
       }
     },
-    
+
     markNotificationRead: (state, action: PayloadAction<string>) => {
       const notification = state.notifications.find(n => n.id === action.payload);
       if (notification) {
         notification.read = true;
       }
     },
-    
+
     markAllNotificationsRead: (state) => {
       state.notifications.forEach(notification => {
         notification.read = true;
       });
     },
-    
+
     removeNotification: (state, action: PayloadAction<string>) => {
       state.notifications = state.notifications.filter(n => n.id !== action.payload);
     },
-    
+
     clearNotifications: (state) => {
       state.notifications = [];
     },
@@ -673,19 +695,19 @@ export const selectNotifications = (state: { ui: UIState }) => state.ui.notifica
 export const selectOnlineStatus = (state: { ui: UIState }) => state.ui.isOnline;
 
 // Complex selectors
-export const selectIsLoading = (state: { ui: UIState }, key: string) => 
+export const selectIsLoading = (state: { ui: UIState }, key: string) =>
   state.ui.loading[key] || false;
 
-export const selectHasAnyLoading = (state: { ui: UIState }) => 
+export const selectHasAnyLoading = (state: { ui: UIState }) =>
   Object.keys(state.ui.loading).length > 0 || state.ui.globalLoading;
 
-export const selectActiveModal = (state: { ui: UIState }) => 
+export const selectActiveModal = (state: { ui: UIState }) =>
   state.ui.modals[state.ui.modals.length - 1] || null;
 
-export const selectUnreadNotifications = (state: { ui: UIState }) => 
+export const selectUnreadNotifications = (state: { ui: UIState }) =>
   state.ui.notifications.filter(n => !n.read);
 
-export const selectFormState = (state: { ui: UIState }, formId: string) => 
+export const selectFormState = (state: { ui: UIState }, formId: string) =>
   state.ui.forms[formId] || {
     isDirty: false,
     isSubmitting: false,
@@ -693,7 +715,7 @@ export const selectFormState = (state: { ui: UIState }, formId: string) =>
     touched: {},
   };
 
-export const selectPageState = (state: { ui: UIState }, page: string) => 
+export const selectPageState = (state: { ui: UIState }, page: string) =>
   state.ui.pages[page] || {
     scrollPosition: 0,
     lastVisited: 0,
@@ -703,7 +725,7 @@ export const selectIsDarkMode = (state: { ui: UIState }) => {
   const { themeMode } = state.ui.preferences;
   if (themeMode === 'dark') return true;
   if (themeMode === 'light') return false;
-  
+
   // System preference
   return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
 };
@@ -715,22 +737,22 @@ export const selectIsDesktop = (state: { ui: UIState }) => state.ui.device.isDes
 export const selectLayoutClasses = (state: { ui: UIState }) => {
   const { preferences, device } = state.ui;
   const classes = [];
-  
+
   classes.push(`theme-${preferences.themeMode}`);
   classes.push(`color-${preferences.colorScheme}`);
   classes.push(`font-${preferences.fontSize}`);
   classes.push(`layout-${preferences.layoutType}`);
-  
+
   if (preferences.sidebarCollapsed) classes.push('sidebar-collapsed');
   if (preferences.highContrast) classes.push('high-contrast');
   if (preferences.reducedMotion) classes.push('reduced-motion');
   if (!preferences.enableAnimations) classes.push('no-animations');
-  
+
   if (device.isMobile) classes.push('is-mobile');
   if (device.isTablet) classes.push('is-tablet');
   if (device.isDesktop) classes.push('is-desktop');
   if (device.touchDevice) classes.push('touch-device');
-  
+
   return classes.join(' ');
 };
 

@@ -25,7 +25,7 @@ import {
   TruckIcon,
   ExclamationCircleIcon,
 } from '@heroicons/react/24/outline';
-import { useCart } from '@/contexts/CartContext';
+import { useCart } from '@/components/providers/CartProvider';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Spinner } from '@/components/ui/Spinner';
@@ -96,7 +96,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   // HOOKS & STATE
   // ============================================================================
 
-  const { state, removeItem, updateQuantity } = useCart();
+  const { items, summary, removeFromCart, updateQuantity, isLoading, isUpdating } = useCart();
   const [isClosing, setIsClosing] = useState(false);
   const [removingItemId, setRemovingItemId] = useState<string | null>(null);
 
@@ -107,9 +107,9 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   // COMPUTED VALUES
   // ============================================================================
 
-  const isEmpty = state.items.length === 0;
-  const itemCount = state.summary.itemCount;
-  const totalQuantity = state.summary.totalQuantity;
+  const isEmpty = items.length === 0;
+  const itemCount = summary.itemCount;
+  const totalQuantity = summary.totalQuantity;
 
   // ============================================================================
   // EFFECTS
@@ -144,14 +144,14 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
     async (itemId: string) => {
       setRemovingItemId(itemId);
       try {
-        await removeItem(itemId);
+        await removeFromCart(itemId);
       } catch (error) {
         console.error('Remove item error:', error);
       } finally {
         setRemovingItemId(null);
       }
     },
-    [removeItem]
+    [removeFromCart]
   );
 
   const handleUpdateQuantity = useCallback(
@@ -213,7 +213,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
       </div>
 
       <div className="flex items-center gap-2">
-        {state.syncing && (
+        {isUpdating && (
           <div className="flex items-center gap-2 text-sm text-blue-600">
             <Spinner size="sm" />
             <span>Syncing...</span>
@@ -291,7 +291,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
     <div className="flex-1 overflow-y-auto py-4">
       <div className="px-4 space-y-4">
         <AnimatePresence mode="popLayout">
-          {state.items.map((item, index) => (
+          {items.map((item, index) => (
             <motion.div
               key={item.id}
               layout
@@ -315,14 +315,14 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
         </AnimatePresence>
 
         {/* Loading state */}
-        {state.loading && (
+        {isLoading && (
           <div className="flex items-center justify-center py-8">
             <Spinner size="lg" />
           </div>
         )}
 
         {/* Low stock warnings */}
-        {state.items.some((item) => item.inStock < 5 && item.inStock > 0) && (
+        {items.some((item) => (item.maxQuantity || 100) < 5 && (item.maxQuantity || 100) > 0) && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -356,7 +356,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
           showCoupon={enableQuickCheckout}
           showShipping={false}
           disableCheckout={isEmpty}
-          isLoading={state.syncing}
+          isLoading={isUpdating}
         />
       </div>
     </div>

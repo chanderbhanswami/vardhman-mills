@@ -2,21 +2,7 @@
  * TestimonialSlider Component
  * 
  * Advanced carousel slider for displaying testimonials with smooth animations,
- * auto-play, and navigation controls.
- * 
- * Features:
- * - Smooth slide transitions
- * - Auto-play with pause on hover
- * - Touch/swipe gestures
- * - Navigation arrows
- * - Dot indicators
- * - Thumbnail preview
- * - Keyboard navigation
- * - Infinite loop
- * - Multiple items per slide
- * - Responsive breakpoints
- * - Progress indicator
- * - Video testimonials support
+ * auto-play, and navigation controls - matching ProductCarousel functionality.
  * 
  * @component
  */
@@ -24,7 +10,7 @@
 'use client';
 
 import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
-import { motion, AnimatePresence, PanInfo, useMotionValue } from 'framer-motion';
+import { motion, PanInfo } from 'framer-motion';
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -33,9 +19,6 @@ import {
 } from '@heroicons/react/24/outline';
 import { TestimonialCard } from './TestimonialCard';
 import type { TestimonialCardProps } from './TestimonialCard';
-import { Button } from '@/components/ui/Button';
-import { Tooltip } from '@/components/ui/Tooltip';
-import { Progress } from '@/components/ui/Progress';
 import { cn } from '@/lib/utils/utils';
 
 // ============================================================================
@@ -43,37 +26,20 @@ import { cn } from '@/lib/utils/utils';
 // ============================================================================
 
 export interface TestimonialSliderProps {
-  /** Testimonials data */
   testimonials: TestimonialCardProps[];
-  /** Items to show per slide */
   itemsPerSlide?: {
     mobile: number;
     tablet: number;
     desktop: number;
   };
-  /** Auto-play enabled */
   autoPlay?: boolean;
-  /** Auto-play interval in milliseconds */
   interval?: number;
-  /** Enable infinite loop */
   infinite?: boolean;
-  /** Transition effect */
-  transitionEffect?: 'slide' | 'fade' | 'scale';
-  /** Show navigation arrows */
   showArrows?: boolean;
-  /** Show dot indicators */
   showDots?: boolean;
-  /** Show progress bar */
-  showProgress?: boolean;
-  /** Enable keyboard navigation */
-  keyboardNavigation?: boolean;
-  /** Enable swipe gestures */
   swipeEnabled?: boolean;
-  /** Gap between items */
   gap?: number;
-  /** Additional CSS classes */
   className?: string;
-  /** On slide change callback */
   onSlideChange?: (index: number) => void;
 }
 
@@ -81,8 +47,14 @@ export interface TestimonialSliderProps {
 // CONSTANTS
 // ============================================================================
 
-const SWIPE_THRESHOLD = 50;
+const DRAG_THRESHOLD = 50;
 const SWIPE_VELOCITY_THRESHOLD = 500;
+
+const DEFAULT_ITEMS_PER_VIEW = {
+  mobile: 1,
+  tablet: 2,
+  desktop: 3,
+};
 
 // ============================================================================
 // COMPONENT
@@ -90,15 +62,12 @@ const SWIPE_VELOCITY_THRESHOLD = 500;
 
 export const TestimonialSlider: React.FC<TestimonialSliderProps> = ({
   testimonials,
-  itemsPerSlide = { mobile: 1, tablet: 2, desktop: 3 },
+  itemsPerSlide = DEFAULT_ITEMS_PER_VIEW,
   autoPlay = true,
   interval = 5000,
   infinite = true,
-  transitionEffect = 'slide',
   showArrows = true,
   showDots = true,
-  showProgress = true,
-  keyboardNavigation = true,
   swipeEnabled = true,
   gap = 24,
   className,
@@ -110,410 +79,201 @@ export const TestimonialSlider: React.FC<TestimonialSliderProps> = ({
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(autoPlay);
-  const [isPaused, setIsPaused] = useState(false);
-  const [direction, setDirection] = useState<'left' | 'right'>('right');
-  const [progress, setProgress] = useState(0);
-  const [itemsShown, setItemsShown] = useState(itemsPerSlide.desktop);
+  const [isPausedByUser, setIsPausedByUser] = useState(!autoPlay);
+  const [isHovered, setIsHovered] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [currentItemsPerView, setCurrentItemsPerView] = useState(itemsPerSlide.desktop);
+
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const autoPlayTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // ============================================================================
-  // REFS
+  // RESPONSIVE ITEMS PER VIEW
   // ============================================================================
 
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+      if (width < 640) {
+        setCurrentItemsPerView(itemsPerSlide.mobile);
+      } else if (width < 1024) {
+        setCurrentItemsPerView(itemsPerSlide.tablet);
+      } else {
+        setCurrentItemsPerView(itemsPerSlide.desktop);
+      }
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [itemsPerSlide]);
 
   // ============================================================================
-  // MOTION VALUES
-  // ============================================================================
-
-  const dragX = useMotionValue(0);
-
-  // ============================================================================
-  // COMPUTED
+  // COMPUTED VALUES
   // ============================================================================
 
   const totalSlides = useMemo(() => {
-    return Math.ceil(testimonials.length / itemsShown);
-  }, [testimonials.length, itemsShown]);
+    return Math.ceil(testimonials.length / currentItemsPerView);
+  }, [testimonials.length, currentItemsPerView]);
 
-  const canGoPrevious = useMemo(
-    () => infinite || currentIndex > 0,
-    [infinite, currentIndex]
-  );
+  const canGoNext = useMemo(() => {
+    return infinite || currentIndex < totalSlides - 1;
+  }, [infinite, currentIndex, totalSlides]);
 
-  const canGoNext = useMemo(
-    () => infinite || currentIndex < totalSlides - 1,
-    [infinite, currentIndex, totalSlides]
-  );
-
-  const visibleTestimonials = useMemo(() => {
-    const startIndex = currentIndex * itemsShown;
-    const endIndex = startIndex + itemsShown;
-    return testimonials.slice(startIndex, endIndex);
-  }, [testimonials, currentIndex, itemsShown]);
+  const canGoPrev = useMemo(() => {
+    return infinite || currentIndex > 0;
+  }, [infinite, currentIndex]);
 
   // ============================================================================
-  // RESPONSIVE
-  // ============================================================================
-
-  useEffect(() => {
-    const updateItemsShown = () => {
-      const width = window.innerWidth;
-      if (width < 640) {
-        setItemsShown(itemsPerSlide.mobile);
-      } else if (width < 1024) {
-        setItemsShown(itemsPerSlide.tablet);
-      } else {
-        setItemsShown(itemsPerSlide.desktop);
-      }
-    };
-
-    updateItemsShown();
-    window.addEventListener('resize', updateItemsShown);
-    return () => window.removeEventListener('resize', updateItemsShown);
-  }, [itemsPerSlide.mobile, itemsPerSlide.tablet, itemsPerSlide.desktop]);
-
-  // ============================================================================
-  // NAVIGATION
-  // ============================================================================
-
-  const goToSlide = useCallback(
-    (index: number) => {
-      let newIndex = index;
-
-      if (infinite) {
-        if (newIndex < 0) {
-          newIndex = totalSlides - 1;
-        } else if (newIndex >= totalSlides) {
-          newIndex = 0;
-        }
-      } else {
-        newIndex = Math.max(0, Math.min(totalSlides - 1, newIndex));
-      }
-
-      setDirection(newIndex > currentIndex ? 'right' : 'left');
-      setCurrentIndex(newIndex);
-      setProgress(0);
-      onSlideChange?.(newIndex);
-      console.log('Testimonial slide changed to:', newIndex);
-    },
-    [currentIndex, totalSlides, infinite, onSlideChange]
-  );
-
-  const goToPrevious = useCallback(() => {
-    if (!canGoPrevious) return;
-    goToSlide(currentIndex - 1);
-  }, [canGoPrevious, currentIndex, goToSlide]);
-
-  const goToNext = useCallback(() => {
-    if (!canGoNext) return;
-    goToSlide(currentIndex + 1);
-  }, [canGoNext, currentIndex, goToSlide]);
-
-  // ============================================================================
-  // AUTO-PLAY
+  // AUTO PLAY
   // ============================================================================
 
   const startAutoPlay = useCallback(() => {
-    if (intervalRef.current) return;
+    if (!autoPlay) return;
 
-    intervalRef.current = setInterval(() => {
-      goToNext();
+    if (autoPlayTimerRef.current) {
+      clearInterval(autoPlayTimerRef.current);
+    }
+
+    autoPlayTimerRef.current = setInterval(() => {
+      if (isPlaying && !isHovered && !isPausedByUser) {
+        setCurrentIndex((prev) => {
+          const nextIndex = prev + 1;
+          if (nextIndex >= totalSlides) {
+            return infinite ? 0 : prev;
+          }
+          return nextIndex;
+        });
+      }
     }, interval);
-
-    console.log('Testimonial autoplay started');
-  }, [interval, goToNext]);
+  }, [autoPlay, interval, totalSlides, infinite, isPlaying, isHovered, isPausedByUser]);
 
   const stopAutoPlay = useCallback(() => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-      console.log('Testimonial autoplay stopped');
-    }
-  }, []);
-
-  const toggleAutoPlay = useCallback(() => {
-    setIsPlaying(!isPlaying);
-    console.log('Testimonial autoplay toggled:', !isPlaying);
-  }, [isPlaying]);
-
-  // ============================================================================
-  // PROGRESS
-  // ============================================================================
-
-  const startProgress = useCallback(() => {
-    setProgress(0);
-
-    if (progressIntervalRef.current) {
-      clearInterval(progressIntervalRef.current);
-    }
-
-    progressIntervalRef.current = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) return 0;
-        return prev + (100 / (interval / 100));
-      });
-    }, 100);
-  }, [interval]);
-
-  const stopProgress = useCallback(() => {
-    if (progressIntervalRef.current) {
-      clearInterval(progressIntervalRef.current);
-      progressIntervalRef.current = null;
+    if (autoPlayTimerRef.current) {
+      clearInterval(autoPlayTimerRef.current);
+      autoPlayTimerRef.current = null;
     }
   }, []);
 
   useEffect(() => {
-    if (isPlaying && !isPaused) {
+    if (isPlaying && !isHovered && !isPausedByUser) {
       startAutoPlay();
-      startProgress();
     } else {
       stopAutoPlay();
-      stopProgress();
     }
 
-    return () => {
-      stopAutoPlay();
-      stopProgress();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isPlaying, isPaused]);
+    return () => stopAutoPlay();
+  }, [isPlaying, isHovered, isPausedByUser, startAutoPlay, stopAutoPlay]);
 
   // ============================================================================
-  // SWIPE GESTURES
+  // NAVIGATION HANDLERS
   // ============================================================================
+
+  const goToSlide = useCallback((index: number) => {
+    const normalizedIndex = Math.max(0, Math.min(index, totalSlides - 1));
+    setCurrentIndex(normalizedIndex);
+    onSlideChange?.(normalizedIndex);
+  }, [totalSlides, onSlideChange]);
+
+  const goToNext = useCallback(() => {
+    if (!canGoNext) return;
+    setCurrentIndex((prev) => {
+      const nextIndex = prev + 1;
+      const newIndex = nextIndex >= totalSlides ? 0 : nextIndex;
+      onSlideChange?.(newIndex);
+      return newIndex;
+    });
+  }, [canGoNext, totalSlides, onSlideChange]);
+
+  const goToPrev = useCallback(() => {
+    if (!canGoPrev) return;
+    setCurrentIndex((prev) => {
+      const prevIndex = prev - 1;
+      const newIndex = prevIndex < 0 ? totalSlides - 1 : prevIndex;
+      onSlideChange?.(newIndex);
+      return newIndex;
+    });
+  }, [canGoPrev, totalSlides, onSlideChange]);
+
+  const togglePlayPause = useCallback(() => {
+    setIsPausedByUser((prev) => !prev);
+    setIsPlaying((prev) => !prev);
+  }, []);
+
+  // ============================================================================
+  // DRAG HANDLERS
+  // ============================================================================
+
+  const handleDragStart = useCallback(() => {
+    setIsDragging(true);
+    stopAutoPlay();
+  }, [stopAutoPlay]);
 
   const handleDragEnd = useCallback(
-    (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-      const { offset, velocity } = info;
+    (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+      setIsDragging(false);
 
-      const shouldGoNext =
-        offset.x < -SWIPE_THRESHOLD || velocity.x < -SWIPE_VELOCITY_THRESHOLD;
-      const shouldGoPrevious =
-        offset.x > SWIPE_THRESHOLD || velocity.x > SWIPE_VELOCITY_THRESHOLD;
+      const offset = info.offset.x;
+      const velocity = info.velocity.x;
 
-      if (shouldGoNext) {
-        goToNext();
-      } else if (shouldGoPrevious) {
-        goToPrevious();
+      if (Math.abs(offset) > DRAG_THRESHOLD || Math.abs(velocity) > SWIPE_VELOCITY_THRESHOLD) {
+        if (offset > 0) {
+          goToPrev();
+        } else {
+          goToNext();
+        }
       }
 
-      dragX.set(0);
+      if (!isPausedByUser) {
+        startAutoPlay();
+      }
     },
-    [goToNext, goToPrevious, dragX]
+    [goToNext, goToPrev, isPausedByUser, startAutoPlay]
   );
 
   // ============================================================================
-  // HOVER
+  // CARD HOVER HANDLERS
   // ============================================================================
 
-  const handleMouseEnter = useCallback(() => {
-    if (isPlaying) {
-      setIsPaused(true);
-      console.log('Testimonial slider paused on hover');
-    }
-  }, [isPlaying]);
+  const handleCardMouseEnter = useCallback(() => {
+    setIsHovered(true);
+    setIsPlaying(false);
+  }, []);
 
-  const handleMouseLeave = useCallback(() => {
-    if (isPlaying) {
-      setIsPaused(false);
-      console.log('Testimonial slider resumed');
+  const handleCardMouseLeave = useCallback(() => {
+    setIsHovered(false);
+    if (!isPausedByUser) {
+      setIsPlaying(true);
     }
-  }, [isPlaying]);
+  }, [isPausedByUser]);
 
   // ============================================================================
   // KEYBOARD NAVIGATION
   // ============================================================================
 
   useEffect(() => {
-    if (!keyboardNavigation) return;
-
     const handleKeyDown = (e: KeyboardEvent) => {
-      switch (e.key) {
-        case 'ArrowLeft':
-          e.preventDefault();
-          goToPrevious();
-          break;
-        case 'ArrowRight':
-          e.preventDefault();
-          goToNext();
-          break;
-        case ' ':
-          e.preventDefault();
-          toggleAutoPlay();
-          break;
-        default:
-          // Number keys for direct navigation
-          const num = parseInt(e.key);
-          if (!isNaN(num) && num >= 1 && num <= totalSlides) {
-            e.preventDefault();
-            goToSlide(num - 1);
-          }
-          break;
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        goToPrev();
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        goToNext();
+      } else if (e.key === ' ') {
+        e.preventDefault();
+        togglePlayPause();
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [keyboardNavigation, goToPrevious, goToNext, toggleAutoPlay, totalSlides, goToSlide]);
-
-  // ============================================================================
-  // TRANSITION VARIANTS
-  // ============================================================================
-
-  const slideVariants = useMemo(
-    () => ({
-      enter: (direction: string) => ({
-        x: direction === 'right' ? 1000 : -1000,
-        opacity: 0,
-      }),
-      center: {
-        x: 0,
-        opacity: 1,
-      },
-      exit: (direction: string) => ({
-        x: direction === 'right' ? -1000 : 1000,
-        opacity: 0,
-      }),
-    }),
-    []
-  );
-
-  const fadeVariants = useMemo(
-    () => ({
-      enter: {
-        opacity: 0,
-      },
-      center: {
-        opacity: 1,
-      },
-      exit: {
-        opacity: 0,
-      },
-    }),
-    []
-  );
-
-  const scaleVariants = useMemo(
-    () => ({
-      enter: {
-        scale: 0.8,
-        opacity: 0,
-      },
-      center: {
-        scale: 1,
-        opacity: 1,
-      },
-      exit: {
-        scale: 0.8,
-        opacity: 0,
-      },
-    }),
-    []
-  );
-
-  const getVariants = useCallback(() => {
-    switch (transitionEffect) {
-      case 'fade':
-        return fadeVariants;
-      case 'scale':
-        return scaleVariants;
-      default:
-        return slideVariants;
-    }
-  }, [transitionEffect, slideVariants, fadeVariants, scaleVariants]);
-
-  // ============================================================================
-  // RENDER FUNCTIONS
-  // ============================================================================
-
-  const renderNavigationArrows = () => {
-    if (!showArrows) return null;
-
-    return (
-      <>
-        <Tooltip content="Previous testimonials">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={goToPrevious}
-            disabled={!canGoPrevious}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-background/90 hover:bg-background shadow-lg"
-            aria-label="Previous testimonials"
-          >
-            <ChevronLeftIcon className="h-5 w-5" />
-          </Button>
-        </Tooltip>
-
-        <Tooltip content="Next testimonials">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={goToNext}
-            disabled={!canGoNext}
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-background/90 hover:bg-background shadow-lg"
-            aria-label="Next testimonials"
-          >
-            <ChevronRightIcon className="h-5 w-5" />
-          </Button>
-        </Tooltip>
-      </>
-    );
-  };
-
-  const renderDotIndicators = () => {
-    if (!showDots || totalSlides <= 1) return null;
-
-    return (
-      <div className="flex justify-center items-center gap-2 mt-6">
-        {Array.from({ length: totalSlides }).map((_, index) => (
-          <button
-            key={index}
-            onClick={() => goToSlide(index)}
-            className={cn(
-              'transition-all duration-300 rounded-full',
-              index === currentIndex
-                ? 'w-8 h-2 bg-blue-600'
-                : 'w-2 h-2 bg-gray-300 hover:bg-gray-400'
-            )}
-            aria-label={`Go to slide ${index + 1}`}
-            aria-current={index === currentIndex ? 'true' : 'false'}
-          />
-        ))}
-        {autoPlay && (
-          <Tooltip content={isPlaying ? 'Pause' : 'Play'}>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={toggleAutoPlay}
-              className="ml-2"
-              aria-label={isPlaying ? 'Pause slider' : 'Play slider'}
-            >
-              {isPlaying ? (
-                <PauseIcon className="h-4 w-4" />
-              ) : (
-                <PlayIcon className="h-4 w-4" />
-              )}
-            </Button>
-          </Tooltip>
-        )}
-      </div>
-    );
-  };
-
-  const renderProgressBar = () => {
-    if (!showProgress || !isPlaying) return null;
-
-    return (
-      <div className="mt-4">
-        <Progress value={progress} className="h-1 bg-gray-200" />
-      </div>
-    );
-  };
+  }, [goToNext, goToPrev, togglePlayPause]);
 
   // ============================================================================
   // RENDER
   // ============================================================================
+
+  const translateX = -(currentIndex * 100);
 
   if (testimonials.length === 0) {
     return (
@@ -525,62 +285,140 @@ export const TestimonialSlider: React.FC<TestimonialSliderProps> = ({
 
   return (
     <div
-      className={cn('space-y-4', className)}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      className={cn('relative', className)}
+      ref={carouselRef}
       role="region"
       aria-roledescription="carousel"
       aria-label="Customer testimonials"
     >
-      {/* Slider Container */}
-      <div className="relative overflow-hidden">
-        <AnimatePresence initial={false} custom={direction} mode="wait">
-          <motion.div
-            key={currentIndex}
-            custom={direction}
-            variants={getVariants()}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            transition={{
-              x: { type: 'spring', stiffness: 300, damping: 30 },
-              opacity: { duration: 0.5 },
-              scale: { duration: 0.5 },
-            }}
-            drag={swipeEnabled ? 'x' : false}
-            dragConstraints={{ left: 0, right: 0 }}
-            dragElastic={1}
-            onDragEnd={handleDragEnd}
-            style={{ x: dragX, gap: `${gap}px` }}
-            className={cn(
-              'grid',
-              itemsShown === 1 && 'grid-cols-1',
-              itemsShown === 2 && 'grid-cols-1 sm:grid-cols-2',
-              itemsShown === 3 && 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3',
-              itemsShown === 4 && 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
-            )}
-          >
-            {visibleTestimonials.map((testimonial) => (
-              <TestimonialCard key={testimonial.id} {...testimonial} />
-            ))}
-          </motion.div>
-        </AnimatePresence>
-
-        {/* Navigation Arrows */}
-        {renderNavigationArrows()}
+      {/* Main Carousel Wrapper - py-4 allows shadow overflow */}
+      <div className="overflow-hidden py-4">
+        <motion.div
+          className="flex"
+          drag={swipeEnabled ? 'x' : false}
+          dragConstraints={{ left: 0, right: 0 }}
+          dragElastic={0.9}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+          animate={{
+            x: `${translateX}%`,
+          }}
+          transition={{
+            type: 'tween',
+            ease: [0.25, 0.1, 0.25, 1],
+            duration: 0.5,
+          }}
+          style={{
+            cursor: isDragging ? 'grabbing' : swipeEnabled ? 'grab' : 'default',
+          }}
+        >
+          {testimonials.map((testimonial) => {
+            const widthPercent = 100 / currentItemsPerView;
+            const gapHalf = gap / 2;
+            const itemStyle = {
+              width: `${widthPercent}%`,
+              paddingLeft: `${gapHalf}px`,
+              paddingRight: `${gapHalf}px`,
+            };
+            return (
+              <div
+                key={testimonial.id}
+                className="flex-shrink-0"
+                style={itemStyle}
+                onMouseEnter={handleCardMouseEnter}
+                onMouseLeave={handleCardMouseLeave}
+              >
+                <TestimonialCard {...testimonial} />
+              </div>
+            );
+          })}
+        </motion.div>
       </div>
 
-      {/* Progress Bar */}
-      {renderProgressBar()}
+      {/* Controls Bar - Bottom (matching ProductCarousel layout) */}
+      {testimonials.length > currentItemsPerView && (
+        <div className="relative flex items-center justify-end gap-6 mt-6">
+          {/* Pagination Dots & Play/Pause (Center) */}
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-4">
+            {/* Play/Pause Button */}
+            {autoPlay && (
+              <button
+                onClick={togglePlayPause}
+                className="w-8 h-8 p-0 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors"
+                aria-label={!isPlaying ? 'Play auto-scroll' : 'Pause auto-scroll'}
+              >
+                {!isPlaying || isPausedByUser ? (
+                  <PlayIcon className="w-4 h-4" />
+                ) : (
+                  <PauseIcon className="w-4 h-4" />
+                )}
+              </button>
+            )}
 
-      {/* Dot Indicators */}
-      {renderDotIndicators()}
+            {/* Dots */}
+            {showDots && (
+              <div className="flex items-center gap-2">
+                {[...Array(totalSlides)].map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => goToSlide(index)}
+                    className={cn(
+                      'transition-all duration-200',
+                      'rounded-full',
+                      currentIndex === index
+                        ? 'w-8 h-2 bg-primary-600'
+                        : 'w-2 h-2 bg-gray-300 hover:bg-gray-400'
+                    )}
+                    aria-label={`Go to slide ${index + 1}`}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
 
-      {/* Screen Reader Announcement */}
+          {/* Navigation Arrows (Right) */}
+          {showArrows && (
+            <div className="flex items-center gap-3 z-10">
+              <button
+                onClick={goToPrev}
+                disabled={!canGoPrev}
+                className={cn(
+                  'w-10 h-10 rounded-full flex items-center justify-center',
+                  'border border-gray-200 shadow-sm',
+                  'hover:border-primary-500 hover:text-primary-600 hover:shadow-md',
+                  'transition-all duration-200',
+                  canGoPrev
+                    ? 'text-gray-700 cursor-pointer'
+                    : 'text-gray-300 cursor-not-allowed opacity-50'
+                )}
+                aria-label="Previous slide"
+              >
+                <ChevronLeftIcon className="w-5 h-5" />
+              </button>
+              <button
+                onClick={goToNext}
+                disabled={!canGoNext}
+                className={cn(
+                  'w-10 h-10 rounded-full flex items-center justify-center',
+                  'border border-gray-200 shadow-sm',
+                  'hover:border-primary-500 hover:text-primary-600 hover:shadow-md',
+                  'transition-all duration-200',
+                  canGoNext
+                    ? 'text-gray-700 cursor-pointer'
+                    : 'text-gray-300 cursor-not-allowed opacity-50'
+                )}
+                aria-label="Next slide"
+              >
+                <ChevronRightIcon className="w-5 h-5" />
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Accessibility */}
       <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">
-        Showing testimonials {currentIndex * itemsShown + 1} to{' '}
-        {Math.min((currentIndex + 1) * itemsShown, testimonials.length)} of{' '}
-        {testimonials.length}
+        Showing slide {currentIndex + 1} of {totalSlides}
       </div>
     </div>
   );

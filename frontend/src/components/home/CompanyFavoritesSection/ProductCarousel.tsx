@@ -268,7 +268,8 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
           transition={{ type: 'spring' as const, stiffness: 300, damping: 30 }}
           style={{ x }}
         >
-          {products.map((product) => {
+          {products.map((product, index) => {
+            if (!product) return null;
             const basePrice = product.pricing?.basePrice?.amount || 0;
             const salePrice = product.pricing?.salePrice?.amount;
             const hasDiscount = salePrice && salePrice < basePrice;
@@ -280,7 +281,7 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
 
             return (
               <div
-                key={product.id}
+                key={product.id || `company-fav-${index}`}
                 className="flex-shrink-0 px-2"
                 {...(itemWidth ? { style: { width: `${itemWidth}%` } } : {})}
               >
@@ -372,6 +373,7 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
                 </Link>
               </div>
             );
+
           })}
         </motion.div>
       </div>

@@ -36,7 +36,7 @@ import { Separator } from '@/components/ui/Separator';
 import { Alert } from '@/components/ui/Alert';
 
 // Hooks and Contexts
-import { useCart } from '@/contexts/CartContext';
+import { useCart } from '@/components/providers/CartProvider';
 import { useToast } from '@/hooks/useToast';
 import { useAuth } from '@/components/providers';
 
@@ -103,27 +103,27 @@ const PriceDisplay: React.FC<{
 }) => {
   const currentPrice = salePrice || basePrice;
   const hasDiscount = salePrice && salePrice < basePrice;
-  
+
   return (
     <div className={cn('flex items-center gap-2 flex-wrap', className)}>
       <div className="flex items-center gap-2">
         <span className="text-lg font-bold text-gray-900">
           {formatCurrency(currentPrice, currency)}
         </span>
-        
+
         {hasDiscount && (
           <span className="text-sm text-gray-500 line-through">
             {formatCurrency(basePrice, currency)}
           </span>
         )}
       </div>
-      
+
       {hasDiscount && showDiscount && (
         <Badge variant="destructive" className="text-xs">
           {formatDiscount(basePrice, salePrice)}
         </Badge>
       )}
-      
+
       {priceChanged && priceChangePercentage !== undefined && (
         <div className={cn(
           'flex items-center gap-1 text-xs font-medium',
@@ -158,7 +158,7 @@ const StockStatus: React.FC<{
       </div>
     );
   }
-  
+
   if (quantity !== undefined && quantity <= lowStockThreshold) {
     return (
       <div className={cn('flex items-center gap-1 text-sm text-orange-600', className)}>
@@ -167,7 +167,7 @@ const StockStatus: React.FC<{
       </div>
     );
   }
-  
+
   return (
     <div className={cn('flex items-center gap-1 text-sm text-green-600', className)}>
       <CheckCircleIcon className="w-4 h-4" />
@@ -189,12 +189,12 @@ const PriorityBadge: React.FC<{
     medium: { label: 'Medium', color: 'bg-blue-100 text-blue-800 border-blue-200', icon: '📌' },
     low: { label: 'Low', color: 'bg-gray-100 text-gray-800 border-gray-200', icon: '📋' },
   };
-  
+
   const { label, color, icon } = config[priority];
-  
+
   return (
-    <Badge 
-      variant="secondary" 
+    <Badge
+      variant="secondary"
       className={cn('text-xs border', color, className)}
     >
       <span className="mr-1">{icon}</span>
@@ -218,9 +218,9 @@ const RatingDisplay: React.FC<{
     md: 'w-4 h-4',
     lg: 'w-5 h-5'
   };
-  
+
   const iconSize = sizeClasses[size];
-  
+
   return (
     <div className={cn('flex items-center gap-1', className)}>
       <div className="flex items-center">
@@ -276,7 +276,7 @@ export const WishlistItem: React.FC<WishlistItemProps> = ({
   // ============================================================================
   // Hooks
   // ============================================================================
-  
+
   const { addItem } = useCart();
   const { toast } = useToast();
   const { isAuthenticated } = useAuth();
@@ -284,7 +284,7 @@ export const WishlistItem: React.FC<WishlistItemProps> = ({
   // ============================================================================
   // State Management
   // ============================================================================
-  
+
   const [isHovered, setIsHovered] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [editModal, setEditModal] = useState<EditModalState>({ open: false, type: null });
@@ -294,34 +294,34 @@ export const WishlistItem: React.FC<WishlistItemProps> = ({
   // ============================================================================
   // Computed Values
   // ============================================================================
-  
-  const productUrl = useMemo(() => 
-    `/products/${item.product.slug}`, 
+
+  const productUrl = useMemo(() =>
+    `/products/${item.product.slug}`,
     [item.product.slug]
   );
 
-  const productImage = useMemo(() => 
-    item.product.media?.images?.[0]?.url || 
+  const productImage = useMemo(() =>
+    item.product.media?.images?.[0]?.url ||
     '/images/placeholder-product.jpg',
     [item.product.media]
   );
 
-  const basePrice = useMemo(() => 
+  const basePrice = useMemo(() =>
     item.product.pricing?.basePrice?.amount || 0,
     [item.product.pricing]
   );
 
-  const salePrice = useMemo(() => 
+  const salePrice = useMemo(() =>
     item.product.pricing?.salePrice?.amount,
     [item.product.pricing]
   );
 
-  const isOnSale = useMemo(() => 
+  const isOnSale = useMemo(() =>
     !!salePrice && salePrice < basePrice,
     [salePrice, basePrice]
   );
 
-  const discount = useMemo(() => 
+  const discount = useMemo(() =>
     isOnSale ? Math.round(((basePrice - salePrice!) / basePrice) * 100) : 0,
     [isOnSale, basePrice, salePrice]
   );
@@ -329,11 +329,11 @@ export const WishlistItem: React.FC<WishlistItemProps> = ({
   // ============================================================================
   // Event Handlers
   // ============================================================================
-  
+
   const handleAddToCart = useCallback(async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (!isAuthenticated) {
       toast({
         title: 'Sign in required',
@@ -342,9 +342,9 @@ export const WishlistItem: React.FC<WishlistItemProps> = ({
       });
       return;
     }
-    
+
     setIsAddingToCart(true);
-    
+
     try {
       await addItem({
         id: `${item.productId}-${item.variantId || 'default'}`,
@@ -358,12 +358,12 @@ export const WishlistItem: React.FC<WishlistItemProps> = ({
         sku: item.product.sku || '',
         inStock: item.product.inventory?.quantity || 0,
       });
-      
+
       toast({
         title: 'Added to cart',
         description: `${item.product.name} has been added to your cart`,
       });
-      
+
       onAddToCart?.();
     } catch (error) {
       console.error('Failed to add to cart:', error);
@@ -380,14 +380,14 @@ export const WishlistItem: React.FC<WishlistItemProps> = ({
   const handleRemove = useCallback(async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     onRemove?.();
   }, [onRemove]);
 
   const handleShare = useCallback(async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (navigator.share) {
       try {
         await navigator.share({
@@ -395,7 +395,7 @@ export const WishlistItem: React.FC<WishlistItemProps> = ({
           text: item.product.shortDescription || item.product.description,
           url: window.location.origin + productUrl,
         });
-        
+
         onShare?.();
       } catch (error) {
         console.error('Error sharing:', error);
@@ -417,13 +417,13 @@ export const WishlistItem: React.FC<WishlistItemProps> = ({
   const handlePriceAlertToggle = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     const newState = !item.priceAlertEnabled;
     onPriceAlertToggle?.(newState);
-    
+
     toast({
       title: newState ? 'Price alert enabled' : 'Price alert disabled',
-      description: newState 
+      description: newState
         ? 'You will be notified when the price drops'
         : 'Price alerts disabled for this item',
     });
@@ -435,20 +435,20 @@ export const WishlistItem: React.FC<WishlistItemProps> = ({
 
   const handleProductClick = useCallback((e: React.MouseEvent) => {
     if (!interactive) return;
-    
+
     // Don't navigate if clicking on action buttons
     const target = e.target as HTMLElement;
     if (target.closest('button') || target.closest('input') || target.closest('a[href]')) {
       return;
     }
-    
+
     onClick?.();
   }, [interactive, onClick]);
 
   const handleSavePriority = useCallback(() => {
     onPriorityChange?.(localPriority);
     setEditModal({ open: false, type: null });
-    
+
     toast({
       title: 'Priority updated',
       description: `Item priority set to ${localPriority}`,
@@ -458,7 +458,7 @@ export const WishlistItem: React.FC<WishlistItemProps> = ({
   const handleSaveNotes = useCallback(() => {
     onNotesUpdate?.(localNotes);
     setEditModal({ open: false, type: null });
-    
+
     toast({
       title: 'Notes updated',
       description: 'Your notes have been saved',
@@ -481,7 +481,7 @@ export const WishlistItem: React.FC<WishlistItemProps> = ({
             src={productImage}
             alt={item.product.name}
             fill
-            sizes={view === 'grid' 
+            sizes={view === 'grid'
               ? '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw'
               : '128px'
             }
@@ -492,7 +492,7 @@ export const WishlistItem: React.FC<WishlistItemProps> = ({
             quality={85}
             priority={false}
           />
-          
+
           {/* Overlay on hover */}
           <AnimatePresence>
             {isHovered && interactive && (
@@ -528,13 +528,13 @@ export const WishlistItem: React.FC<WishlistItemProps> = ({
             -{discount}%
           </Badge>
         )}
-        
+
         {item.product.isNewArrival && (
           <Badge variant="secondary" className="text-xs bg-green-500 text-white shadow-md">
             New
           </Badge>
         )}
-        
+
         {item.product.isBestseller && (
           <Badge variant="secondary" className="text-xs bg-primary-500 text-white shadow-md">
             <SparklesIcon className="w-3 h-3 mr-1" />
@@ -565,7 +565,7 @@ export const WishlistItem: React.FC<WishlistItemProps> = ({
     )}>
       {/* Product Info */}
       <div className="space-y-1">
-        <Link 
+        <Link
           href={productUrl}
           className="hover:text-blue-600 transition-colors"
         >
@@ -576,13 +576,13 @@ export const WishlistItem: React.FC<WishlistItemProps> = ({
             {item.product.name}
           </h3>
         </Link>
-        
+
         {item.product.category && (
           <p className="text-xs text-gray-500">
             {item.product.category.name}
           </p>
         )}
-        
+
         {item.product.brand && (
           <p className="text-xs text-gray-600 font-medium">
             {item.product.brand.name}
@@ -618,11 +618,11 @@ export const WishlistItem: React.FC<WishlistItemProps> = ({
         {showPriority && (
           <PriorityBadge priority={item.priority} />
         )}
-        
+
         <span className="text-xs text-gray-500">
           Added {formatRelativeDate(item.addedAt)}
         </span>
-        
+
         {showAlerts && item.priceAlertEnabled && (
           <Tooltip content="Price alert active">
             <Badge variant="secondary" className="text-xs">
@@ -679,7 +679,7 @@ export const WishlistItem: React.FC<WishlistItemProps> = ({
             Out of Stock
           </Button>
         )}
-        
+
         <div className="flex gap-1">
           <Tooltip content="Price alert">
             <Button
@@ -695,7 +695,7 @@ export const WishlistItem: React.FC<WishlistItemProps> = ({
               )}
             </Button>
           </Tooltip>
-          
+
           <Tooltip content="Share">
             <Button
               variant="ghost"
@@ -706,7 +706,7 @@ export const WishlistItem: React.FC<WishlistItemProps> = ({
               <ShareIcon className="w-4 h-4" />
             </Button>
           </Tooltip>
-          
+
           <Tooltip content="Edit">
             <Button
               variant="ghost"
@@ -721,7 +721,7 @@ export const WishlistItem: React.FC<WishlistItemProps> = ({
               <PencilIcon className="w-4 h-4" />
             </Button>
           </Tooltip>
-          
+
           <Tooltip content="Remove">
             <Button
               variant="ghost"
@@ -763,7 +763,7 @@ export const WishlistItem: React.FC<WishlistItemProps> = ({
                 className="w-full"
               />
             </div>
-            
+
             <div className="flex gap-3 justify-end">
               <Button
                 variant="outline"
@@ -790,7 +790,7 @@ export const WishlistItem: React.FC<WishlistItemProps> = ({
                 className="w-full"
               />
             </div>
-            
+
             <div className="flex gap-3 justify-end">
               <Button
                 variant="outline"
@@ -847,7 +847,7 @@ export const WishlistItem: React.FC<WishlistItemProps> = ({
               view === 'list' ? 'flex flex-col flex-1' : 'flex flex-col'
             )}>
               {renderContent()}
-              
+
               {/* Actions */}
               <div className={cn(
                 view === 'list' && 'mt-auto',

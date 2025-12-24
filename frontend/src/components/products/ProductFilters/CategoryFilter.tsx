@@ -134,29 +134,32 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({
               disabled && 'cursor-not-allowed'
             )}
           >
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2.5 min-w-0 flex-1">
               <input
                 type={multiSelect ? 'checkbox' : 'radio'}
                 checked={isSelected}
                 onChange={() => handleCategoryToggle(category.id)}
                 disabled={disabled || category.count === 0}
                 className={cn(
-                  'w-4 h-4 border-gray-300 text-primary-600',
+                  'w-4 h-4 border-gray-300 text-primary-600 flex-shrink-0',
                   multiSelect ? 'rounded' : 'rounded-full',
                   'focus:ring-2 focus:ring-primary-500',
                   'disabled:cursor-not-allowed'
                 )}
               />
-              
-              <span className={cn(
-                'text-sm',
-                isSelected ? 'font-medium text-gray-900' : 'text-gray-700'
-              )}>
+
+              <span
+                className={cn(
+                  'text-sm truncate',
+                  isSelected ? 'font-medium text-gray-900' : 'text-gray-700'
+                )}
+                title={category.name}
+              >
                 {category.name}
               </span>
             </div>
 
-            <span className="text-xs text-gray-500 ml-2">
+            <span className="text-xs text-gray-500 ml-2 flex-shrink-0">
               ({category.count})
             </span>
           </label>
@@ -184,21 +187,21 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({
   const selectedCount = selectedCategoryIds.length;
 
   return (
-    <div className={cn('space-y-4', className)}>
+    <div className={cn('space-y-3', className)}>
       <div className="flex items-center justify-between">
-        <h3 className="font-semibold text-gray-900">Categories</h3>
+        <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">Categories</h3>
         {multiSelect && selectedCount > 0 && (
           <button
             onClick={handleClearAll}
             disabled={disabled}
-            className="text-xs text-primary-600 hover:text-primary-700 disabled:opacity-50"
+            className="text-xs font-medium text-primary-600 hover:text-primary-700 disabled:opacity-50 transition-colors"
           >
             Clear ({selectedCount})
           </button>
         )}
       </div>
 
-      <div className="space-y-1 max-h-96 overflow-y-auto custom-scrollbar">
+      <div className="space-y-1 max-h-96 overflow-y-auto custom-scrollbar pr-2">
         <AnimatePresence mode="popLayout">
           {categoryTree.map(category => renderCategory(category))}
         </AnimatePresence>

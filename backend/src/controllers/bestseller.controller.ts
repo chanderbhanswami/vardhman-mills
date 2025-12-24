@@ -14,64 +14,51 @@ import mongoose from 'mongoose';
  */
 export const getBestsellers = catchAsync(async (req: Request, res: Response) => {
   const {
-    period = 'monthly',
     categoryId,
     brandId,
     page = 1,
-    limit = 20,
-    sortBy = 'rank',
-    sortOrder = 'asc',
+    limit = 12,
     isActive = 'true',
-    isFeatured,
     search
   } = req.query;
 
   const filter: any = {
-    period,
-    isActive: isActive === 'true'
+    isActive: isActive === 'true',
+    isFeatured: true // Only feature products
   };
 
-  if (categoryId) filter.categoryId = categoryId;
-  if (brandId) filter.brandId = brandId;
-  if (isFeatured !== undefined) filter.isFeatured = isFeatured === 'true';
-
-  // Date range filter (only show current period)
-  const now = new Date();
-  filter.periodStartDate = { $lte: now };
-  filter.periodEndDate = { $gte: now };
+  if (categoryId) filter.category = categoryId;
+  if (brandId) filter.brand = brandId;
 
   // Search filter
   if (search) {
     const searchRegex = new RegExp(search as string, 'i');
     filter.$or = [
-      { title: searchRegex },
+      { name: searchRegex },
       { description: searchRegex },
-      { tags: searchRegex }
+      { 'seo.keywords': searchRegex }
     ];
   }
 
-  const sortOptions: any = {};
-  sortOptions[sortBy as string] = sortOrder === 'desc' ? -1 : 1;
-
   const skip = (Number(page) - 1) * Number(limit);
 
-  const bestsellers = await Bestseller.find(filter)
-    .populate('productId', 'name slug images price inStock')
-    .populate('categoryId', 'name slug')
-    .populate('brandId', 'name slug logo')
-    .sort(sortOptions)
+  // Query main Product collection sorted by salesCount (highest first)
+  const products = await Product.find(filter)
+    .populate('category', 'name slug')
+    .populate('brand', 'name slug logo')
+    .sort({ salesCount: -1, rating: -1 }) // Sort by sales, then rating
     .skip(skip)
     .limit(Number(limit));
 
-  const total = await Bestseller.countDocuments(filter);
+  const total = await Product.countDocuments(filter);
 
   res.status(200).json({
     success: true,
-    count: bestsellers.length,
+    count: products.length,
     total,
     page: Number(page),
     totalPages: Math.ceil(total / Number(limit)),
-    data: bestsellers
+    data: products
   });
 });
 

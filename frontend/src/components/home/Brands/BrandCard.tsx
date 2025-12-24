@@ -349,31 +349,117 @@ export const BrandCard: React.FC<BrandCardProps> = ({
         className={cn(
           'relative group bg-white dark:bg-gray-800 rounded-xl overflow-hidden',
           'border border-gray-200 dark:border-gray-700',
-          'shadow-lg hover:shadow-xl transition-shadow',
+          'shadow-sm hover:shadow-lg',
+          'hover:border-primary-400 dark:hover:border-primary-500',
+          'transition-all duration-300',
           className
         )}
       >
-        {/* Image Container */}
-        <div className="relative h-48 bg-gray-100 dark:bg-gray-700 overflow-hidden">
-          <motion.div variants={animated ? imageVariants : undefined}>
-            <Image
-              src={brandLogo}
-              alt={brand.name}
-              fill
-              className="object-contain p-6"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            />
-          </motion.div>
+        {/* Top Badge - With strong left fade */}
+        {brand.isFeatured && (
+          <div className="absolute top-3 right-3 z-20">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-300/60 via-amber-500 to-orange-600 text-white rounded-full text-xs font-bold shadow-lg">
+              <CheckBadgeIcon className="w-3.5 h-3.5" />
+              Featured
+            </div>
+          </div>
+        )}
 
-          {/* Badges */}
-          {renderBadges()}
-
-          {/* Quick Actions */}
-          {renderQuickActions()}
+        {/* Logo Section */}
+        <div className="relative bg-gradient-to-br from-slate-50 via-gray-50 to-slate-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-8 border-b border-gray-100 dark:border-gray-700">
+          <div className="relative h-32 flex items-center justify-center overflow-hidden">
+            <motion.div
+              variants={animated ? imageVariants : undefined}
+              whileHover={animated ? { scale: 1.1 } : undefined}
+              className="relative w-full h-full"
+              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+            >
+              <Image
+                src={brandLogo}
+                alt={brand.name}
+                fill
+                className="object-contain"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              />
+            </motion.div>
+          </div>
         </div>
 
-        {/* Content */}
-        <div className="p-6">{renderContent()}</div>
+        {/* Content Section */}
+        <div className="p-5 space-y-4">
+          {/* Brand Title & Description */}
+          <div className="space-y-3">
+            <h3 className="text-xl font-bold" style={{ color: '#1a202c' }}>
+              {brand.name}
+            </h3>
+            {brand.description && (
+              <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 leading-relaxed">
+                {brand.description}
+              </p>
+            )}
+          </div>
+
+          {/* Stats Row */}
+          <div className="flex items-center gap-4 pt-2 border-t border-gray-100 dark:border-gray-700">
+            {/* Product Count */}
+            {showProductCount && (
+              <div className="flex items-center gap-1.5">
+                <div className="w-2 h-2 rounded-full bg-primary-500"></div>
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  {formatNumber(brand.productCount)} Products
+                </span>
+              </div>
+            )}
+
+            {/* Rating */}
+            {showRating && (
+              <div className="flex items-center gap-1.5 ml-auto">
+                <StarIconSolid className="w-4 h-4 text-amber-400" />
+                <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                  {averageRating.toFixed(1)}
+                </span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  ({formatNumber(reviewCount)})
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex gap-2 pt-2">
+            <Button
+              variant="default"
+              size="sm"
+              className="flex-1 bg-primary-600 hover:bg-primary-700 text-white font-semibold shadow-sm"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+            >
+              View Products
+              <ArrowRightIcon className="w-4 h-4 ml-1.5" />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="px-4 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+            >
+              <EyeIcon className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Hover Gradient Overlay on Logo Only */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: isHovered ? 1 : 0 }}
+          className="absolute top-0 left-0 right-0 h-[calc(8rem+4rem+1px)] bg-gradient-to-b from-transparent via-primary-500/5 to-primary-500/10 pointer-events-none"
+          style={{ height: 'calc(8rem + 4rem + 1px)' }}
+        />
       </motion.div>
     </Link>
   );
