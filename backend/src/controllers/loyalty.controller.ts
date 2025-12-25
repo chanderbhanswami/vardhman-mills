@@ -1,10 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
-import Loyalty, { LOYALTY_TIERS, POINTS_RATES } from '../models/loyalty.model';
-import Order from '../models/Order.model';
-import Review from '../models/Review.model';
-import User from '../models/User.model';
-import catchAsync from '../utils/catchAsync';
-import AppError from '../utils/appError';
+import Loyalty, { LOYALTY_TIERS, POINTS_RATES } from '../models/loyalty.model.js';
+import Order from '../models/Order.model.js';
+import Review from '../models/Review.model.js';
+import User from '../models/User.model.js';
+import catchAsync from '../utils/catchAsync.js';
+import AppError from '../utils/appError.js';
 import { Types } from 'mongoose';
 
 /**

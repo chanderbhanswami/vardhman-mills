@@ -1,4 +1,4 @@
-import { messaging } from '../config/firebase.config';
+import { messaging } from '../config/firebase.config.js';
 import type { Message, MulticastMessage } from 'firebase-admin/messaging';
 
 interface NotificationPayload {

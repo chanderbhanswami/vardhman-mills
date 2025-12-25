@@ -1,10 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
-import Notification from '../models/Notification.model';
-import NotificationPreference from '../models/NotificationPreference.model';
-import NotificationTemplate from '../models/NotificationTemplate.model';
-import NotificationService from '../services/notification.service';
-import catchAsync from '../utils/catchAsync';
-import AppError from '../utils/appError';
+import Notification from '../models/Notification.model.js';
+import NotificationPreference from '../models/NotificationPreference.model.js';
+import NotificationTemplate from '../models/NotificationTemplate.model.js';
+import NotificationService from '../services/notification.service.js';
+import catchAsync from '../utils/catchAsync.js';
+import AppError from '../utils/appError.js';
 import mongoose from 'mongoose';
 
 // ==================== CRUD OPERATIONS ====================

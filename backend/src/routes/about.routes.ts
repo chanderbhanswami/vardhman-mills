@@ -1,7 +1,7 @@
 import express from 'express';
-import * as aboutController from '../controllers/about.controller';
-import { protect, restrictTo } from '../middleware/auth.middleware';
-import { upload } from '../config/cloudinary';
+import * as aboutController from '../controllers/about.controller.js';
+import { protect, restrictTo } from '../middleware/auth.middleware.js';
+import { upload } from '../config/cloudinary.js';
 
 const router = express.Router();
 

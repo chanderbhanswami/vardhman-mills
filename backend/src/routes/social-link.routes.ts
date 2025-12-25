@@ -26,8 +26,8 @@ import {
   bulkDeleteSocialLinks,
   resetSocialLinkAnalytics,
   exportSocialLinks
-} from '../controllers/social-link.controller';
-import { protect, restrictTo } from '../middleware/auth.middleware';
+} from '../controllers/social-link.controller.js';
+import { protect, restrictTo } from '../middleware/auth.middleware.js';
 
 const router = express.Router();
 

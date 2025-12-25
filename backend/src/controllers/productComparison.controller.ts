@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
-import ProductComparison from '../models/ProductComparison.model';
+import ProductComparison from '../models/ProductComparison.model.js';
 import Product from '../models/Product.model.js';
-import catchAsync from '../utils/catchAsync';
-import AppError from '../utils/appError';
+import catchAsync from '../utils/catchAsync.js';
+import AppError from '../utils/appError.js';
 import mongoose from 'mongoose';
 import PDFDocument from 'pdfkit';
 import ExcelJS from 'exceljs';

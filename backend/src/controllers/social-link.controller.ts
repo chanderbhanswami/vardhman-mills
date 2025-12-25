@@ -5,9 +5,9 @@
 
 import { Request, Response } from 'express';
 import mongoose from 'mongoose';
-import SocialLink, { ISocialLink, SocialPlatform, DisplayLocation } from '../models/social-link.model';
-import catchAsync from '../utils/catchAsync';
-import AppError from '../utils/appError';
+import SocialLink, { ISocialLink, SocialPlatform, DisplayLocation } from '../models/social-link.model.js';
+import catchAsync from '../utils/catchAsync.js';
+import AppError from '../utils/appError.js';
 
 // ============================================================================
 // PUBLIC ENDPOINTS

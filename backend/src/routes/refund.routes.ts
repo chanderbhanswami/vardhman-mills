@@ -13,8 +13,8 @@ import {
   getOrderRefunds,
   getRefundStats,
   updateRefundStatus
-} from '../controllers/refund.controller';
-import { protect, restrictTo } from '../middleware/auth.middleware';
+} from '../controllers/refund.controller.js';
+import { protect, restrictTo } from '../middleware/auth.middleware.js';
 import { body, query, param } from 'express-validator';
 
 /**

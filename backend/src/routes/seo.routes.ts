@@ -72,8 +72,8 @@ import {
 
   // Analytics
   getSEOAnalytics
-} from '../controllers/seo.controller';
-import { protect, restrictTo } from '../middleware/auth.middleware';
+} from '../controllers/seo.controller.js';
+import { protect, restrictTo } from '../middleware/auth.middleware.js';
 
 const router = express.Router();
 

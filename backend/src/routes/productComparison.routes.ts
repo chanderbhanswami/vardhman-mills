@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { protect as authenticate, restrictTo } from '../middleware/auth.middleware';
-import * as comparisonController from '../controllers/productComparison.controller';
+import { protect as authenticate, restrictTo } from '../middleware/auth.middleware.js';
+import * as comparisonController from '../controllers/productComparison.controller.js';
 
 const router = Router();
 

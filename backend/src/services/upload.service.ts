@@ -1,4 +1,4 @@
-import { cloudinary } from '../config/cloudinary';
+import { cloudinary } from '../config/cloudinary.js';
 import { UploadApiResponse } from 'cloudinary';
 
 export interface UploadOptions {

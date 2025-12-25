@@ -5,11 +5,11 @@ import {
   StockMovement,
   Warehouse,
   InventoryAlert
-} from '../models/inventory.model';
-import Product from '../models/Product.model';
-import catchAsync from '../utils/catchAsync';
-import AppError from '../utils/appError';
-import { AuthRequest } from '../types';
+} from '../models/inventory.model.js';
+import Product from '../models/Product.model.js';
+import catchAsync from '../utils/catchAsync.js';
+import AppError from '../utils/appError.js';
+import { AuthRequest } from '../types/index.js';
 
 // ============================================
 // INVENTORY ITEMS
@@ -632,7 +632,7 @@ async function checkAndCreateAlerts(item: any) {
   // Check for expiry warnings (if batch info exists)
   if (item.batchInfo?.expiryDate) {
     const daysUntilExpiry = Math.ceil((item.batchInfo.expiryDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-    
+
     if (daysUntilExpiry <= 30 && daysUntilExpiry > 0) {
       await InventoryAlert.findOneAndUpdate(
         {

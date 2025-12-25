@@ -22,9 +22,9 @@ import {
   IMetaTag,
   IRedirectRule,
   ISEOAudit
-} from '../models/seo.model';
-import catchAsync from '../utils/catchAsync';
-import AppError from '../utils/appError';
+} from '../models/seo.model.js';
+import catchAsync from '../utils/catchAsync.js';
+import AppError from '../utils/appError.js';
 
 // ============================================================================
 // SEO SETTINGS ENDPOINTS

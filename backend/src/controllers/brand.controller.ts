@@ -1,10 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
-import Brand from '../models/brand.model';
-import Product from '../models/Product.model';
-import Category from '../models/Category.model';
-import catchAsync from '../utils/catchAsync';
-import AppError from '../utils/appError';
-import { uploadToCloudinary, deleteFromCloudinary } from '../config/cloudinary';
+import Brand from '../models/brand.model.js';
+import Product from '../models/Product.model.js';
+import Category from '../models/Category.model.js';
+import catchAsync from '../utils/catchAsync.js';
+import AppError from '../utils/appError.js';
+import { uploadToCloudinary, deleteFromCloudinary } from '../config/cloudinary.js';
 
 // Get all brands with filtering, sorting, and pagination
 export const getBrands = catchAsync(async (req: Request, res: Response) => {

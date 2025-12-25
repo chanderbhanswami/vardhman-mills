@@ -6,10 +6,10 @@ import {
   Award,
   CompanyLocation,
   CompanyStats
-} from '../models/about.model';
-import catchAsync from '../utils/catchAsync';
-import AppError from '../utils/appError';
-import { uploadToCloudinary, deleteFromCloudinary } from '../config/cloudinary';
+} from '../models/about.model.js';
+import catchAsync from '../utils/catchAsync.js';
+import AppError from '../utils/appError.js';
+import { uploadToCloudinary, deleteFromCloudinary } from '../config/cloudinary.js';
 
 // ============================================
 // COMPANY INFO

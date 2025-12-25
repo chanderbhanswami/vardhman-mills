@@ -1,4 +1,4 @@
-import { messaging, auth, firestore } from '../config/firebase.config';
+import { messaging, auth, firestore } from '../config/firebase.config.js';
 import type { Message, MulticastMessage, BatchResponse } from 'firebase-admin/messaging';
 import type { UserRecord } from 'firebase-admin/auth';
 

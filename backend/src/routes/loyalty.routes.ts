@@ -16,8 +16,8 @@ import {
   getLeaderboard,
   awardPurchasePoints,
   awardReviewPoints
-} from '../controllers/loyalty.controller';
-import { protect, restrictTo } from '../middleware/auth.middleware';
+} from '../controllers/loyalty.controller.js';
+import { protect, restrictTo } from '../middleware/auth.middleware.js';
 import { body, query, param } from 'express-validator';
 
 /**

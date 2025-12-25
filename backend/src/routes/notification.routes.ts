@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import NotificationService from '../services/notification.service';
-import { protect as authenticate, restrictTo } from '../middleware/auth.middleware';
-import * as notificationController from '../controllers/notification.controller';
+import NotificationService from '../services/notification.service.js';
+import { protect as authenticate, restrictTo } from '../middleware/auth.middleware.js';
+import * as notificationController from '../controllers/notification.controller.js';
 
 const router = Router();
 
