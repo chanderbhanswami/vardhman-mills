@@ -40,6 +40,11 @@ export class NotificationService {
         },
       };
 
+      if (!messaging) {
+        console.warn('⚠️ Firebase messaging not initialized, skipping notification');
+        return 'SKIPPED_NO_MESSAGING';
+      }
+
       const response = await messaging.send(message);
       console.log('✅ Notification sent successfully:', response);
       return response;
@@ -74,10 +79,15 @@ export class NotificationService {
         },
       };
 
+      if (!messaging) {
+        console.warn('⚠️ Firebase messaging not initialized, skipping multicast notification');
+        return { successCount: 0, failureCount: tokens.length };
+      }
+
       const response = await messaging.sendEachForMulticast(message);
       console.log(`✅ ${response.successCount} notifications sent successfully`);
       console.log(`❌ ${response.failureCount} notifications failed`);
-      
+
       return {
         successCount: response.successCount,
         failureCount: response.failureCount,
@@ -112,6 +122,11 @@ export class NotificationService {
         },
       };
 
+      if (!messaging) {
+        console.warn('⚠️ Firebase messaging not initialized, skipping topic notification');
+        return 'SKIPPED_NO_MESSAGING';
+      }
+
       const response = await messaging.send(message);
       console.log('✅ Topic notification sent successfully:', response);
       return response;
@@ -129,6 +144,11 @@ export class NotificationService {
     topic: string
   ): Promise<void> {
     try {
+      if (!messaging) {
+        console.warn('⚠️ Firebase messaging not initialized, skipping topic subscription');
+        return;
+      }
+
       const response = await messaging.subscribeToTopic(tokens, topic);
       console.log(`✅ Successfully subscribed to topic: ${topic}`);
       console.log(`Success: ${response.successCount}, Failures: ${response.failureCount}`);
@@ -146,6 +166,11 @@ export class NotificationService {
     topic: string
   ): Promise<void> {
     try {
+      if (!messaging) {
+        console.warn('⚠️ Firebase messaging not initialized, skipping topic unsubscription');
+        return;
+      }
+
       const response = await messaging.unsubscribeFromTopic(tokens, topic);
       console.log(`✅ Successfully unsubscribed from topic: ${topic}`);
       console.log(`Success: ${response.successCount}, Failures: ${response.failureCount}`);
