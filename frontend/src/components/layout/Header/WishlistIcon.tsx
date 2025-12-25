@@ -85,8 +85,19 @@ const WishlistIcon: React.FC<WishlistIconProps> = ({
         const stored = localStorage.getItem('vardhman_cart');
         if (stored) {
           const parsedCart = JSON.parse(stored);
+          // Handle both formats:
+          // 1. CartProvider saves directly as array: [{...}, {...}]
+          // 2. CartIcon/WishlistIcon saves as object: { items: [...], summary: {...} }
+          let rawItems: { productId?: string; id?: string }[];
+          if (Array.isArray(parsedCart)) {
+            rawItems = parsedCart;
+          } else if (parsedCart && Array.isArray(parsedCart.items)) {
+            rawItems = parsedCart.items;
+          } else {
+            rawItems = [];
+          }
           const ids = new Set<string>(
-            (parsedCart.items || []).map((item: { productId?: string }) => item.productId)
+            rawItems.map(item => item.productId || item.id).filter(Boolean) as string[]
           );
           setCartItemIds(ids);
         } else {
@@ -98,8 +109,13 @@ const WishlistIcon: React.FC<WishlistIconProps> = ({
     };
 
     loadCartItemIds();
+    // Listen for both storage event and custom cart update event
     window.addEventListener('storage', loadCartItemIds);
-    return () => window.removeEventListener('storage', loadCartItemIds);
+    window.addEventListener('vardhman_cart_updated', loadCartItemIds);
+    return () => {
+      window.removeEventListener('storage', loadCartItemIds);
+      window.removeEventListener('vardhman_cart_updated', loadCartItemIds);
+    };
   }, []);
 
   // Handle outside click to close dropdown
@@ -197,8 +213,13 @@ const WishlistIcon: React.FC<WishlistIconProps> = ({
       loadWishlistFromStorage();
     };
 
+    // Listen for both storage event and custom wishlist update event
     window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    window.addEventListener('vardhman_wishlist_updated', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('vardhman_wishlist_updated', handleStorageChange);
+    };
   }, []);
 
   // Animate heart when items change

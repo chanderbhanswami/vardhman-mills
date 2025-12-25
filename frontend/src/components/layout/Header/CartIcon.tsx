@@ -104,29 +104,46 @@ const CartIcon: React.FC<CartIconProps> = ({
         const stored = localStorage.getItem('vardhman_cart');
         if (stored) {
           const parsedCart = JSON.parse(stored);
-          const items: CartItem[] = (parsedCart.items || []).map((item: {
+
+          // Handle both formats:
+          // 1. CartProvider saves directly as array: [{...}, {...}]
+          // 2. CartIcon saves as object: { items: [...], summary: {...} }
+          let rawItems: unknown[];
+          if (Array.isArray(parsedCart)) {
+            rawItems = parsedCart;
+          } else if (parsedCart && Array.isArray(parsedCart.items)) {
+            rawItems = parsedCart.items;
+          } else {
+            rawItems = [];
+          }
+
+          const items: CartItem[] = rawItems.map((item: {
             id: string;
             productId?: string;
-            product: { id?: string; name: string; image?: string; category: string; brand?: string; inStock?: boolean; maxQuantity?: number };
+            title?: string;
+            name?: string;
+            image?: string;
+            product?: { id?: string; name?: string; image?: string; category?: string; brand?: string; inStock?: boolean; maxQuantity?: number };
             price: number;
             originalPrice?: number;
             quantity: number;
             color?: string;
             size?: string;
             fabric?: string;
-            variant?: { attributes?: { color?: string; size?: string; fabric?: string } };
+            variant?: { color?: string; size?: string; material?: string; attributes?: { color?: string; size?: string; fabric?: string } };
             discount?: number;
+            addedAt?: string;
           }) => ({
             id: item.id,
-            productId: item.productId || item.product?.id || item.id, // Get actual product ID
-            name: item.product?.name || 'Product',
-            image: item.product?.image || '',
+            productId: item.productId || item.product?.id || item.id,
+            name: item.title || item.name || item.product?.name || 'Product',
+            image: item.image || item.product?.image || '',
             price: item.price || 0,
             originalPrice: item.originalPrice,
             quantity: item.quantity || 1,
-            color: item.color || item.variant?.attributes?.color || '',
-            size: item.size || item.variant?.attributes?.size || '',
-            fabric: item.fabric || item.variant?.attributes?.fabric || '',
+            color: item.color || item.variant?.color || item.variant?.attributes?.color || '',
+            size: item.size || item.variant?.size || item.variant?.attributes?.size || '',
+            fabric: item.fabric || item.variant?.material || item.variant?.attributes?.fabric || '',
             inStock: item.product?.inStock !== false,
             maxQuantity: item.product?.maxQuantity || 99,
             category: item.product?.category || '',

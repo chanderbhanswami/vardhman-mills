@@ -13,8 +13,9 @@ import {
   Plus,
   Minus
 } from 'lucide-react';
-import { useAddToCart } from '@/hooks/cart/useAddToCart';
-import { useToggleWishlist } from '@/hooks/wishlist/useToggleWishlist';
+// Use global providers instead of mock hooks
+import { useCart } from '@/components/providers/CartProvider';
+import { useWishlist } from '@/components/providers/WishlistProvider';
 import { Tooltip } from '@/components/ui/Tooltip';
 import { Badge } from '@/components/ui/Badge';
 import { useRouter } from 'next/navigation';
@@ -64,17 +65,19 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
 }) => {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
-  const { addToCart, isAdding: isAddingToCart } = useAddToCart();
-  const { isInWishlist, toggleAsync, isToggling } = useToggleWishlist();
+  // Use global providers
+  const { addToCart, isUpdating: isAddingToCart } = useCart();
+  const { addToWishlist, removeFromWishlist, isInWishlist: checkInWishlist, isUpdating: isTogglingWishlist } = useWishlist();
 
   const [quantity, setQuantity] = useState(1);
   const [isAddedToCart, setIsAddedToCart] = useState(false);
   const [isLoadingCompare, setIsLoadingCompare] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
+  const [isToggling, setIsToggling] = useState(false);
 
   const inWishlist = useMemo(() =>
-    isInWishlist(product.id, variant?.id),
-    [isInWishlist, product.id, variant?.id]
+    checkInWishlist(product.id),
+    [checkInWishlist, product.id]
   );
 
   const isOutOfStock = useMemo(() => {
@@ -87,7 +90,7 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
     return Math.min(stockStatus.quantity, 10);
   }, [product, variant]);
 
-  // Handle Add to Cart
+  // Handle Add to Cart - uses global CartProvider
   const handleAddToCart = useCallback(async () => {
     if (isOutOfStock) {
       toast.error('This product is out of stock');
@@ -95,7 +98,9 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
     }
 
     try {
-      await addToCart(product.id, quantity, { variantId: variant?.id });
+      // Global provider's addToCart(productId, quantity, variantData)
+      const variantData = variant?.id ? { id: variant.id } : undefined;
+      await addToCart(product.id, quantity, variantData);
 
       setIsAddedToCart(true);
       onAddToCart?.(quantity);
@@ -106,30 +111,28 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
     }
   }, [product.id, variant?.id, quantity, isOutOfStock, addToCart, onAddToCart]);
 
-  // Handle Wishlist Toggle
+  // Handle Wishlist Toggle - uses global WishlistProvider
   const handleWishlistToggle = useCallback(async () => {
-    if (!isAuthenticated) {
-      toast.error('Please login to add to wishlist');
-      router.push('/auth/login');
-      return;
-    }
-
+    setIsToggling(true);
     try {
-      await toggleAsync({
-        productId: product.id,
-        variantId: variant?.id,
-      });
-
+      if (inWishlist) {
+        // Remove from wishlist
+        await removeFromWishlist(product.id);
+      } else {
+        // Add to wishlist (guest mode works without auth)
+        await addToWishlist(product.id);
+      }
       onAddToWishlist?.();
     } catch (error) {
       console.error('Wishlist error:', error);
+    } finally {
+      setIsToggling(false);
     }
   }, [
-    isAuthenticated,
+    inWishlist,
     product.id,
-    variant?.id,
-    toggleAsync,
-    router,
+    addToWishlist,
+    removeFromWishlist,
     onAddToWishlist,
   ]);
 

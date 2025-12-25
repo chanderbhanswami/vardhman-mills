@@ -621,8 +621,19 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
           setLastUpdated(new Date().toISOString());
         }
       } else {
-        // For guest users, load from localStorage
-        const guestCart = guestCartStorage.value || [];
+        // For guest users, read directly from localStorage to avoid hydration timing issues
+        // The guestCartStorage.value may not be hydrated yet on initial render
+        let guestCart: CartItem[] = [];
+        if (typeof window !== 'undefined') {
+          try {
+            const storedCart = localStorage.getItem('vardhman_cart');
+            if (storedCart) {
+              guestCart = JSON.parse(storedCart);
+            }
+          } catch (e) {
+            console.error('[CartProvider] Error reading cart from localStorage:', e);
+          }
+        }
         console.log('[CartProvider] Loading guest cart from localStorage:', guestCart.length, 'items');
         setItems(guestCart);
         setSummary(calculateSummary(guestCart));
@@ -630,7 +641,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     } catch (error) {
       console.error('Refresh cart error:', error);
     }
-  }, [isAuthenticated, apiRequest, calculateSummary, guestCartStorage.value]);
+  }, [isAuthenticated, apiRequest, calculateSummary]);
 
   const saveForLater = async (itemId: string) => {
     try {
