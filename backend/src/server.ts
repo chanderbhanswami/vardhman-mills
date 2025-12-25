@@ -42,13 +42,13 @@ try {
 
   // Initialize comparison namespace
   initializeComparisonSocket(io);
-  
+
   console.log('✅ Socket.IO initialized');
   console.log('🔌 Comparison namespace: /comparison');
 
-  const server = httpServer.listen(port, '127.0.0.1', () => {
-    console.log(`🚀 Server running on http://127.0.0.1:${port}`);
-    console.log(`🌐 Server running on http://localhost:${port}`);
+  const server = httpServer.listen(port, '0.0.0.0', () => {
+    console.log(`🚀 Server running on http://0.0.0.0:${port}`);
+    console.log(`🌐 Server running on port ${port}`);
     console.log('✅ Server successfully bound to port');
     console.log('🔌 WebSocket server ready for connections');
   });
