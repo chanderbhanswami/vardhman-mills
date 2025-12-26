@@ -71,6 +71,7 @@ interface LayoutState {
   isScrolled: boolean;
   scrollProgress: number;
   isSidebarOpen: boolean;
+  isMobileMenuOpen: boolean;
   windowWidth: number;
   windowHeight: number;
 }
@@ -89,6 +90,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
     isScrolled: false,
     scrollProgress: 0,
     isSidebarOpen: false,
+    isMobileMenuOpen: false,
     windowWidth: 1024,
     windowHeight: 768,
   });
@@ -161,6 +163,19 @@ export default function MainLayout({ children }: MainLayoutProps) {
   // Handler Functions
   const handleToggleSidebar = useCallback(() => {
     setState(prev => ({ ...prev, isSidebarOpen: !prev.isSidebarOpen }));
+  }, []);
+
+  // Mobile menu handlers
+  const handleToggleMobileMenu = useCallback(() => {
+    console.log('🍔 Hamburger clicked! Current state:', state.isMobileMenuOpen);
+    setState(prev => {
+      console.log('🍔 Setting isMobileMenuOpen to:', !prev.isMobileMenuOpen);
+      return { ...prev, isMobileMenuOpen: !prev.isMobileMenuOpen };
+    });
+  }, [state.isMobileMenuOpen]);
+
+  const handleCloseMobileMenu = useCallback(() => {
+    setState(prev => ({ ...prev, isMobileMenuOpen: false }));
   }, []);
 
   // Error handler
@@ -262,6 +277,9 @@ export default function MainLayout({ children }: MainLayoutProps) {
         {/* Header */}
         <Header
           isScrolled={state.isScrolled}
+          isMobileMenuOpen={state.isMobileMenuOpen}
+          onToggleMobileMenu={handleToggleMobileMenu}
+          onCloseMobileMenu={handleCloseMobileMenu}
         />
 
         {/* Mobile Sidebar Toggle Button */}

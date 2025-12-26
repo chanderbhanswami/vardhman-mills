@@ -38,16 +38,45 @@ interface HeaderState {
   headerHeight: number;
 }
 
+
 const Header: React.FC<HeaderProps> = ({
-  isMobileMenuOpen = false,
+  isMobileMenuOpen: externalMobileMenuOpen,
   isScrolled = false,
-  onToggleMobileMenu,
-  onCloseMobileMenu,
+  onToggleMobileMenu: externalToggleMobileMenu,
+  onCloseMobileMenu: externalCloseMobileMenu,
   className = '',
   showTopBar = true,
   showSearch = true,
   compact = false,
 }) => {
+  // Internal state for mobile menu (used when no external control is provided)
+  const [internalMobileMenuOpen, setInternalMobileMenuOpen] = useState(false);
+
+  // Determine if we're in controlled mode (parent passes handlers) or uncontrolled mode
+  const isControlled = externalToggleMobileMenu !== undefined;
+
+  // Use external state if controlled, otherwise use internal state
+  const isMobileMenuOpen = isControlled ? (externalMobileMenuOpen ?? false) : internalMobileMenuOpen;
+
+  // Handler that works in both modes
+  const handleToggleMobileMenu = () => {
+    console.log('🍔 Header: Toggle mobile menu clicked, isControlled:', isControlled);
+    if (isControlled && externalToggleMobileMenu) {
+      externalToggleMobileMenu();
+    } else {
+      setInternalMobileMenuOpen(prev => !prev);
+    }
+  };
+
+  const handleCloseMobileMenu = () => {
+    console.log('🍔 Header: Close mobile menu');
+    if (isControlled && externalCloseMobileMenu) {
+      externalCloseMobileMenu();
+    } else {
+      setInternalMobileMenuOpen(false);
+    }
+  };
+
   const [state, setState] = useState<HeaderState>({
     isSticky: false,
     searchVisible: false,
@@ -86,7 +115,7 @@ const Header: React.FC<HeaderProps> = ({
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 1024 && isMobileMenuOpen) {
-        onCloseMobileMenu?.();
+        handleCloseMobileMenu();
       }
     };
 
@@ -94,7 +123,7 @@ const Header: React.FC<HeaderProps> = ({
       window.addEventListener('resize', handleResize);
       return () => window.removeEventListener('resize', handleResize);
     }
-  }, [isMobileMenuOpen, onCloseMobileMenu]);
+  }, [isMobileMenuOpen, handleCloseMobileMenu]);
 
   const toggleSearch = () => {
     setState(prev => ({ ...prev, searchVisible: !prev.searchVisible }));
@@ -162,7 +191,7 @@ const Header: React.FC<HeaderProps> = ({
               {/* Mobile Menu Button */}
               <div className="flex items-center lg:hidden">
                 <button
-                  onClick={onToggleMobileMenu}
+                  onClick={handleToggleMobileMenu}
                   className="p-2 rounded-md text-gray-900 hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   aria-label="Toggle mobile menu"
                 >
@@ -216,12 +245,12 @@ const Header: React.FC<HeaderProps> = ({
             )}
 
             {/* Right Section: Actions */}
-            <div className="flex items-center justify-end space-x-2 lg:space-x-3">
+            <div className="flex items-center justify-end space-x-1 sm:space-x-2 lg:space-x-3 flex-shrink-0">
               {/* Search Toggle - Mobile */}
               {showSearch && (
                 <button
                   onClick={toggleSearch}
-                  className="md:hidden p-2 rounded-md text-gray-900 hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="md:hidden p-1.5 sm:p-2 rounded-md text-gray-900 hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-primary flex-shrink-0"
                   aria-label="Toggle search"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -230,25 +259,35 @@ const Header: React.FC<HeaderProps> = ({
                 </button>
               )}
 
-              {/* Theme Toggle */}
-              <ThemeToggle />
-
-              {/* Language Selector */}
+              {/* Theme Toggle - Hidden on small mobile */}
               <div className="hidden sm:block">
+                <ThemeToggle />
+              </div>
+
+              {/* Language Selector - Hidden on small screens */}
+              <div className="hidden md:block">
                 <LanguageSelector />
               </div>
 
-              {/* Notifications */}
-              <Notification />
+              {/* Notifications - Hidden on small mobile */}
+              <div className="hidden sm:block flex-shrink-0">
+                <Notification />
+              </div>
 
-              {/* Wishlist */}
-              <WishlistIcon />
+              {/* Wishlist - Always visible */}
+              <div className="flex-shrink-0">
+                <WishlistIcon />
+              </div>
 
-              {/* Cart */}
-              <CartIcon />
+              {/* Cart - Always visible */}
+              <div className="flex-shrink-0">
+                <CartIcon />
+              </div>
 
               {/* User Menu */}
-              <UserMenu />
+              <div className="flex-shrink-0">
+                <UserMenu />
+              </div>
             </div>
           </div>
 
@@ -275,7 +314,7 @@ const Header: React.FC<HeaderProps> = ({
       {/* Mobile Menu */}
       <MobileMenu
         isOpen={isMobileMenuOpen}
-        onClose={onCloseMobileMenu}
+        onClose={handleCloseMobileMenu}
       />
 
       {/* Mobile Menu Overlay */}
@@ -285,7 +324,7 @@ const Header: React.FC<HeaderProps> = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={onCloseMobileMenu}
+            onClick={handleCloseMobileMenu}
             className="fixed inset-0 z-40 bg-black bg-opacity-50 backdrop-blur-sm lg:hidden"
           />
         )}

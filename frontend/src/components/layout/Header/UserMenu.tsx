@@ -15,7 +15,6 @@ import {
   QuestionMarkCircleIcon,
   ArrowRightOnRectangleIcon,
   UserCircleIcon,
-  StarIcon,
   GiftIcon,
   DocumentTextIcon,
   ShieldCheckIcon,
@@ -179,13 +178,21 @@ const UserMenu: React.FC<UserMenuProps> = ({
 
   if (!isAuthenticated) {
     return (
-      <div className={`flex items-center gap-2 ${className}`}>
-        <Link href="/login">
+      <div className={`flex items-center gap-1 sm:gap-2 ${className}`}>
+        {/* Mobile: Just show user icon that links to login */}
+        <Link href="/login" className="sm:hidden p-2 rounded-md hover:bg-gray-100">
+          <UserIcon className="w-5 h-5 text-gray-600" />
+        </Link>
+
+        {/* Tablet and up: Show Sign In button */}
+        <Link href="/login" className="hidden sm:block">
           <Button variant="ghost" size="sm">
             Sign In
           </Button>
         </Link>
-        <Link href="/register">
+
+        {/* Desktop: Also show Sign Up button */}
+        <Link href="/register" className="hidden md:block">
           <Button size="sm">
             Sign Up
           </Button>
@@ -246,7 +253,7 @@ const UserMenu: React.FC<UserMenuProps> = ({
           )}
 
           {/* Verification Badge */}
-          {user?.isVerified && (
+          {(user as unknown as { isVerified?: boolean })?.isVerified && (
             <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-white flex items-center justify-center">
               <ShieldCheckIcon className="w-2 h-2 text-white" />
             </div>
@@ -296,7 +303,7 @@ const UserMenu: React.FC<UserMenuProps> = ({
                       </div>
                     )}
                   </div>
-                  {user?.isVerified && (
+                  {(user as unknown as { isVerified?: boolean })?.isVerified && (
                     <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white flex items-center justify-center">
                       <ShieldCheckIcon className="w-2.5 h-2.5 text-white" />
                     </div>
@@ -314,7 +321,7 @@ const UserMenu: React.FC<UserMenuProps> = ({
                     {user?.email}
                   </p>
                   <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
-                    <span>{user?.orderCount} orders</span>
+                    <span>{(user as unknown as { orderCount?: number })?.orderCount || 0} orders</span>
                   </div>
                 </div>
               </div>
@@ -414,7 +421,7 @@ const UserMenu: React.FC<UserMenuProps> = ({
             {/* Member Since */}
             <div className="px-4 py-2 bg-gray-50 border-t border-gray-200">
               <div className="text-center text-xs text-gray-500">
-                Member since {new Date(user?.memberSince || '').toLocaleDateString('en-US', {
+                Member since {new Date((user as unknown as { memberSince?: string })?.memberSince || new Date().toISOString()).toLocaleDateString('en-US', {
                   year: 'numeric',
                   month: 'long'
                 })}
